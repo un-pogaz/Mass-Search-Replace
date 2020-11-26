@@ -26,9 +26,9 @@ from calibre.gui2 import error_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
-from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
-from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceAction, KEY_QUERY
+from calibre_plugins.multiple_search_replace.config import PLUGIN_ICONS, PREFS, KEY
+from calibre_plugins.multiple_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
+from calibre_plugins.multiple_search_replace.SearchReplace import SearchReplaceAction, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):

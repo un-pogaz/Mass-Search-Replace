@@ -36,7 +36,7 @@ from polyglot.builtins import (
     error_message, iteritems, itervalues, native_string_type, unicode_type
 )
 
-from calibre_plugins.mass_search_replace.templates import check_template, TEMPLATE_ERROR
+from calibre_plugins.multiple_search_replace.templates import check_template, TEMPLATE_ERROR
 
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 

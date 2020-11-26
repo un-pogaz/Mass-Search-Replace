@@ -36,7 +36,7 @@ from calibre.utils.config import JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
 from calibre.gui2.widgets2 import Dialog
 
-from calibre_plugins.mass_search_replace.common_utils import NoWheelComboBox, KeyboardConfigDialog, ImageTitleLayout, get_library_uuid, debug_print, CSS_CleanRules
+from calibre_plugins.multiple_search_replace.common_utils import NoWheelComboBox, KeyboardConfigDialog, ImageTitleLayout, get_library_uuid, debug_print, CSS_CleanRules
 
 PLUGIN_ICONS = ['images/plugin.png', 'images/image_add.png']
 
