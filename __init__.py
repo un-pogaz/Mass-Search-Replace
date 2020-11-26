@@ -27,7 +27,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                    = 'Multiple Search-Replace'
+    name                    = 'Mass Search-Replace'
     description             = _('Applie a list of saved Search/Replace operations')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
@@ -37,7 +37,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
     #: This field defines the GUI plugin class that contains all the code
     #: that actually does something. Its format is module_path:class_name
     #: The specified class must be defined in the specified module.
-    actual_plugin           = 'calibre_plugins.multiple_search_replace.action:MassSearchReplaceAction'
+    actual_plugin           = 'calibre_plugins.mass_search_replace.action:MassSearchReplaceAction'
 
     def is_customizable(self):
         '''
@@ -70,7 +70,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
         # GUI libraries to be loaded, which we do not want when using calibre
         # from the command line
         if self.actual_plugin_:
-            from calibre_plugins.multiple_search_replace.config import ConfigWidget
+            from calibre_plugins.mass_search_replace.config import ConfigWidget
             return ConfigWidget(self.actual_plugin_)
 
     def save_settings(self, config_widget):

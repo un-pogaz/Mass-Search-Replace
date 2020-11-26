@@ -26,9 +26,9 @@ from calibre.gui2 import error_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
-from calibre_plugins.multiple_search_replace.config import PLUGIN_ICONS, PREFS, KEY
-from calibre_plugins.multiple_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
-from calibre_plugins.multiple_search_replace.SearchReplace import SearchReplaceAction, KEY_QUERY
+from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
+from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceAction, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -247,7 +247,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     
                     # update Progress
                     self.setValue(num)
-                    self.setLabelText(_('Book {0} of {1}. Search/Replace {2} of {3}').format(num, self.book_count, sr_op, self.search_replaces_count))
+                    self.setLabelText(_('Book {0} of {1}. Search/Replace {2} on {3}.').format(num, self.book_count, sr_op, self.search_replaces_count))
                     
                     if self.total_operation_count < 100:
                         self.hide()

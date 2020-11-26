@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-11-25 13:04+0100\n"
+"POT-Creation-Date: 2020-11-26 21:13+0100\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,42 +18,41 @@ msgstr ""
 "X-Poedit-SearchPath-2: __init__.py\n"
 "X-Poedit-SearchPath-3: common_utils.py\n"
 
-#: __init__.py:31 action.py:39
+#: __init__.py:31 action.py:38
 msgid "Applie a list of saved Search/Replace operations"
 msgstr ""
 
-#: action.py:64
-msgid "&Applie a list of saved Search/Replace operations"
-msgstr ""
-
-#: action.py:70
+#: action.py:89
 msgid "&Customize plugin..."
 msgstr ""
 
-#: action.py:87 action.py:92
+#: action.py:140
+msgid "Chain Error"
+msgstr ""
+
+#: action.py:140
+msgid "Validating the chain settings before running failed. You can see the detailed errors by opening the chain in the config dialog"
+msgstr ""
+
+#: action.py:145 action.py:150
 msgid "No selected book"
 msgstr ""
 
-#: action.py:87 action.py:92
+#: action.py:145 action.py:150
 msgid "No book selected for cleaning comments"
 msgstr ""
 
-#: action.py:117
-msgid "Cancel"
+#: action.py:210
+msgid "Aborting..."
 msgstr ""
 
-#: action.py:120
-msgid "Comments Cleaner Progress"
+#: action.py:212
+msgid "Mass Search/Replace Progress"
 msgstr ""
 
-#: action.py:157
+#: action.py:250
 #, python-brace-format
-msgid "Book {0} of {1}"
-msgstr ""
-
-#: action.py:193
-#, python-brace-format
-msgid "Update the library for {0} books..."
+msgid "Book {0} of {1}. Search/Replace {2} on {3}."
 msgstr ""
 
 #: common_utils.py:223
@@ -64,185 +63,156 @@ msgstr ""
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr ""
 
-#: common_utils.py:293
+#: common_utils.py:299
 msgid "Keyboard shortcut dialog"
 msgstr ""
 
-#: common_utils.py:295
+#: common_utils.py:301
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: config.py:47
-msgid "Keep URL"
+#: config.py:43
+msgid "Title"
 msgstr ""
 
-#: config.py:48
-msgid "Delete URL"
+#: config.py:43
+msgid "Submenu"
 msgstr ""
 
-#: config.py:51
-msgid "Converte to a paragraph"
+#: config.py:43
+msgid "Image"
 msgstr ""
 
-#: config.py:52
-msgid "Converte to a paragraph but keep the bold"
+#: config.py:43 config.py:593 config.py:832
+msgid "Settings"
 msgstr ""
 
-#: config.py:53 config.py:64 config.py:75 config.py:81 config.py:86
-#: config.py:90
-msgid "No change"
-msgstr ""
-
-#: config.py:56
-msgid "Round the Weights value to the hundred"
-msgstr ""
-
-#: config.py:57
-msgid "Round to Bold (value 600)"
-msgstr ""
-
-#: config.py:58
-msgid "Do not change the Weights"
-msgstr ""
-
-#: config.py:59
-msgid "Delete Weights"
-msgstr ""
-
-#: config.py:62
-msgid "Force the justification (ecrase \"center\" and \"right\")"
-msgstr ""
-
-#: config.py:63
-msgid "Justification for indeterminate text (keep \"center\" and \"right\")"
-msgstr ""
-
-#: config.py:65
-msgid "Delete all alignment"
-msgstr ""
-
-#: config.py:68
-msgid "Use the 'Justification' setting"
-msgstr ""
-
-#: config.py:69
-msgid "Delete the alignment in lists"
+#: config.py:45
+msgid "Add New Image..."
 msgstr ""
 
 #: config.py:72
-msgid "Delete \"id\" attribut"
+msgid "Select and configure the menu items to display:"
 msgstr ""
 
-#: config.py:73
-msgid "Delete \"class\" attribut"
+#: config.py:88
+msgid "Move row up"
 msgstr ""
 
-#: config.py:74
-msgid "Delete \"id\" and \"class\" attribut"
+#: config.py:95
+msgid "Add menu item row"
 msgstr ""
 
-#: config.py:79
-msgid "Convert in all comments (not recomanded)"
+#: config.py:102
+msgid "Delete menu item row"
 msgstr ""
 
-#: config.py:80
-msgid "Convert only from a plain text comment"
+#: config.py:112
+msgid "Move row down"
 msgstr ""
 
-#: config.py:84
-msgid "Create a empty paragraph"
-msgstr ""
-
-#: config.py:85
-msgid "Create a new paragraph"
-msgstr ""
-
-#: config.py:89
-msgid "Merge in a single empty paragraph"
-msgstr ""
-
-#: config.py:91
-msgid "Delete empty paragraph"
-msgstr ""
-
-#: config.py:125
-msgid "Comments Mass Search/Replace Options"
-msgstr ""
-
-#: config.py:136
-msgid "Hyperlink:"
-msgstr ""
-
-#: config.py:140
-msgid "Headings:"
-msgstr ""
-
-#: config.py:150
-msgid "Remove Italic"
-msgstr ""
-
-#: config.py:154
-msgid "Remove Underline"
-msgstr ""
-
-#: config.py:158
-msgid "Remove Strikethrough"
-msgstr ""
-
-#: config.py:165
-msgid "Justification:"
-msgstr ""
-
-#: config.py:169
-msgid "List alignment:"
-msgstr ""
-
-#: config.py:173
-msgid "ID & CLASS attributs:"
-msgstr ""
-
-#: config.py:180
-msgid "CSS rule to keep:"
-msgstr ""
-
-#: config.py:183
-msgid "Custom CSS rules to keep in addition to the basic ones. Rules separated by a space."
-msgstr ""
-
-#: config.py:188
-msgid "Remove all formatting"
-msgstr ""
-
-#: config.py:200
-msgid "Markdown:"
-msgstr ""
-
-#: config.py:203
-msgid "Try to convert the Markdown strings to HTML"
-msgstr ""
-
-#: config.py:205
-msgid "Multiple 'Line Return' in a paragraph:"
-msgstr ""
-
-#: config.py:209
-msgid "Convert 'Line Return' into a new paragraph"
-msgstr ""
-
-#: config.py:211
-msgid ""
-"This operation is applied after \"Multiple 'Line Return' in a paragraph\"\n"
-"and before \"Multiple empty paragraph\""
-msgstr ""
-
-#: config.py:216
-msgid "Multiple empty paragraph:"
-msgstr ""
-
-#: config.py:222
+#: config.py:124
 msgid "Keyboard shortcuts..."
 msgstr ""
 
-#: config.py:223
+#: config.py:125
 msgid "Edit the keyboard shortcuts associated with this plugin"
+msgstr ""
+
+#: config.py:202
+msgid "Change settings"
+msgstr ""
+
+#: config.py:397
+msgid "Are you sure you want to delete this menu item?"
+msgstr ""
+
+#: config.py:399
+#, python-format
+msgid "Are you sure you want to delete the selected %d menu items?"
+msgstr ""
+
+#: config.py:400 config.py:564 config.py:730
+msgid "Are you sure?"
+msgstr ""
+
+#: config.py:492
+msgid "Add New Image"
+msgstr ""
+
+#: config.py:495
+msgid "&Select image source"
+msgstr ""
+
+#: config.py:498
+msgid "From &web domain favicon"
+msgstr ""
+
+#: config.py:518
+msgid "&Save as filename:"
+msgstr ""
+
+#: config.py:542
+msgid "menu icon dialog"
+msgstr ""
+
+#: config.py:542
+msgid "Select a .png file for the menu icon"
+msgstr ""
+
+#: config.py:556 config.py:572 config.py:579
+msgid "Cannot import image"
+msgstr ""
+
+#: config.py:556
+msgid "You must specify a filename to save as."
+msgstr ""
+
+#: config.py:559
+msgid "The save as filename should consist of a filename only."
+msgstr ""
+
+#: config.py:565
+msgid "An image with this name already exists - overwrite it?"
+msgstr ""
+
+#: config.py:572
+msgid "You must specify a web domain url"
+msgstr ""
+
+#: config.py:579
+msgid "You must specify a source file."
+msgstr ""
+
+#: config.py:581
+msgid "Source image must be a .png file."
+msgstr ""
+
+#: config.py:583
+msgid "Source image does not exist!"
+msgstr ""
+
+#: config.py:589
+msgid "Columns"
+msgstr ""
+
+#: config.py:589
+msgid "Search mode"
+msgstr ""
+
+#: config.py:589
+msgid "Search"
+msgstr ""
+
+#: config.py:589
+msgid "Replace"
+msgstr ""
+
+#: config.py:727
+msgid "Are you sure you want to delete this item?"
+msgstr ""
+
+#: config.py:729
+#, python-brace-format
+msgid "Are you sure you want to delete the selected {0} items?"
 msgstr ""
