@@ -41,7 +41,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_hasSearchField, query_string, KEY_QUERY
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
@@ -566,6 +566,14 @@ class SettingsButton(QToolButton):
         QToolButton.__init__(self)
         self.config_dialog = parent
         self.plugin_action = plugin_action
+        
+        query_list_clean = []
+        for qu in query[KEY.MENU_SEARCH_REPLACES]:
+            if query_hasSearchField(qu):
+                query_list_clean.append(qu)
+        
+        query[KEY.MENU_SEARCH_REPLACES] = query_list_clean
+        
         self.query = query
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
@@ -800,8 +808,14 @@ class SearchReplaceTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(COL_CONFIG)
         self.verticalHeader().setDefaultSectionSize(24)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setRowCount(len(query_list))
-        for row, query in enumerate(query_list):
+        
+        query_list_clean = []
+        for query in query_list:
+            if query_hasSearchField(query):
+                query_list_clean.append(query)
+            
+        self.setRowCount(len(query_list_clean))
+        for row, query in enumerate(query_list_clean):
             self.populate_table_row(row, query)
         
         self.resizeColumnsToContents()
@@ -825,7 +839,10 @@ class SearchReplaceTableWidget(QTableWidget):
     def get_data(self):
         data_items = []
         for row in range(self.rowCount()):
-            data_items.append(self.convert_row_to_data(row))
+            query = self.convert_row_to_data(row)
+            if query_hasSearchField(query):
+                data_items.append(query)
+                
         return data_items
     
     def convert_row_to_data(self, row):

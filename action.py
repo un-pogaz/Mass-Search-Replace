@@ -31,14 +31,14 @@ from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_hasSearchField, query_string, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):
     
     name = 'Mass Search/Replace'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = ('Mass Search/Replace', None, _('Applie a list of saved Search/Replace operations'), None)
+    action_spec = ('Mass Search/Replace', None, _('Applie a list of multiple saved Search/Replace operations'), None)
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])
@@ -119,10 +119,9 @@ class MassSearchReplaceAction(InterfaceAction):
     def run_SearchReplace(self, query):
         
         # check querys for errors
-        query_chk = check_query(query)
-        if query_chk is not True:
+        if check_query(query) is not True:
             return error_dialog(self.gui, _('Config Error'),
-                _('Validating the configuration settings before running failed.'),
+                _('Validating the configuration settings before running failed.\nThe JSON file of plugin settings contains errors.'),
                 show=True)
         
         
@@ -251,27 +250,28 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 debug_print('Search/Replace for '+book_info)
                 
-                for sr_op, setting in enumerate(self.search_replaces, 1):
-                    
-                    srt_setting = query_string(setting)
-                    
-                    if sr_op==len(self.search_replaces): nl ='\n'
-                    else: nl =''
-                    
-                    debug_print('Operation N°{:d} > {:s}'.format(sr_op, srt_setting)+nl)
-                    self.setLabelText(_('Book {:d} of {:d}. Search/Replace {:d} on {:d}.').format(num, self.book_count, sr_op, self.search_replaces_count))
-                    
-                    if self.total_operation_count < 100:
-                        self.hide()
-                    else:
-                        self.show()
-                    
-                    if self.wasCanceled():
-                        self.close()
-                        return
-                    
-                    sr_search_replace(book_id, setting)
-                    
+                for sr_op, query in enumerate(self.search_replaces, 1):
+                    if query_hasSearchField(query):
+                        
+                        srt_setting = query_string(query)
+                        
+                        if sr_op==len(self.search_replaces): nl ='\n'
+                        else: nl =''
+                        
+                        debug_print('Operation N°{:d} > {:s}'.format(sr_op, srt_setting)+nl)
+                        self.setLabelText(_('Book {:d} of {:d}. Search/Replace {:d} on {:d}.').format(num, self.book_count, sr_op, self.search_replaces_count))
+                        
+                        if self.total_operation_count < 100:
+                            self.hide()
+                        else:
+                            self.show()
+                        
+                        if self.wasCanceled():
+                            self.close()
+                            return
+                        
+                        sr_search_replace(book_id, query)
+                        
                 
             
             lst_id= []

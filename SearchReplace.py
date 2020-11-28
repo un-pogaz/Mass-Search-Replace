@@ -39,14 +39,22 @@ def get_default_query(plugin_action):
             _default_query = s_r.save_settings()
             s_r.close()
             del s_r
+        
+        _default_query[KEY_QUERY.SEARCH_FIELD] = 'title'
+        
         return _default_query
+
+def query_hasSearchField(query):
+    return len(query[KEY_QUERY.SEARCH_FIELD])>0
 
 def query_string(query):
     column = query[KEY_QUERY.SEARCH_FIELD]
     field = query[KEY_QUERY.DESTINATION_FIELD]
-    if field and field != column:
+    if (field and field != column):
         column += ' => '+ field
+    
     return '"'+ '" | "'.join([column, query[KEY_QUERY.SEARCH_MODE], query[KEY_QUERY.SEARCH_FOR], query[KEY_QUERY.REPLACE_WITH]])+'"'
+
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
@@ -83,10 +91,7 @@ class SearchReplaceDialog(Dialog):
     def accept(self):
         self.query = self.widget.save_settings()
         
-        warning_dialog(self.parent, _('Invalid operation'), _('qsdqsdqsd'),
-                        show=True, show_copy_button=False)
-        
-        if not self.query[KEY_QUERY.SEARCH_FIELD] or len(self.query[KEY_QUERY.SEARCH_FIELD])==0:
+        if not query_hasSearchField(self.query):
             if question_dialog(self.parent, _('Invalid operation'),
                              _('The registering of Find/Replace operation has failed, it has no search fields.\nResume to the editing?\n\nElse, the changes will be discard.'),
                              default_yes=True, show_copy_button=False):
