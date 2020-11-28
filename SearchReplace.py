@@ -40,12 +40,16 @@ def get_default_query(plugin_action):
             s_r.close()
             del s_r
         
-        _default_query[KEY_QUERY.SEARCH_FIELD] = 'title'
-        
         return _default_query
 
 def query_hasSearchField(query):
     return len(query[KEY_QUERY.SEARCH_FIELD])>0
+def query_hasError(query):
+    return KEY_QUERY.S_R_ERROR in query
+
+def query_isValid(query):
+    return query_hasSearchField(query) and not query_hasError(query)
+
 
 def query_string(query):
     column = query[KEY_QUERY.SEARCH_FIELD]
@@ -76,7 +80,7 @@ class SearchReplaceDialog(Dialog):
         self.plugin_action = plugin_action
         self.parent = parent
         self.query = query
-        Dialog.__init__(self, _('Search/Replace settings'), 'config_query_SearchReplace', parent)
+        Dialog.__init__(self, _('Search/Replace configuration'), 'config_query_SearchReplace', parent)
 
     def setup_ui(self):
         self.widget = SearchReplaceWidget(self.plugin_action)
@@ -91,16 +95,22 @@ class SearchReplaceDialog(Dialog):
     def accept(self):
         self.query = self.widget.save_settings()
         
+        msg_error = None
         if not query_hasSearchField(self.query):
+            msg_error = _('You must specify the target "Search field".')
+        
+        if query_hasError(self.query):
+            msg_error = str(self.query[KEY_QUERY.S_R_ERROR])
+        
+        if msg_error:
             if question_dialog(self.parent, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed, it has no search fields.\nResume to the editing?\n\nElse, the changes will be discard.'),
+                             _('The registering of Find/Replace operation has failed.\n{:s}\nResume to the editing?\nElse, the changes will be discard.').format(msg_error),
                              default_yes=True, show_copy_button=False):
                 
                 return
             else:
                 Dialog.reject(self)
                 return
-            
         
         debug_print('Saved operation > {0:s}\n{1}\n'.format(query_string(self.query), self.query))
         Dialog.accept(self)

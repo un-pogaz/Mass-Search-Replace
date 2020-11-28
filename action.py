@@ -31,7 +31,7 @@ from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_hasSearchField, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_isValid, query_string, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -251,7 +251,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 debug_print('Search/Replace for '+book_info)
                 
                 for sr_op, query in enumerate(self.search_replaces, 1):
-                    if query_hasSearchField(query):
+                    if query_isValid(query):
                         
                         srt_setting = query_string(query)
                         

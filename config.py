@@ -41,7 +41,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_hasSearchField, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_isValid, query_string, KEY_QUERY
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
@@ -337,19 +337,24 @@ class MenuTableWidget(QTableWidget):
         self.blockSignals(False)
     
     def cell_changed(self, row, col):
-        if col == 1:
+        self.blockSignals(True)
+        
+        if col == 1 or col == 2:
             menu_text = unicode(self.item(row, col).text()).strip()
-            self.blockSignals(True)
-            if menu_text:
-                # Make sure that the other columns in this row are enabled if not already.
-                if not self.cellWidget(row, 4):
-                    # We need to make later columns in this row editable
-                    self.set_editable_cells_in_row(row)
-            else:
-                # Blank menu text so treat it as a separator row
-                self.set_noneditable_cells_in_row(row)
-            self.resizeColumnsToContents()
-            self.blockSignals(False)
+            self.item(row, col).setText(menu_text)
+        
+        
+        if unicode(self.item(row, 1).text()):
+            # Make sure that the other columns in this row are enabled if not already.
+            if not self.cellWidget(row, len(COL_NAMES)):
+                self.set_editable_cells_in_row(row)
+            self.cellWidget(row, 4).query = self.convert_row_to_data(row)
+        else:
+            # Blank menu text so treat it as a separator row
+            self.set_noneditable_cells_in_row(row)
+        
+        self.resizeColumnsToContents()
+        self.blockSignals(False)
     
     def image_combo_index_changed(self, combo, row):
         if combo.currentText() == COMBO_IMAGE_ADD:
@@ -369,7 +374,7 @@ class MenuTableWidget(QTableWidget):
         self.setCellWidget(row, 4, SettingsButton(self, self.plugin_action, query))
     
     def set_noneditable_cells_in_row(self, row):
-        for col in range(3,6):
+        for col in range(3, len(COL_NAMES)):
             if self.cellWidget(row, col):
                 self.removeCellWidget(row, col)
             item = QTableWidgetItem()
@@ -420,6 +425,7 @@ class MenuTableWidget(QTableWidget):
         self.insertRow(row)
         self.populate_table_row(row, row_data)
         self.select_and_scroll_to_row(row)
+        self.resizeColumnsToContents()
     
     def delete_rows(self):
         self.setFocus()
@@ -522,6 +528,7 @@ class MenuTableWidget(QTableWidget):
         for row in range(self.rowCount()):
             data_items.append(self.convert_row_to_data(row))
         # Remove any blank separator row items from the end as unneeded.
+        
         while len(data_items) > 0 and len(data_items[-1][KEY.MENU_TEXT]) == 0:
             data_items.pop()
         return data_items
@@ -569,7 +576,7 @@ class SettingsButton(QToolButton):
         
         query_list_clean = []
         for qu in query[KEY.MENU_SEARCH_REPLACES]:
-            if query_hasSearchField(qu):
+            if query_isValid(qu):
                 query_list_clean.append(qu)
         
         query[KEY.MENU_SEARCH_REPLACES] = query_list_clean
@@ -811,7 +818,7 @@ class SearchReplaceTableWidget(QTableWidget):
         
         query_list_clean = []
         for query in query_list:
-            if query_hasSearchField(query):
+            if query_isValid(query):
                 query_list_clean.append(query)
             
         self.setRowCount(len(query_list_clean))
@@ -840,7 +847,7 @@ class SearchReplaceTableWidget(QTableWidget):
         data_items = []
         for row in range(self.rowCount()):
             query = self.convert_row_to_data(row)
-            if query_hasSearchField(query):
+            if query_isValid(query):
                 data_items.append(query)
                 
         return data_items
