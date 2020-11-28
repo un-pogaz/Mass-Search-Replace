@@ -4,10 +4,12 @@ from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
 
 __license__   = 'GPL v3'
-__copyright__ = '2011, Grant Drake <grant.drake@gmail.com>'
+__copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, os
+import os, time
+# calibre Python 3 compatibility.
+from six import text_type as unicode
 
 try:
     load_translations()
@@ -37,8 +39,9 @@ from calibre.constants import iswindows
 from calibre.utils.config import config_dir, JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
 from calibre.gui2.widgets2 import Dialog
+from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_string, KEY_QUERY
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
@@ -57,9 +60,9 @@ class KEY:
 # This is where all preferences for this plugin are stored
 PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
-PREFS.defaults[KEY.MASS_SEARCH_REPLACE] = None
+PREFS.defaults[KEY.MASS_SEARCH_REPLACE] = []
 
-DEFAULT_QUERY = None
+OWIP = 'owip'
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -67,9 +70,6 @@ class ConfigWidget(QWidget):
         self.plugin_action = plugin_action
         layout = QVBoxLayout(self)
         self.setLayout(layout)
-        
-        global DEFAULT_QUERY
-        DEFAULT_QUERY = get_default_query(plugin_action)
         
         data_items = PREFS[KEY.MASS_SEARCH_REPLACE]
         
@@ -91,35 +91,35 @@ class ConfigWidget(QWidget):
         button_layout = QtGui.QVBoxLayout()
         table_layout.addLayout(button_layout)
         move_up_button = QtGui.QToolButton(self)
-        move_up_button.setToolTip(_('Move row up'))
+        move_up_button.setToolTip(_('Move menu item up'))
         move_up_button.setIcon(QIcon(I('arrow-up.png')))
         button_layout.addWidget(move_up_button)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QtGui.QToolButton(self)
-        add_button.setToolTip(_('Add menu item row'))
+        add_button.setToolTip(_('Add menu item'))
         add_button.setIcon(QIcon(I('plus.png')))
         button_layout.addWidget(add_button)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QtGui.QToolButton(self)
-        copy_button.setToolTip(_('Copy menu item row'))
+        copy_button.setToolTip(_('Copy menu item'))
         copy_button.setIcon(QIcon(I('edit-copy.png')))
         button_layout.addWidget(copy_button)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QtGui.QToolButton(self)
-        delete_button.setToolTip(_('Delete menu item row'))
+        delete_button.setToolTip(_('Delete menu item'))
         delete_button.setIcon(QIcon(I('minus.png')))
         button_layout.addWidget(delete_button)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QtGui.QToolButton(self)
-        move_down_button.setToolTip(_('Move row down'))
+        move_down_button.setToolTip(_('Move menu item down'))
         move_down_button.setIcon(QIcon(I('arrow-down.png')))
         button_layout.addWidget(move_down_button)
         
@@ -128,6 +128,9 @@ class ConfigWidget(QWidget):
         add_button.clicked.connect(self._table.add_row)
         delete_button.clicked.connect(self._table.delete_rows)
         copy_button.clicked.connect(self._table.copy_row)
+        
+        # Define a context menu for the table widget
+        self.create_context_menu(self._table)
         
         
         # --- Keyboard shortcuts ---
@@ -142,8 +145,8 @@ class ConfigWidget(QWidget):
     
     def save_settings(self):
         
-        
-        debug_print('Save settings: {0}\n'.format(PREFS))
+        PREFS[KEY.MASS_SEARCH_REPLACE] = self._table.get_data()
+        debug_print('Save settings:\n{0}\n'.format(PREFS))
         
     
     def edit_shortcuts(self):
@@ -153,6 +156,121 @@ class ConfigWidget(QWidget):
         if d.exec_() == d.Accepted:
             self.plugin_action.gui.keyboard.finalize()
         
+    def create_context_menu(self, table):
+        table.setContextMenuPolicy(Qt.ActionsContextMenu)
+        act_add_image = QAction(get_icon(PLUGIN_ICONS[1]), _('&Add image...'), table)
+        act_add_image.triggered.connect(table.display_add_new_image_dialog)
+        table.addAction(act_add_image)
+        act_open = QAction(get_icon('document_open.png'), _('&Open images folder'), table)
+        act_open.triggered.connect(partial(self.open_images_folder, table.resources_dir))
+        table.addAction(act_open)
+        sep2 = QAction(table)
+        sep2.setSeparator(True)
+        table.addAction(sep2)
+        act_import = QAction(get_icon(PLUGIN_ICONS[2]), _('&Import...'), table)
+        act_import.triggered.connect(self.import_menus)
+        table.addAction(act_import)
+        act_export = QAction(get_icon(PLUGIN_ICONS[3]), _('&Export...'), table)
+        act_export.triggered.connect(self.export_menus)
+        table.addAction(act_export)
+    
+    def open_images_folder(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+        open_local_file(path)
+    
+    def import_menus(self):
+        table = self._table
+        archive_path = self.pick_archive_to_import()
+        if not archive_path:
+            return
+        
+        json = os.path.join(table.resources_dir, OWIP)
+        json_path = os.path.join(table.resources_dir, OWIP+'.json')
+        
+        # Write the whole file contents into the resources\images directory
+        if not os.path.exists(table.resources_dir):
+            os.makedirs(table.resources_dir)
+        with ZipFile(archive_path, 'r') as zf:
+            contents = zf.namelist()
+            if  os.path.basename(json_path) not in contents:
+                return error_dialog(self, _('Import failed'), _('This is not a valid OWIP export archive'), show=True)
+            for resource in contents:
+                fs = os.path.join(table.resources_dir,resource)
+                with open(fs,'wb') as f:
+                    f.write(zf.read(resource))
+        
+        try:
+            # Read the .JSON file to add to the menus then delete it.
+            import_config = JSONConfig(json)
+            menus_config = import_config[KEY.MASS_SEARCH_REPLACE]
+            # Now insert the menus into the table
+            table.append_data(menus_config)
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(menus_config)),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Import failed'), e, show=True)
+        finally:
+            if os.path.exists(json_path):
+                os.remove(json_path)
+    
+    def pick_archive_to_import(self):
+        archives = choose_files(self, 'owp archive dialog', _('Select a menu file archive to import'),
+                             filters=[('OWIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
+        if not archives:
+            return
+        f = archives[0]
+        return f
+    
+    def export_menus(self):
+        table = self._table
+        data_items = table.get_selected_data()
+        if len(data_items) == 0:
+            return error_dialog(self, _('Export failed'), _('No menu items selected to export.'), show=True)
+        archive_path = self.pick_archive_to_export()
+        if not archive_path:
+            return
+        
+        # Build our unique list of images that need to be exported
+        image_names = {}
+        for data in data_items:
+            image_name = data[KEY.MENU_IMAGE]
+            if image_name and image_name not in image_names:
+                image_path = os.path.join(table.resources_dir, image_name)
+                if os.path.exists(image_path):
+                    image_names[image_name] = image_path
+        
+        # Write our menu items out to a json file
+        if not os.path.exists(table.resources_dir):
+            os.makedirs(table.resources_dir)
+        
+        json = os.path.join(table.resources_dir, OWIP)
+        export_config = JSONConfig(json)
+        export_config[KEY.MASS_SEARCH_REPLACE] = data_items
+        json_path = os.path.join(table.resources_dir, OWIP+'.json')
+        
+        try:
+            # Create the zip file archive
+            with ZipFile(archive_path, 'w') as archive_zip:
+                archive_zip.write(json_path, os.path.basename(json_path))
+                # Add any images referred to in those menu items that are local resources
+                for image_name, image_path in list(image_names.items()):
+                    archive_zip.write(image_path, os.path.basename(image_path))
+            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(data_items), archive_path),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Export failed'), e, show=True)
+        finally:
+            if os.path.exists(json_path):
+                os.remove(json_path)
+    
+    def pick_archive_to_export(self):
+        fd = FileDialog(name='owp archive dialog', title=_('Save archive as'), filters=[('OWIP Files', ['zip'])],
+                        parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
+        fd.setParent(None)
+        if not fd.accepted:
+            return None
+        return fd.get_files()[0]
 
 
 COMBO_IMAGE_ADD = _('Add New Image...')
@@ -166,7 +284,7 @@ def get_image_names(image_map):
     return image_names
 
 
-COL_NAMES = ['', _('Title'), _('Submenu'), _('Image'), _('Settings')]
+COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
 
 class MenuTableWidget(QTableWidget):
     def __init__(self, plugin_action, data_items=None, *args):
@@ -174,8 +292,13 @@ class MenuTableWidget(QTableWidget):
         self.plugin_action = plugin_action
         self.gui = plugin_action.gui
         
+        self.resources_dir = os.path.join(config_dir, 'resources/images')
+        if iswindows:
+            self.resources_dir = os.path.normpath(self.resources_dir)
+        
         self.populate_table(data_items)
         self.cellChanged.connect(self.cell_changed)
+        
         
     def populate_table(self, data_items=None):
         self.image_map = self.get_image_map()
@@ -305,7 +428,7 @@ class MenuTableWidget(QTableWidget):
             return
         message = _('Are you sure you want to delete this menu item?')
         if len(rows) > 1:
-            message = _('Are you sure you want to delete the selected %d menu items?'%len(rows))
+            message = _('Are you sure you want to delete the selected {:d} menu items?').format(len(rows))
         if not question_dialog(self, _('Are you sure?'), message, show_copy_button=False):
             return
         first_sel_row = self.currentRow()
@@ -374,10 +497,6 @@ class MenuTableWidget(QTableWidget):
     
     def get_image_map(self):
         image_map = {}
-        # Now read any images from the config\resources\images directory if any
-        self.resources_dir = os.path.join(config_dir, 'resources/images')
-        if iswindows:
-            self.resources_dir = os.path.normpath(self.resources_dir)
         
         if os.path.exists(self.resources_dir):
             # Get the names of any .png images in this directory
@@ -387,9 +506,8 @@ class MenuTableWidget(QTableWidget):
                     image_map[image_name] = get_icon(image_name)
         
         return image_map
-        
-        
-        
+    
+    
     def create_blank_row_data(self):
         data = {}
         data[KEY.MENU_ACTIVE] = True
@@ -418,15 +536,12 @@ class MenuTableWidget(QTableWidget):
             data[KEY.MENU_SEARCH_REPLACES] = self.cellWidget(row, 4).query[KEY.MENU_SEARCH_REPLACES]
         return data
     
-        
-        
     def get_selected_data(self):
         data_items = []
         for row in self.selectionModel().selectedRows():
             data_items.append(self.convert_row_to_data(row.row()))
         return data_items
     
-        
     def append_data(self, data_items):
         for data in reversed(data_items):
             row = self.currentRow() + 1
@@ -444,7 +559,6 @@ class ImageComboBox(NoWheelComboBox):
             self.insertItem(i, image_map.get(image, image), image)
         idx = self.findText(selected_text)
         self.setCurrentIndex(idx)
-        #self.setItemData(0, QVariant(idx))
         self.setItemData(0, idx)
 
 class SettingsButton(QToolButton):
@@ -457,18 +571,29 @@ class SettingsButton(QToolButton):
         
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.setIcon(get_icon('gear.png'))
-        self.upadate_text()
-        self.setToolTip(_('Change settings'))
+        self.update_text()
+        self.setToolTip(_('Change operation list'))
         self.clicked.connect(self._clicked)
     
     def _clicked(self):
         d = ConfigSearchReplaceWidget(self, self.plugin_action, query=self.query)
         if d.exec_() == d.Accepted:
             self.query[KEY.MENU_SEARCH_REPLACES] = d.query_list
-            self.upadate_text()
+            self.update_text()
+            
+            if len(d.query_list)==0:
+                debug_print('Saving a empty list')
+            else:
+                txt = 'Saved operation list:'
+                for i, query in enumerate(d.query_list, 1):
+                    txt += '\nOperation {:d} > {:s}'.format(i, query_string(query))
+                txt += '\n[  '+ ',\n'.join( [str(query) for query in d.query_list] ) +'  ]\n'
+                debug_print(txt)
+                
+            
     
-    def upadate_text(self):
-        self.setText(_('{0} operations').format(len(self.query[KEY.MENU_SEARCH_REPLACES])))
+    def update_text(self):
+        self.setText(_('{:d} operations').format(len(self.query[KEY.MENU_SEARCH_REPLACES])))
 
 class ImageDialog(QDialog):
     def __init__(self, parent=None, resources_dir='', image_names=[]):
@@ -531,7 +656,7 @@ class ImageDialog(QDialog):
             return
         f = images[0]
         if not f.lower().endswith('.png'):
-            return error_dialog(self, 'Cannot select image', 'Source image must be a .png file.', show=True)
+            return error_dialog(self, _('Cannot import image'), _('Source image must be a .png file.'), show=True)
         self._input_file_edit.setText(f)
         self._save_as_edit.setText(os.path.splitext(os.path.basename(f))[0])
     
@@ -542,13 +667,12 @@ class ImageDialog(QDialog):
             return error_dialog(self, _('Cannot import image'), _('You must specify a filename to save as.'), show=True)
         self.new_image_name = os.path.splitext(save_name)[0] + '.png'
         if save_name.find('\\') > -1 or save_name.find('/') > -1:
-            return error_dialog(self, 'Cannot import image', _('The save as filename should consist of a filename only.'), show=True)
+            return error_dialog(self, _('Cannot import image'), _('The save as filename should consist of a filename only.'), show=True)
         if not os.path.exists(self.resources_dir):
             os.makedirs(self.resources_dir)
         dest_path = os.path.join(self.resources_dir, self.new_image_name)
         if save_name in self.image_names or os.path.exists(dest_path):
-            if not question_dialog(self, _('Are you sure?'), '<p>'+
-                    _('An image with this name already exists - overwrite it?'),
+            if not question_dialog(self, _('Are you sure?'), _('An image with this name already exists - overwrite it?'),
                     show_copy_button=False):
                 return
         
@@ -564,9 +688,9 @@ class ImageDialog(QDialog):
             if not source_file_path:
                 return error_dialog(self, _('Cannot import image'), _('You must specify a source file.'), show=True)
             if not source_file_path.lower().endswith('.png'):
-                return error_dialog(self, 'Cannot import image', _('Source image must be a .png file.'), show=True)
+                return error_dialog(self, _('Cannot import image'), _('Source image must be a .png file.'), show=True)
             if not os.path.exists(source_file_path):
-                return error_dialog(self, 'Cannot import image', _('Source image does not exist!'), show=True)
+                return error_dialog(self, _('Cannot import image'), _('Source image does not exist!'), show=True)
             shutil.copyfile(source_file_path, dest_path)
             return self.accept()
 
@@ -579,9 +703,9 @@ class ConfigSearchReplaceWidget(Dialog):
         name = query[KEY.MENU_TEXT]
         self.query_list = query[KEY.MENU_SEARCH_REPLACES]
         if self.query_list == None: self.query_list = []
-        title = _('List of search/replace operations')
+        title = _('List of Search/Replace operations')
         if name:
-            title += ' for '+name
+            title = _('List of Search/Replace operations for {:s}').format(name)
         
         Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
         
@@ -591,7 +715,7 @@ class ConfigSearchReplaceWidget(Dialog):
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
-        heading_label = QLabel(_('Select and configure the order of execution of the operations of search/replace operations:'), self)
+        heading_label = QLabel(_('Select and configure the order of execution of the operations of Search/Replace operations:'), self)
         heading_layout.addWidget(heading_label)
         help_label = QLabel(' ', self)
         help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
@@ -611,35 +735,35 @@ class ConfigSearchReplaceWidget(Dialog):
         button_layout = QtGui.QVBoxLayout()
         table_layout.addLayout(button_layout)
         move_up_button = QtGui.QToolButton(self)
-        move_up_button.setToolTip(_('Move row up'))
+        move_up_button.setToolTip(_('Move operation up'))
         move_up_button.setIcon(QIcon(I('arrow-up.png')))
         button_layout.addWidget(move_up_button)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QtGui.QToolButton(self)
-        add_button.setToolTip(_('Add menu item row'))
+        add_button.setToolTip(_('Add operation'))
         add_button.setIcon(QIcon(I('plus.png')))
         button_layout.addWidget(add_button)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QtGui.QToolButton(self)
-        copy_button.setToolTip(_('Copy menu item row'))
+        copy_button.setToolTip(_('Copy operation'))
         copy_button.setIcon(QIcon(I('edit-copy.png')))
         button_layout.addWidget(copy_button)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QtGui.QToolButton(self)
-        delete_button.setToolTip(_('Delete menu item row'))
+        delete_button.setToolTip(_('Delete operation'))
         delete_button.setIcon(QIcon(I('minus.png')))
         button_layout.addWidget(delete_button)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QtGui.QToolButton(self)
-        move_down_button.setToolTip(_('Move row down'))
+        move_down_button.setToolTip(_('Move operation down'))
         move_down_button.setIcon(QIcon(I('arrow-down.png')))
         button_layout.addWidget(move_down_button)
         
@@ -655,7 +779,6 @@ class ConfigSearchReplaceWidget(Dialog):
         self.query_list = self._table.get_data()
         Dialog.accept(self)
         
-    
 
 class ReadOnlySearchReplaceTableWidgetItem(ReadOnlyTableWidgetItem):
     def __init__(self, text, query):
@@ -723,7 +846,7 @@ class SearchReplaceTableWidget(QTableWidget):
         
     
     def create_blank_row_data(self):
-        return DEFAULT_QUERY
+        return get_default_query(self.plugin_action)
     
     def add_row(self):
         self.setFocus()
@@ -748,9 +871,9 @@ class SearchReplaceTableWidget(QTableWidget):
         rows = self.selectionModel().selectedRows()
         if len(rows) == 0:
             return
-        message = _('Are you sure you want to delete this item?')
+        message = _('Are you sure you want to delete this operation?')
         if len(rows) > 1:
-            message = _('Are you sure you want to delete the selected {0} items?').format(len(rows))
+            message = _('Are you sure you want to delete the selected {:d} operations?').format(len(rows))
         if not question_dialog(self, _('Are you sure?'), message, show_copy_button=False):
             return
         first_sel_row = self.currentRow()

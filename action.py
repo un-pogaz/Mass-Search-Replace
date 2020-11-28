@@ -4,10 +4,12 @@ from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
 
 __license__   = 'GPL v3'
-__copyright__ = '2020, un_pogaz <>'
+__copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, sys, time
+import os, time
+# calibre Python 3 compatibility.
+from six import text_type as unicode
 
 try:
     load_translations()
@@ -28,8 +30,8 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
-from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, KEY_QUERY
+from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_string, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -76,7 +78,10 @@ class MassSearchReplaceAction(InterfaceAction):
         
         for query in query_list:
             if query[KEY.MENU_ACTIVE] and len(query[KEY.MENU_SEARCH_REPLACES])>0:
-                debug_print('Rebuilding menu for ({})'.format(query[KEY.MENU_TEXT]))
+                if query[KEY.MENU_SUBMENU]:
+                    debug_print('Rebuilding menu for: {:s}>{:s}'.format(query[KEY.MENU_SUBMENU], query[KEY.MENU_TEXT]))
+                else:
+                    debug_print('Rebuilding menu for: {:s}'.format(query[KEY.MENU_TEXT]))
                 self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
         
         self.menu.addSeparator()
@@ -87,8 +92,8 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
-    def append_menu_item_ex(self, m, sub_menus, menu_text, sub_menu_text, image_name, query):
-        parent_menu = m
+    def append_menu_item_ex(self, parent_menu, sub_menus, menu_text, sub_menu_text, image_name, query):
+        
         if sub_menu_text:
             # Create the sub-menu if it does not exist
             if sub_menu_text not in sub_menus:
@@ -110,39 +115,26 @@ class MassSearchReplaceAction(InterfaceAction):
             self.query_menu.append((query, ac))
         return ac
     
-    def set_enabled_for_all_menu_actions(self, is_enabled):
-        for query_data, menu_action in self.query_menu:
-            query_settings = query_data['query_settings']
-            menu_action.setEnabled(is_enabled)
-    
-    def is_menu_enabled(self, query_settings):
-        '''
-        Determine whether menu item for the query is enabled or not
-        '''
-#        query_links = query_settings.get('query_links', [])
-#        for query_link inquery_links:
-#            action_name = query_link['action_name']
-#            action_settings = query_link['action_settings']
-#            action = self.all_actions[action_name]
-#            pass
-        return True
     
     def run_SearchReplace(self, query):
         
         # check querys for errors
         query_chk = check_query(query)
         if query_chk is not True:
-            return error_dialog(self.gui, _('Query Error'), _('Validating the querys settings before running failed. You can see the detailed errors by opening the query in the config dialog'),
+            return error_dialog(self.gui, _('Config Error'),
+                _('Validating the configuration settings before running failed.'),
                 show=True)
         
         
         if not self.is_library_selected:
-            return error_dialog(self.gui, _('No selected book'), _('No book selected for cleaning comments'), show=True)
+            return error_dialog(self.gui, _('No selected book'),
+                _('No book selected for Search/Replace.'), show=True)
             return
         
         rows = self.gui.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            return error_dialog(self.gui, _('No selected book'), _('No book selected for cleaning comments'), show=True)
+            return error_dialog(self.gui, _('No selected book'),
+                _('No book selected for Search/Replace.'), show=True)
         book_ids = self.gui.library_view.get_selected_ids()
         
         srpg = SearchReplacesProgressDialog(self, book_ids, query)
@@ -151,23 +143,27 @@ class MassSearchReplaceAction(InterfaceAction):
     
     def show_configuration(self):
         self.interface_action_base_plugin.do_user_config(self.gui)
-        
+
 
 def check_query(query):
     try:
+        val = query[KEY.MENU_ACTIVE]
+        val = query[KEY.MENU_IMAGE]
+        val = query[KEY.MENU_SUBMENU]
+        
         query_name = query[KEY.MENU_TEXT]
         for search_replace in query[KEY.MENU_SEARCH_REPLACES]:
             for key in KEY_QUERY.ALL:
                 if key not in search_replace.keys():
-                    debug_print('query "{}": settings are not valide, "{}" is missing'.format(query_name, key))
+                    debug_print('query "{:s}": settings are not valide, "{:s}" is missing'.format(query_name, key))
                     return False
     except Exception as e:
-        debug_print('Exception when checking query: {}'.format(e))
+        debug_print('Exception when checking query: {0}'.format(e))
         return False
     return True
 
+
 class SearchReplacesProgressDialog(QProgressDialog):
-    
     def __init__(self, plugin_action, book_ids, query):
         
         # plugin_action
@@ -202,7 +198,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # Exception
         self.exception = None
         
-        QProgressDialog.__init__(self, '', _('Aborting...'), 0, self.book_count, self.gui)
+        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
         
         self.setWindowTitle(_('Mass Search/Replace Progress'))
         self.setWindowIcon(get_icon(PLUGIN_ICONS[0]))
@@ -215,7 +211,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.setAutoReset(False)
         
         self.hide()
-        debug_print('Launch Search/Replace for {0} books.'.format(self.book_count))
+        debug_print('Launch Search/Replace for {:d} books.'.format(self.book_count))
         debug_print(str(self.search_replaces)+'\n')
         
         QTimer.singleShot(0, self._run_search_replaces)
@@ -224,13 +220,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
         if self.wasCanceled():
             debug_print('Mass Search/Replace as cancelled. No change.')
         elif self.exception:
-            debug_print('Mass Search/Replace as cancelled. An exception has occurred:')
+            debug_print('Mass Search/Replace a was interupted. An exception has occurred:')
             debug_print(self.exception)
             raise self.exception
         else:
-            debug_print('Search/Replace launched for {0} books.'.format(self.book_count))
-            debug_print('Search/Replace performed for {0} books with a total of {1} fields modify.'.format(self.books_update, self.fields_update))
-            debug_print('Search/Replace execute in {0} seconds.'.format(self.time_execut))
+            debug_print('Search/Replace launched for {:d} books.'.format(self.book_count))
+            debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
+            debug_print('Search/Replace execute in {:0.3f} seconds.'.format(self.time_execut))
             debug_print('{0}\n'.format(self.search_replaces))
         
     def _run_search_replaces(self):
@@ -241,9 +237,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
             s_r = SearchReplaceWidget(self.plugin_action)
             s_r.resize(QSize(0, 0))
             
-            sr_load = s_r.load_settings
-            sr_func = s_r.do_search_replace
-            sr_field_edit = s_r.set_field_calls
+            sr_search_replace = s_r.search_replace
+            sr_updated_fields = s_r.updated_fields
             del s_r
             
             for num, book_id in enumerate(self.book_ids, 1):
@@ -258,36 +253,29 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 for sr_op, setting in enumerate(self.search_replaces, 1):
                     
-                    column = setting[KEY_QUERY.SEARCH_FIELD]
-                    field = setting[KEY_QUERY.DESTINATION_FIELD]
-                    if field and field != column:
-                        column += ' => '+ field
-                    
-                    srt_setting = '"'+ '" | "'.join([column, setting[KEY_QUERY.SEARCH_MODE], setting[KEY_QUERY.SEARCH_FOR], setting[KEY_QUERY.REPLACE_WITH]])+'"'
+                    srt_setting = query_string(setting)
                     
                     if sr_op==len(self.search_replaces): nl ='\n'
                     else: nl =''
                     
-                    debug_print('Transaction N°{0} > {1}'.format(sr_op, srt_setting)+nl)
-                    self.setLabelText(_('Book {0} of {1}. Search/Replace {2} on {3}.').format(num, self.book_count, sr_op, self.search_replaces_count))
+                    debug_print('Operation N°{:d} > {:s}'.format(sr_op, srt_setting)+nl)
+                    self.setLabelText(_('Book {:d} of {:d}. Search/Replace {:d} on {:d}.').format(num, self.book_count, sr_op, self.search_replaces_count))
                     
                     if self.total_operation_count < 100:
                         self.hide()
                     else:
                         self.show()
                     
-                    sr_load(setting)
-                    
                     if self.wasCanceled():
                         self.close()
                         return
                     
-                    sr_func(book_id)
+                    sr_search_replace(book_id, setting)
                     
                 
             
             lst_id= []
-            for field, book_id_val_map in sr_field_edit.items():
+            for field, book_id_val_map in sr_updated_fields.items():
                 lst_id += book_id_val_map.keys()
             self.fields_update = len(lst_id)
             
@@ -296,10 +284,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
             if self.books_update > 0:
                 
-                debug_print('Update the database for {0} books...\n'.format(self.books_update))
-                self.setLabelText(_('Update the library for {0} books...').format(self.books_update))
+                debug_print('Update the database for {:d} books...\n'.format(self.books_update))
+                self.setLabelText(_('Update the library for {:d} books...').format(self.books_update))
                 
-                for field, book_id_val_map in sr_field_edit.items():
+                for field, book_id_val_map in sr_updated_fields.items():
                     self.dbA.set_field(field, book_id_val_map)
                 
                 self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)

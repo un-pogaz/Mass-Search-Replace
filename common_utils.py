@@ -7,7 +7,9 @@ __license__   = 'GPL v3'
 __copyright__ = '2011, Grant Drake <grant.drake@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time, six
+import os, sys, time
+# calibre Python 3 compatibility.
+from six import text_type as unicode
 
 try:
     load_translations()
@@ -70,7 +72,7 @@ def debug_print(*args):
         BASE_TIME = time.time()
     if DEBUG:
         prints('DEBUG MassSearch/Replace: ', *args)
-        #prints('DEBUG MassSearch/Replace: %6.1f'%(time.time()-BASE_TIME), *args)
+        #prints('DEBUG CommentsCleaner: %6.1f'%(time.time()-BASE_TIME), *args)
 
 def debug_text(pre, text):
     debug_print(pre+':::\n'+text+'\n')
@@ -151,6 +153,33 @@ def get_library_uuid(db):
     except:
         library_uuid = ''
     return library_uuid
+
+def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
+                     shortcut=(), triggered=None, is_checked=None):
+    '''
+    Create a menu action with the specified criteria and action
+    Note that if no shortcut is specified, will not appear in Preferences->Keyboard
+    This method should only be used for actions which either have no shortcuts,
+    or register their menus only once. Use create_menu_action_unique for all else.
+    '''
+    if shortcut is not None:
+        if len(shortcut) == 0:
+            shortcut = ()
+        else:
+            shortcut = _(shortcut)
+    ac = ia.create_action(spec=(menu_text, None, tooltip, shortcut),
+        attr=menu_text)
+    if image:
+        ac.setIcon(get_icon(image))
+    if triggered is not None:
+        ac.triggered.connect(triggered)
+    if is_checked is not None:
+        ac.setCheckable(True)
+        if is_checked:
+            ac.setChecked(True)
+
+    parent_menu.addAction(ac)
+    return ac
 
 def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=None,
                               shortcut=None, shortcut_name=None, triggered=None, is_checked=None,
@@ -408,7 +437,7 @@ class CustomColumnComboBox(QComboBox):
                 selected_idx = idx
         for key in sorted(custom_columns.keys()):
             self.column_names.append(key)
-            self.addItem('%s (%s)'%(key, custom_columns[key]['name']))
+            self.addItem('{:s} ({:s})'.format(key, custom_columns[key]['name']))
             if key == selected_column:
                 selected_idx = len(self.column_names) - 1
         self.setCurrentIndex(selected_idx)
@@ -633,18 +662,4 @@ class regexException(BaseException):
     
     def __str__(self):
         return self.msg
-
-
-def CSS_CleanRules(css):
-    #remove space and invalid character
-    r = regex()
-    css = r.loop(r'[.*!()?+<>\\]', r'', css.lower())
-    css = r.loop(r'(,|;|:|\n|\r|\s{2,})', r' ', css)
-    css = r.simple(r'^\s*(.*?)\s*$', r'\1', css); 
-    # split to table and remove duplicate
-    css = list(dict.fromkeys(css.split(' ')))
-    # sort
-    css = sorted(css)
-    # join in a string
-    css = ' '.join(css)
-    return css
+        
