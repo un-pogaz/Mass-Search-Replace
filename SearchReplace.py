@@ -25,16 +25,14 @@ from calibre import prints
 from calibre.constants import iswindows, isosx
 from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
 from calibre.ebooks.metadata.book.formatter import SafeFormat
-from calibre.gui2.widgets import HistoryLineEdit
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
 from calibre.utils.config import JSONConfig, dynamic, prefs, tweaks
 from calibre.utils.date import now
 from calibre.utils.icu import capitalize, sort_key
 from calibre.utils.titlecase import titlecase
-from calibre.gui2.widgets import LineEditECM
-from polyglot.builtins import (
-    error_message, iteritems, itervalues, native_string_type, unicode_type
-)
+from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
+from calibre.gui2.widgets2 import Dialog
+from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
 
 from calibre_plugins.mass_search_replace.templates import check_template, TEMPLATE_ERROR
 
@@ -764,53 +762,6 @@ class SearchReplaceWidget(QWidget):
                 self.s_r_set_colors()
                 break
     
-    def do_search_replace(self, book_id):
-        source = self.s_r_sf_itemdata(None)
-        if not source or not self.s_r_obj:
-            return
-        dest = self.s_r_df_itemdata(None)
-        if not dest:
-            dest = source
-        
-        dfm = self.db.field_metadata[dest]
-        mi = self.db.new_api.get_proxy_metadata(book_id)
-        original = mi.get(dest)
-        val = self.s_r_do_regexp(mi)
-        val = self.s_r_do_destination(mi, val)
-        if dfm['is_multiple']:
-            if dfm['is_csp']:
-                # convert the colon-separated pair strings back into a dict,
-                # which is what set_identifiers wants
-                dst_id_type = unicode_type(self.s_r_dst_ident.text())
-                if dst_id_type and dst_id_type != '*':
-                    v = ''.join(val)
-                    ids = mi.get(dest)
-                    ids[dst_id_type] = v
-                    val = ids
-                else:
-                    try:
-                        val = dict([(t.split(':')) for t in val])
-                    except:
-                        raise Exception(_('Invalid identifier string. It must be a '
-                                          'comma-separated list of pairs of '
-                                          'strings separated by a colon'))
-        else:
-            val = self.s_r_replace_mode_separator().join(val)
-            if dest == 'title' and len(val) == 0:
-                val = _('Unknown')
-        
-        if not val and dfm['datatype'] == 'datetime':
-            val = None
-        if dfm['datatype'] == 'rating':
-            if (not val or int(val) == 0):
-                val = None
-            if dest == 'rating' and val:
-                val = (int(val) // 2) * 2
-                
-        
-        if original != val:
-            self.set_field_calls[dest][book_id] = val
-    # }}}
     
     def s_r_remove_query(self, *args):
         if self.query_field.currentIndex() == 0:
@@ -959,7 +910,8 @@ class SearchReplaceWidget(QWidget):
         self.results_count.setValue(999)
         self.starting_from.setValue(1)
         self.multiple_separator.setText(" ::: ")
-    
+     # }}}
+     
     def load_settings(self, query):
         if query:
             def set_text(attr, key):
@@ -1005,13 +957,64 @@ class SearchReplaceWidget(QWidget):
             set_value(self.starting_from, KEY_QUERY.STARTING_FROM)
             set_text(self.multiple_separator, KEY_QUERY.MULTIPLE_SEPARATOR)
     
+    def do_search_replace(self, book_id):
+        source = self.s_r_sf_itemdata(None)
+        if not source or not self.s_r_obj:
+            return
+        dest = self.s_r_df_itemdata(None)
+        if not dest:
+            dest = source
+        
+        dfm = self.db.field_metadata[dest]
+        mi = self.db.new_api.get_proxy_metadata(book_id)
+        
+        #edit the metadata object with the stored edited field
+        for dest in self.set_field_calls:
+            if book_id in self.set_field_calls[dest]:
+                store = str(self.set_field_calls[dest][book_id])
+                mi.set(dest, store)
+                
+        original = mi.get(dest)
+        
+        val = self.s_r_do_regexp(mi)
+        val = self.s_r_do_destination(mi, val)
+        if dfm['is_multiple']:
+            if dfm['is_csp']:
+                # convert the colon-separated pair strings back into a dict,
+                # which is what set_identifiers wants
+                dst_id_type = unicode_type(self.s_r_dst_ident.text())
+                if dst_id_type and dst_id_type != '*':
+                    v = ''.join(val)
+                    ids = mi.get(dest)
+                    ids[dst_id_type] = v
+                    val = ids
+                else:
+                    try:
+                        val = dict([(t.split(':')) for t in val])
+                    except:
+                        raise Exception(_('Invalid identifier string. It must be a '
+                                          'comma-separated list of pairs of '
+                                          'strings separated by a colon'))
+        else:
+            val = self.s_r_replace_mode_separator().join(val)
+            if dest == 'title' and len(val) == 0:
+                val = _('Unknown')
+        
+        if not val and dfm['datatype'] == 'datetime':
+            val = None
+        if dfm['datatype'] == 'rating':
+            if (not val or int(val) == 0):
+                val = None
+            if dest == 'rating' and val:
+                val = (int(val) // 2) * 2
+                
+        
+        if original != val:
+            self.set_field_calls[dest][book_id] = val
+   
     def save_settings(self):
-        
-        name, ok =  QInputDialog.getItem(self, _('Save search/replace'),
-                    _('Search/replace name:'), names, dex, True)
-        
         query = {}
-        query[KEY_QUERY.NAME] = name
+        query[KEY_QUERY.NAME] = unicode_type(self.query_field.currentText())
         query[KEY_QUERY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
         query[KEY_QUERY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
         query[KEY_QUERY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
@@ -1031,6 +1034,7 @@ class SearchReplaceWidget(QWidget):
         if self.s_r_error != None:
             query[KEY_QUERY.S_R_ERROR] = self.s_r_error
         return query
+    
     
     def validate(self, settings):
         if self.s_r_error:
@@ -1080,7 +1084,7 @@ class KEY_QUERY:
     S_R_TEMPLATE        = 's_r_template'
     SEARCH_FIELD        = 'search_field'
     SEARCH_FOR          = 'search_for'
-    SEARCH_MODE         ='search_mode'
+    SEARCH_MODE         = 'search_mode'
     STARTING_FROM       = 'starting_from'
     
     S_R_ERROR           = 's_r_error'
@@ -1103,150 +1107,34 @@ class KEY_QUERY:
         SEARCH_MODE       ,
         STARTING_FROM     ,
     ]
-
-
-class ChainAction(object):
-
-    name = 'Chain Action'
-
-    '''
-    This is the base class for all actions
-    '''
-    def __init__(self, plugin_action):
-        '''
-        All actions are intialized at startup
-        The are re-initialized on library change, and on adding or modifying custom modules
-        '''
-        self.plugin_action = plugin_action
-
-    def run(self, gui, settings, chain_loop):
-        '''
-        This is the method that contain the logic of the action you want.
-        It is called whenever a chain is activated.
-        The settings is a dictionary with options configured for the specific
-        action in the chain dialog.
-        chain_loop is the instance running the chain actions, it have info that
-        are used by some actions (e.g. start time for each chain action)
-        '''
-        raise NotImplementedError
-
-#    def shutting_down(self):
-#        '''
-#        Implement this if you want to do anything related to your action
-#        when calibre shuts down (e.g cleaning)
-#        '''
-#        pass
-
-    def config_widget(self):
-        '''
-        If you want your action to have settings dialog, implement this method
-        This should return a Qwidget (not dialog) with the following methods:
-        [*] __init__(self, plugin_action)
-        [*] save_settings(settings)
-                This method is used to save the settings from the widget
-                it should return a dictionary containing all the settings
-        [*] load_settings(self, settings)
-                This method is used to load the saved settings into the
-                widget
-        '''
-        return None
-
-    def validate(self, settings):
-        '''
-        Validate settings dict. This is called when you press the OK button in config dialog.
-        changes are applied only if the this methods returns True.
-        It is called also when verifying the chain validity on multiple occasions: startup,
-        library change, chain dialog initialization .....
-        If the setting in the dictionary are not valid, return a tuple
-        of two strings (message, details), these will be displayed as a warning dialog to
-        the user and the process will be aborted.
-        '''
-        return True
-
-class SearchReplaceAction(ChainAction):
-
-    name = 'Search and replace'
     
-    def __init__(self, plugin_action):
-        self.plugin_action = plugin_action
 
-    def run(self, gui, settings, book_ids, chain_loop):
-        db = gui.current_db
-        api = db.new_api
-        refresh_books = set(book_ids)
-        
-        s_r = SearchReplaceWidget(self.plugin_action, [], set())
+def get_default_query(plugin_action):
+        s_r = SearchReplaceWidget(plugin_action)
         s_r.resize(QSize(0, 0))
-        s_r.load_settings(settings)
-        
-        sr_func = s_r.do_search_replace
-        self.set_field_calls = s_r.set_field_calls
+        query = s_r.save_settings()
+        s_r.close()
         del s_r
-        
-        for book_id in book_ids:
-            sr_func(book_id)
-        if self.set_field_calls:
-            for field, book_id_val_map in iteritems(self.set_field_calls):
-                refresh_books.update(db.new_api.set_field(field, book_id_val_map))
-        db.clean()
-        model = gui.library_view.model()
-        model.refresh_ids(refresh_books)
-    
-    def get_possible_fields(self):
-        gui = self.plugin_action.gui
-        db = gui.current_db
-        all_fields = []
-        writable_fields = []
-        fm = db.field_metadata
-        for f in fm:
-            if (f in ['author_sort'] or
-                    (fm[f]['datatype'] in ['text', 'series', 'enumeration', 'comments', 'rating'] and
-                     fm[f].get('search_terms', None) and
-                     f not in ['formats', 'ondevice', 'series_sort']) or
-                    (fm[f]['datatype'] in ['int', 'float', 'bool', 'datetime'] and
-                     f not in ['id', 'timestamp'])):
-                all_fields.append(f)
-                writable_fields.append(f)
-            if fm[f]['datatype'] == 'composite':
-                all_fields.append(f)
-        all_fields.sort()
-        all_fields.insert(1, '{template}')
-        writable_fields.sort()
-        return all_fields, writable_fields
-    
-    def validate(self, settings):
-        
-        if not settings:
-            return (_('Settings Error'), _('You must configure this action before running it'))
-        if settings.get('s_r_error'):
-            return (_('Wrong Expression'), error_message(settings['s_r_error']))
-        
-        all_fields, writable_fields = self.get_possible_fields()
-            
-        search_field = settings['search_field']
-        dest_field = settings['destination_field']
-        if not search_field:
-            return (_('Search field unavailable'), _('You must choose a search field'))
-        if search_field not in all_fields:
-            return (_('Search field unavailable'), _('Search field "{}" is not available for this library'.format(search_field)))
-        if search_field == '{template}':
-            dest_field = settings['destination_field']
-            if not dest_field:
-                return (_('Destination field empty'), _('Destination field cannot be empty if the search field is a template'))
-            if not dest_field in writable_fields:
-                return (_('Destination field unavailable'), _('Destination field "{}" is not available for this library'.format(dest_field)))
-            is_template_valid = check_template(settings['s_r_template'], self.plugin_action, print_error=False)
-            if is_template_valid is not True:
-                return is_template_valid
-        if dest_field == 'identifiers' or (search_field == 'identifiers' and dest_field == ''):
-            dest_ident = settings['s_r_dst_ident']
-            if not dest_ident or ( dest_ident == '*'):
-                return (_('Invalid identifier'), _('You must enter a valid destination identifier (not empty or *)'))
-        if dest_field and not ( dest_field in writable_fields ):
-            return (_('Destination field unavailable'), _('Destination field "{}" not available for this library'.format(dest_field)))
-        return True
-    
-    def config_widget(self):
-        return SearchReplaceWidget
+        return query
 
+class SearchReplaceDialog(Dialog):
+    def __init__(self, parent, plugin_action, query):
+        self.plugin_action = plugin_action
+        self.query = query
+        self.widget_cls = SearchReplaceWidget
+        Dialog.__init__(self, _('Settings'), 'config_query_SearchReplace', parent)
+
+    def setup_ui(self):
+        self.widget = self.widget_cls(self.plugin_action)
+        l = QVBoxLayout()
+        self.setLayout(l)
+        l.addWidget(self.widget)
+        l.addWidget(self.bb)
+        
+        self.widget.load_settings(self.query)
+    
+    
+    def accept(self):
+        self.query = self.widget.save_settings()
+        Dialog.accept(self)
 

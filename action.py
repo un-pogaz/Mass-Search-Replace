@@ -17,18 +17,19 @@ except NameError:
 from functools import partial
 from datetime import datetime
 try:
-    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer
+    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 except ImportError:
-    from PyQt4.Qt import QToolButton, QMenu, QProgressDialog, QTimer
+    from PyQt4.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
 from calibre.ebooks.metadata.book.base import Metadata
+from calibre.constants import numeric_version as calibre_version, isosx, isnewosx
 from calibre.gui2 import error_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceAction, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, KEY_QUERY
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -60,29 +61,23 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
-        chain_items = PREFS[KEY.MASS_SEARCH_REPLACE]
+        query_list = PREFS[KEY.MASS_SEARCH_REPLACE]
         self.menu.clear()
-        self.chain_menu = []
+        self.query_menu = []
         sub_menus = {}
         
         for action in self.menu_actions:
             self.gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
             # starting in calibre 2.10.0, actions are registers at
             # the top gui level for OSX' benefit.
-            if calibre_version >= (2,10,0):
+            if (isosx or isnewosx) and calibre_version >= (2,10,0):
                 self.gui.removeAction(action)
         self.menu_actions = []
         
-        for chain in chain_items:
-            debug_print('Rebuilding menu for ({})'.format(chain[KEY.MENU_TEXT]))
-            ## check chains for errors
-            ## Note: this is commented out, we are going to defer checking the chain
-            ## to just before we run them, because chains that contain calibre actions
-            ## return invalid settings status when this method runs at initialization
-            ## as the menu entries of the some plugin are not yet available
-            
-            if chain[KEY.MENU_ACTIVE]:
-                self.append_menu_item_ex(self.menu, sub_menus, chain[KEY.MENU_TEXT], chain[KEY.MENU_SUBMENU], chain[KEY.MENU_IMAGE], chain)
+        for query in query_list:
+            if query[KEY.MENU_ACTIVE] and len(query[KEY.MENU_SEARCH_REPLACES])>0:
+                debug_print('Rebuilding menu for ({})'.format(query[KEY.MENU_TEXT]))
+                self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
         
         self.menu.addSeparator()
         
@@ -92,7 +87,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
-    def append_menu_item_ex(self, m, sub_menus, menu_text, sub_menu_text, image_name, chain):
+    def append_menu_item_ex(self, m, sub_menus, menu_text, sub_menu_text, image_name, query):
         parent_menu = m
         if sub_menu_text:
             # Create the sub-menu if it does not exist
@@ -109,35 +104,35 @@ class MassSearchReplaceAction(InterfaceAction):
         else:
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
                            unique_name=menu_text,
-                           triggered=partial(self.run_SearchReplace, chain))
-            # Maintain our list of menus by chain references so we can easily enable/disable menus when user right-clicks.
+                           triggered=partial(self.run_SearchReplace, query))
+            # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
             self.menu_actions.append(ac)
-            self.chain_menu.append((chain, ac))
+            self.query_menu.append((query, ac))
         return ac
     
     def set_enabled_for_all_menu_actions(self, is_enabled):
-        for chain_data, menu_action in self.chain_menu:
-            chain_settings = chain_data['chain_settings']
+        for query_data, menu_action in self.query_menu:
+            query_settings = query_data['query_settings']
             menu_action.setEnabled(is_enabled)
     
-    def is_menu_enabled(self, chain_settings):
+    def is_menu_enabled(self, query_settings):
         '''
-        Determine whether menu item for the chain is enabled or not
+        Determine whether menu item for the query is enabled or not
         '''
-#        chain_links = chain_settings.get('chain_links', [])
-#        for chain_link in chain_links:
-#            action_name = chain_link['action_name']
-#            action_settings = chain_link['action_settings']
+#        query_links = query_settings.get('query_links', [])
+#        for query_link inquery_links:
+#            action_name = query_link['action_name']
+#            action_settings = query_link['action_settings']
 #            action = self.all_actions[action_name]
 #            pass
         return True
     
-    def run_SearchReplace(self, chain):
+    def run_SearchReplace(self, query):
         
-        # check chains for errors
-        chain_chk = check_chain(chain)
-        if chain_chk is not True:
-            return error_dialog(self.gui, _('Chain Error'), _('Validating the chain settings before running failed. You can see the detailed errors by opening the chain in the config dialog'),
+        # check querys for errors
+        query_chk = check_query(query)
+        if query_chk is not True:
+            return error_dialog(self.gui, _('Query Error'), _('Validating the querys settings before running failed. You can see the detailed errors by opening the query in the config dialog'),
                 show=True)
         
         
@@ -150,7 +145,7 @@ class MassSearchReplaceAction(InterfaceAction):
             return error_dialog(self.gui, _('No selected book'), _('No book selected for cleaning comments'), show=True)
         book_ids = self.gui.library_view.get_selected_ids()
         
-        srpg = SearchReplacesProgressDialog(self, book_ids, chain)
+        srpg = SearchReplacesProgressDialog(self, book_ids, query)
         srpg.close()
         del srpg
     
@@ -158,22 +153,22 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(self.gui)
         
 
-def check_chain(chain):
-    #try:
-    chain_name = chain[KEY.MENU_TEXT]
-    for search_replace in chain[KEY.MENU_SEARCH_REPLACES]:
-        for key in KEY_QUERY.ALL:
-            if key not in search_replace.keys():
-                debug_print('chain "{}": settings are not valide, the {} is missing'.format(chain_name, key))
-                return False
-    #except Exception as e:
-    #    debug_print('Exception when checking chain: {}'.format(e))
-    #    return False
+def check_query(query):
+    try:
+        query_name = query[KEY.MENU_TEXT]
+        for search_replace in query[KEY.MENU_SEARCH_REPLACES]:
+            for key in KEY_QUERY.ALL:
+                if key not in search_replace.keys():
+                    debug_print('query "{}": settings are not valide, "{}" is missing'.format(query_name, key))
+                    return False
+    except Exception as e:
+        debug_print('Exception when checking query: {}'.format(e))
+        return False
     return True
 
 class SearchReplacesProgressDialog(QProgressDialog):
     
-    def __init__(self, plugin_action, book_ids, chain):
+    def __init__(self, plugin_action, book_ids, query):
         
         # plugin_action
         self.plugin_action = plugin_action
@@ -194,10 +189,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.fields_update = 0
         
         # name of the search/replace
-        self.menu_text = chain[KEY.MENU_TEXT]
+        self.menu_text = query[KEY.MENU_TEXT]
         
         # name of the search/replace
-        self.search_replaces = chain[KEY.MENU_SEARCH_REPLACES]
+        self.search_replaces = query[KEY.MENU_SEARCH_REPLACES]
         # Count of search/replace
         self.search_replaces_count = len(self.search_replaces)
         
@@ -231,22 +226,49 @@ class SearchReplacesProgressDialog(QProgressDialog):
         elif self.exception:
             debug_print('Mass Search/Replace as cancelled. An exception has occurred:')
             debug_print(self.exception)
+            raise self.exception
         else:
             debug_print('Search/Replace launched for {0} books.'.format(self.book_count))
             debug_print('Search/Replace performed for {0} books with a total of {1} fields modify.'.format(self.books_update, self.fields_update))
+            debug_print('Search/Replace execute in {0} seconds.'.format(self.time_execut))
             debug_print('{0}\n'.format(self.search_replaces))
         
     def _run_search_replaces(self):
-        
+        start = time.time()
         try:
             self.setValue(0)
-            lst_id= []
             
-            for num, book_id in enumerate(self.book_ids, start=1):
-                for sr_op, search_replace in enumerate(self.search_replaces, start=1):
+            s_r = SearchReplaceWidget(self.plugin_action)
+            s_r.resize(QSize(0, 0))
+            
+            sr_load = s_r.load_settings
+            sr_func = s_r.do_search_replace
+            sr_field_edit = s_r.set_field_calls
+            del s_r
+            
+            for num, book_id in enumerate(self.book_ids, 1):
+                
+                # update Progress
+                self.setValue(num)
+                
+                miA = self.dbA.get_proxy_metadata(book_id)
+                book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
+                
+                debug_print('Search/Replace for '+book_info)
+                
+                for sr_op, setting in enumerate(self.search_replaces, 1):
                     
-                    # update Progress
-                    self.setValue(num)
+                    column = setting[KEY_QUERY.SEARCH_FIELD]
+                    field = setting[KEY_QUERY.DESTINATION_FIELD]
+                    if field and field != column:
+                        column += ' => '+ field
+                    
+                    srt_setting = '"'+ '" | "'.join([column, setting[KEY_QUERY.SEARCH_MODE], setting[KEY_QUERY.SEARCH_FOR], setting[KEY_QUERY.REPLACE_WITH]])+'"'
+                    
+                    if sr_op==len(self.search_replaces): nl ='\n'
+                    else: nl =''
+                    
+                    debug_print('Transaction N°{0} > {1}'.format(sr_op, srt_setting)+nl)
                     self.setLabelText(_('Book {0} of {1}. Search/Replace {2} on {3}.').format(num, self.book_count, sr_op, self.search_replaces_count))
                     
                     if self.total_operation_count < 100:
@@ -254,27 +276,38 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     else:
                         self.show()
                     
+                    sr_load(setting)
+                    
                     if self.wasCanceled():
                         self.close()
                         return
                     
-                    action = SearchReplaceAction(self.plugin_action)
-                    action.run(self.gui, search_replace, self.book_ids, self)
-                    
-                    for field, book_id_val_map in action.set_field_calls.items():
-                        self.dbA.set_field(field, book_id_val_map)
-                        self.fields_update += len(book_id_val_map)
-                        lst_id += book_id_val_map.keys()
+                    sr_func(book_id)
                     
                 
-            self.books_update = len(list(dict.fromkeys(lst_id)))
             
-            #self.dbA.set_field('comments', {id:self.books_dic[id] for id in self.books_dic.keys()})
-            self.gui.iactions['Edit Metadata'].refresh_gui(self.book_ids, covers_changed=False)
+            lst_id= []
+            for field, book_id_val_map in sr_field_edit.items():
+                lst_id += book_id_val_map.keys()
+            self.fields_update = len(lst_id)
+            
+            lst_id = list(dict.fromkeys(lst_id));
+            self.books_update = len(lst_id)
+            
+            if self.books_update > 0:
+                
+                debug_print('Update the database for {0} books...\n'.format(self.books_update))
+                self.setLabelText(_('Update the library for {0} books...').format(self.books_update))
+                
+                for field, book_id_val_map in sr_field_edit.items():
+                    self.dbA.set_field(field, book_id_val_map)
+                
+                self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
             
         except Exception as e:
             self.exception = e;
-            
+        
+        self.time_execut = round(time.time() - start, 3)
         self.db.clean()
         self.hide()
         return

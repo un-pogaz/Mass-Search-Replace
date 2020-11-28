@@ -32,7 +32,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
     version                 = (0, 9, 0)
-    minimum_calibre_version = (2, 0, 0)
+    minimum_calibre_version = (5, 0, 0)
 
     #: This field defines the GUI plugin class that contains all the code
     #: that actually does something. Its format is module_path:class_name
@@ -80,6 +80,8 @@ class ActionMassSearchReplace(InterfaceActionBase):
         :param config_widget: The widget returned by :meth:`config_widget`.
         '''
         config_widget.save_settings()
+        if self.actual_plugin_:
+            self.actual_plugin_.rebuild_menus()
 
 
 # For testing, run from command line with this:

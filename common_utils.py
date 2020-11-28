@@ -263,8 +263,115 @@ class SizePersistedDialog(QDialog):
     def save_custom_pref(self, name, value):
         gprefs[self.unique_pref_name+':'+name] = value
 
-class KeyValueComboBox(QComboBox):
+
+class ReadOnlyTableWidgetItem(QTableWidgetItem):
+    def __init__(self, text):
+        if text is None:
+            text = ''
+        QTableWidgetItem.__init__(self, text, QtGui.QTableWidgetItem.UserType)
+        self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+
+class RatingTableWidgetItem(QTableWidgetItem):
+    def __init__(self, rating, is_read_only=False):
+        QTableWidgetItem.__init__(self, '', QtGui.QTableWidgetItem.UserType)
+        self.setData(Qt.DisplayRole, rating)
+        if is_read_only:
+            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+
+class DateTableWidgetItem(QTableWidgetItem):
+    def __init__(self, date_read, is_read_only=False, default_to_today=False, fmt=None):
+        if (date_read == UNDEFINED_DATE) and default_to_today:
+            date_read = now()
+        if is_read_only:
+            QTableWidgetItem.__init__(self, format_date(date_read, fmt), QtGui.QTableWidgetItem.UserType)
+            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+        else:
+            QTableWidgetItem.__init__(self, '', QtGui.QTableWidgetItem.UserType)
+            dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
+            self.setData(Qt.DisplayRole, dt)
+
+class NoWheelComboBox(QComboBox):
     
+    def wheelEvent (self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
+
+class CheckableTableWidgetItem(QTableWidgetItem):
+    def __init__(self, checked=False, is_tristate=False):
+        QTableWidgetItem.__init__(self, '')
+        self.setFlags(Qt.ItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        if is_tristate:
+            self.setFlags(self.flags() | Qt.ItemIsTristate)
+        if checked:
+            self.setCheckState(Qt.Checked)
+        else:
+            if is_tristate and checked is None:
+                self.setCheckState(Qt.PartiallyChecked)
+            else:
+                self.setCheckState(Qt.Unchecked)
+    
+    def get_boolean_value(self):
+        '''
+        Return a boolean value indicating whether checkbox is checked
+        If this is a tristate checkbox, a partially checked value is returned as None
+        '''
+        if self.checkState() == Qt.PartiallyChecked:
+            return None
+        else:
+            return self.checkState() == Qt.Checked
+
+class TextIconWidgetItem(QTableWidgetItem):
+    def __init__(self, text, icon, tooltip=None, is_read_only=False):
+        QTableWidgetItem.__init__(self, text)
+        if icon:
+            self.setIcon(icon)
+        if tooltip:
+            self.setToolTip(tooltip)
+        if is_read_only:
+            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+
+class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
+    def __init__(self, text, icon):
+        ReadOnlyTableWidgetItem.__init__(self, text)
+        if icon:
+            self.setIcon(icon)
+
+class ReadOnlyLineEdit(QLineEdit):
+    def __init__(self, text, parent):
+        if text is None:
+            text = ''
+        QLineEdit.__init__(self, text, parent)
+        self.setEnabled(False)
+
+class NumericLineEdit(QLineEdit):
+    '''
+    Allows a numeric value up to two decimal places, or an integer
+    '''
+    def __init__(self, *args):
+        QLineEdit.__init__(self, *args)
+        self.setValidator(QRegExpValidator(QRegExp(r'(^\d*\.[\d]{1,2}$)|(^[1-9]\d*[\.]$)'), self))
+
+class ListComboBox(QComboBox):
+    def __init__(self, parent, values, selected_value=None):
+        QComboBox.__init__(self, parent)
+        self.values = values
+        if selected_value is not None:
+            self.populate_combo(selected_value)
+    
+    def populate_combo(self, selected_value):
+        self.clear()
+        selected_idx = idx = -1
+        for value in self.values:
+            idx = idx + 1
+            self.addItem(value)
+            if value == selected_value:
+                selected_idx = idx
+        self.setCurrentIndex(selected_idx)
+    
+    def selected_value(self):
+        return unicode(self.currentText())
+
+class KeyValueComboBox(QComboBox):
     def __init__(self, parent, values, selected_key):
         QComboBox.__init__(self, parent)
         self.values = values
@@ -273,7 +380,7 @@ class KeyValueComboBox(QComboBox):
     def populate_combo(self, selected_key):
         self.clear()
         selected_idx = idx = -1
-        for key, value in six.iteritems(self.values):
+        for key, value in list(self.values.items()):
             idx = idx + 1
             self.addItem(value)
             if key == selected_key:
@@ -281,15 +388,154 @@ class KeyValueComboBox(QComboBox):
         self.setCurrentIndex(selected_idx)
     
     def selected_key(self):
-        for key, value in six.iteritems(self.values):
-            if value == six.text_type(self.currentText()).strip():
+        for key, value in list(self.values.items()):
+            if value == unicode(self.currentText()).strip():
                 return key
 
-class NoWheelComboBox(QComboBox):
+class CustomColumnComboBox(QComboBox):
+    def __init__(self, parent, custom_columns={}, selected_column='', initial_items=['']):
+        QComboBox.__init__(self, parent)
+        self.populate_combo(custom_columns, selected_column, initial_items)
+    
+    def populate_combo(self, custom_columns, selected_column, initial_items=['']):
+        self.clear()
+        self.column_names = list(initial_items)
+        if len(initial_items) > 0:
+            self.addItems(initial_items)
+        selected_idx = 0
+        for idx, value in enumerate(initial_items):
+            if value == selected_column:
+                selected_idx = idx
+        for key in sorted(custom_columns.keys()):
+            self.column_names.append(key)
+            self.addItem('%s (%s)'%(key, custom_columns[key]['name']))
+            if key == selected_column:
+                selected_idx = len(self.column_names) - 1
+        self.setCurrentIndex(selected_idx)
+    
+    def select_column(self, key):
+        selected_idx = 0
+        for i, val in enumerate(self.column_names):
+            if val == key:
+                selected_idx = i
+                break
+        self.setCurrentIndex(selected_idx)
+    
+    def get_selected_column(self):
+        return self.column_names[self.currentIndex()]
 
-    def wheelEvent (self, event):
-        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
-        event.ignore()
+class ReorderedComboBox(QComboBox):
+    def __init__(self, parent, strip_items=True):
+        QComboBox.__init__(self, parent)
+        self.strip_items = strip_items
+        self.setEditable(True)
+        self.setMaxCount(10)
+        self.setInsertPolicy(QComboBox.InsertAtTop)
+    
+    def populate_items(self, items, sel_item):
+        self.blockSignals(True)
+        self.clear()
+        self.clearEditText()
+        for text in items:
+            if text != sel_item:
+                self.addItem(text)
+        if sel_item:
+            self.insertItem(0, sel_item)
+            self.setCurrentIndex(0)
+        else:
+            self.setEditText('')
+        self.blockSignals(False)
+    
+    def reorder_items(self):
+        self.blockSignals(True)
+        text = unicode(self.currentText())
+        if self.strip_items:
+            text = text.strip()
+        if not text.strip():
+            return
+        existing_index = self.findText(text, Qt.MatchExactly)
+        if existing_index:
+            self.removeItem(existing_index)
+            self.insertItem(0, text)
+            self.setCurrentIndex(0)
+        self.blockSignals(False)
+    
+    def get_items_list(self):
+        if self.strip_items:
+            return [unicode(self.itemText(i)).strip() for i in range(0, self.count())]
+        else:
+            return [unicode(self.itemText(i)) for i in range(0, self.count())]
+
+class DragDropLineEdit(QLineEdit):
+    '''
+    Unfortunately there is a flaw in the Qt implementation which means that
+    when the QComboBox is in editable mode that dropEvent is not fired
+    if you drag into the editable text area. Working around this by having
+    a custom LineEdit() set for the parent combobox.
+    '''
+    def __init__(self, parent, drop_mode):
+        QLineEdit.__init__(self, parent)
+        self.drop_mode = drop_mode
+        self.setAcceptDrops(True)
+    
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+    
+    def dragEnterEvent(self, event):
+        if int(event.possibleActions() & Qt.CopyAction) + \
+           int(event.possibleActions() & Qt.MoveAction) == 0:
+            return
+        data = self._get_data_from_event(event)
+        if data:
+            event.acceptProposedAction()
+    
+    def dropEvent(self, event):
+        data = self._get_data_from_event(event)
+        event.setDropAction(Qt.CopyAction)
+        self.setText(data[0])
+    
+    def _get_data_from_event(self, event):
+        md = event.mimeData()
+        if self.drop_mode == 'file':
+            urls, filenames = dnd_get_files(md, ['csv', 'txt'])
+            if not urls:
+                # Nothing found
+                return
+            if not filenames:
+                # Local files
+                return urls
+            else:
+                # Remote files
+                return filenames
+        if event.mimeData().hasFormat('text/uri-list'):
+            urls = [unicode(u.toString()).strip() for u in md.urls()]
+            return urls
+
+class DragDropComboBox(ReorderedComboBox):
+    '''
+    Unfortunately there is a flaw in the Qt implementation which means that
+    when the QComboBox is in editable mode that dropEvent is not fired
+    if you drag into the editable text area. Working around this by having
+    a custom LineEdit() set for the parent combobox.
+    '''
+    def __init__(self, parent, drop_mode='url'):
+        ReorderedComboBox.__init__(self, parent)
+        self.drop_line_edit = DragDropLineEdit(parent, drop_mode)
+        self.setLineEdit(self.drop_line_edit)
+        self.setAcceptDrops(True)
+        self.setEditable(True)
+        self.setMaxCount(10)
+        self.setInsertPolicy(QComboBox.InsertAtTop)
+    
+    def dragMoveEvent(self, event):
+        self.lineEdit().dragMoveEvent(event)
+    
+    def dragEnterEvent(self, event):
+        self.lineEdit().dragEnterEvent(event)
+    
+    def dropEvent(self, event):
+        self.lineEdit().dropEvent(event)
+
 
 class KeyboardConfigDialog(SizePersistedDialog):
     '''
