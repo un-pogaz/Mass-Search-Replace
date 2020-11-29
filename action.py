@@ -80,7 +80,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions = []
         
         for query in query_list:
-            if not query_hasError(query) and query[KEY.MENU_ACTIVE]:
+            if not query_testGetError(query) and query[KEY.MENU_ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
         
         self.menu.addSeparator()
@@ -144,7 +144,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(self.gui)
 
 
-def query_hasError(query):
+def query_testGetError(query):
     try:
         val = query[KEY.MENU_ACTIVE]
         val = query[KEY.MENU_TEXT]
