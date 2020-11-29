@@ -20,50 +20,63 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSize
                       
 from calibre import prints
-from calibre.gui2 import error_dialog, question_dialog, warning_dialog
+from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog
 
 from calibre_plugins.mass_search_replace.common_utils import debug_print
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_QUERY as CALIBRE_KEY_QUERY, TEMPLATE_FIELD
+from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_QUERY, TEMPLATE_FIELD
 
-class KEY_QUERY():
-    locals().update(vars(CALIBRE_KEY_QUERY))
+class KEY_OPERATION():
+    locals().update(vars(KEY_QUERY))
 
-_default_query = None
+_default_operation = None
 
-def get_default_query(plugin_action):
-        global _default_query
-        if not _default_query:
-            s_r = SearchReplaceWidget(plugin_action)
-            s_r.resize(QSize(0, 0))
-            _default_query = s_r.save_settings()
+def get_default_operation(plugin_action):
+        global _default_operation
+        if not _default_operation:
+            s_r = SearchReplaceWidget_NoWindows(plugin_action)
+            _default_operation = s_r.save_settings()
             s_r.close()
             del s_r
         
-        return _default_query
-
-def query_hasSearchField(query):
-    return len(query[KEY_QUERY.SEARCH_FIELD])>0
-def query_hasError(query):
-    return KEY_QUERY.S_R_ERROR in query
-def query_hasAllKey(query):
-    for key in KEY_QUERY.ALL:
-        if key not in query.keys():
-            return False
-    return True
-
-def query_isValid(query):
-    return query_hasSearchField(query) and query_hasAllKey(query) and not query_hasError(query)
+        return _default_operation
 
 
-def query_string(query):
-    column = query[KEY_QUERY.SEARCH_FIELD]
-    field = query[KEY_QUERY.DESTINATION_FIELD]
+def operation_testGetError(operation):
+    for key in KEY_OPERATION.ALL:
+        if key not in operation.keys():
+            return Exception(_('This operation is not valide, the "{:s}" key is missing.').format(key))
+    if len(operation[KEY_OPERATION.SEARCH_FIELD])==0:
+        return Exception(_('You must specify the target "Search field".'))
+    if KEY_OPERATION.S_R_ERROR in operation:
+        return operation[KEY_OPERATION.S_R_ERROR]
+    return None
+
+def operation_isValid(operation):
+    return operation_testGetError(operation) == None
+
+def clean_operation_list(operation_list):
+    if operation_list == None: operation_list = []
+    rslt = []
+    for operation in operation_list:
+        if operation_isValid(operation):
+            rslt.append(operation)
+    
+    return rslt
+
+def operation_string(operation):
+    column = operation[KEY_OPERATION.SEARCH_FIELD]
+    field = operation[KEY_OPERATION.DESTINATION_FIELD]
     if (field and field != column):
         column += ' => '+ field
     
-    return '"'+ '" | "'.join([column, query[KEY_QUERY.SEARCH_MODE], query[KEY_QUERY.SEARCH_FOR], query[KEY_QUERY.REPLACE_WITH]])+'"'
+    return '"'+ '" | "'.join([column, operation[KEY_OPERATION.SEARCH_MODE], operation[KEY_OPERATION.SEARCH_FOR], operation[KEY_OPERATION.REPLACE_WITH]])+'"'
 
+
+def SearchReplaceWidget_NoWindows(plugin_action):
+    rslt = SearchReplaceWidget(plugin_action)
+    rslt.resize(QSize(0, 0))
+    return rslt;
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
@@ -74,21 +87,30 @@ class SearchReplaceWidget(MetadataBulkWidget):
         MetadataBulkWidget.__init__(self, plugin_action, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
     
-    def load_settings(self, query):
-        self.load_query(query)
-        
+    def load_settings(self, operation):
+        self.load_query(operation)
+    
     def save_settings(self):
         return self.get_query()
+        
+    def testGetError(self):
+        return operation_testGetError(self.get_query())
     
-    def search_replace(self, book_id, query):
-        self.load_settings(query)
-        self.do_search_replace(book_id)
+    def search_replace(self, book_id, operation=None):
+        if operation:
+            self.load_settings(operation)
+        
+        err = self.testGetError()
+        if not err:
+            self.do_search_replace(book_id)
+        return err
+
 
 class SearchReplaceDialog(Dialog):
-    def __init__(self, parent, plugin_action, query, book_ids=[]):
+    def __init__(self, parent, plugin_action, operation=None, book_ids=[]):
         self.plugin_action = plugin_action
         self.parent = parent
-        self.query = query
+        self.operation = operation
         self.widget = SearchReplaceWidget(self.plugin_action, book_ids)
         Dialog.__init__(self, _('Search/Replace configuration'), 'config_query_SearchReplace', parent)
 
@@ -98,22 +120,19 @@ class SearchReplaceDialog(Dialog):
         l.addWidget(self.widget)
         l.addWidget(self.bb)
         
-        self.widget.load_settings(self.query)
+        if self.operation:
+            self.widget.load_settings(self.operation)
         
     
     def accept(self):
-        self.query = self.widget.save_settings()
+        self.operation = self.widget.save_settings()
         
-        msg_error = None
-        if not query_hasSearchField(self.query):
-            msg_error = _('You must specify the target "Search field".')
+        err = self.widget.testGetError()
+        debug_print('msg_error:', err)
         
-        if query_hasError(self.query):
-            msg_error = str(self.query[KEY_QUERY.S_R_ERROR])
-        
-        if msg_error:
+        if err:
             if question_dialog(self.parent, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed.\n{:s}\nResume to the editing?\nElse, the changes will be discard.').format(msg_error),
+                             _('The registering of Find/Replace operation has failed.\n{:s}\nResume to the editing?\nElse, the changes will be discard.').format(str(err)),
                              default_yes=True, show_copy_button=False):
                 
                 return
@@ -121,6 +140,6 @@ class SearchReplaceDialog(Dialog):
                 Dialog.reject(self)
                 return
         
-        debug_print('Saved operation > {0:s}\n{1}\n'.format(query_string(self.query), self.query))
+        debug_print('Saved operation > {0:s}\n{1}\n'.format(operation_string(self.operation), self.operation))
         Dialog.accept(self)
 

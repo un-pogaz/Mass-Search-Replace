@@ -46,7 +46,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_query, query_isValid, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_operation, clean_operation_list, operation_string, KEY_OPERATION
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
@@ -76,7 +76,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        data_items = PREFS[KEY.MASS_SEARCH_REPLACE]
+        query_list = PREFS[KEY.MASS_SEARCH_REPLACE]
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
@@ -87,8 +87,8 @@ class ConfigWidget(QWidget):
         table_layout = QHBoxLayout()
         layout.addLayout(table_layout)
         
-        # Create a table the user can edit the data values in
-        self._table = MenuTableWidget(plugin_action, data_items, self)
+        # Create a table the user can edit the query list
+        self._table = MenuQueryTableWidget(plugin_action, query_list, self)
         heading_label.setBuddy(self._table)
         table_layout.addWidget(self._table)
         
@@ -150,8 +150,8 @@ class ConfigWidget(QWidget):
     
     def save_settings(self):
         
-        PREFS[KEY.MASS_SEARCH_REPLACE] = self._table.get_data()
-        debug_print('Save settings:\n{0}\n'.format(PREFS))
+        PREFS[KEY.MASS_SEARCH_REPLACE] = self._table.get_query_list()
+        #debug_print('Save settings:\n{0}\n'.format(PREFS))
         
     
     def edit_shortcuts(self):
@@ -208,10 +208,10 @@ class ConfigWidget(QWidget):
         try:
             # Read the .JSON file to add to the menus then delete it.
             import_config = JSONConfig(json)
-            data_items = import_config[KEY.MASS_SEARCH_REPLACE]
+            query_list = import_config[KEY.MASS_SEARCH_REPLACE]
             # Now insert the menus into the table
-            table.append_data(data_items)
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(data_items)),
+            table.append_query_list(query_list)
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(query_list)),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Import failed'), e, show=True)
@@ -221,7 +221,7 @@ class ConfigWidget(QWidget):
     
     def pick_archive_to_import(self):
         archives = choose_files(self, 'owp archive dialog', _('Select a menu file archive to import...'),
-                             filters=[('OWIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
+                             filters=[('OWIP Files', ['owip','owip.zip']),('ZIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
         if not archives:
             return
         f = archives[0]
@@ -229,8 +229,8 @@ class ConfigWidget(QWidget):
     
     def export_menus(self):
         table = self._table
-        data_items = table.get_selected_data()
-        if len(data_items) == 0:
+        query_list = table.get_selected_query()
+        if len(query_list) == 0:
             return error_dialog(self, _('Export failed'), _('No menu items selected to export'), show=True)
         archive_path = self.pick_archive_to_export()
         if not archive_path:
@@ -238,8 +238,8 @@ class ConfigWidget(QWidget):
         
         # Build our unique list of images that need to be exported
         image_names = {}
-        for data in data_items:
-            image_name = data[KEY.MENU_IMAGE]
+        for query in query_list:
+            image_name = query[KEY.MENU_IMAGE]
             if image_name and image_name not in image_names:
                 image_path = os.path.join(table.resources_dir, image_name)
                 if os.path.exists(image_path):
@@ -251,7 +251,7 @@ class ConfigWidget(QWidget):
         
         json = os.path.join(table.resources_dir, OWIP)
         export_config = JSONConfig(json)
-        export_config[KEY.MASS_SEARCH_REPLACE] = data_items
+        export_config[KEY.MASS_SEARCH_REPLACE] = query_list
         json_path = os.path.join(table.resources_dir, OWIP+'.json')
         
         try:
@@ -261,7 +261,7 @@ class ConfigWidget(QWidget):
                 # Add any images referred to in those menu items that are local resources
                 for image_name, image_path in list(image_names.items()):
                     archive_zip.write(image_path, os.path.basename(image_path))
-            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(data_items), archive_path),
+            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(query_list), archive_path),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
@@ -270,7 +270,7 @@ class ConfigWidget(QWidget):
                 os.remove(json_path)
     
     def pick_archive_to_export(self):
-        fd = FileDialog(name='owp archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['zip'])],
+        fd = FileDialog(name='owp archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
                         parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
@@ -291,8 +291,8 @@ def get_image_names(image_map):
 
 COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
 
-class MenuTableWidget(QTableWidget):
-    def __init__(self, plugin_action, data_items=None, *args):
+class MenuQueryTableWidget(QTableWidget):
+    def __init__(self, plugin_action, query_list=None, *args):
         QTableWidget.__init__(self, *args)
         self.plugin_action = plugin_action
         self.gui = plugin_action.gui
@@ -301,23 +301,23 @@ class MenuTableWidget(QTableWidget):
         if iswindows:
             self.resources_dir = os.path.normpath(self.resources_dir)
         
-        self.populate_table(data_items)
+        self.populate_table(query_list)
         self.cellChanged.connect(self.cell_changed)
         
         
-    def populate_table(self, data_items=None):
+    def populate_table(self, query_list=None):
         self.image_map = self.get_image_map()
         self.clear()
         self.setAlternatingRowColors(True)
-        if data_items == None: data_items = []
-        self.setRowCount(len(data_items))
+        if query_list == None: query_list = []
+        self.setRowCount(len(query_list))
         
         self.setColumnCount(len(COL_NAMES))
         self.setHorizontalHeaderLabels(COL_NAMES)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        for row, data in enumerate(data_items, 0):
-            self.populate_table_row(row, data)
+        for row, query in enumerate(query_list, 0):
+            self.populate_table_row(row, query)
         
         self.resizeColumnsToContents()
         self.setSortingEnabled(False)
@@ -325,16 +325,16 @@ class MenuTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.selectRow(0)
     
-    def populate_table_row(self, row, data):
+    def populate_table_row(self, row, query):
         self.blockSignals(True)
-        icon_name = data[KEY.MENU_IMAGE]
-        menu_text = data[KEY.MENU_TEXT]
+        icon_name = query[KEY.MENU_IMAGE]
+        menu_text = query[KEY.MENU_TEXT]
         
-        self.setItem(row, 0, CheckableTableWidgetItem(data[KEY.MENU_ACTIVE]))
+        self.setItem(row, 0, CheckableTableWidgetItem(query[KEY.MENU_ACTIVE]))
         self.setItem(row, 1, TextIconWidgetItem(menu_text, get_icon(icon_name)))
-        self.setItem(row, 2, QTableWidgetItem(data[KEY.MENU_SUBMENU]))
+        self.setItem(row, 2, QTableWidgetItem(query[KEY.MENU_SUBMENU]))
         if menu_text:
-            self.set_editable_cells_in_row(row, image=icon_name, query=data)
+            self.set_editable_cells_in_row(row, image=icon_name, query=query)
         else:
             # Make all the later column cells non-editable
             self.set_noneditable_cells_in_row(row)
@@ -352,9 +352,8 @@ class MenuTableWidget(QTableWidget):
         if unicode(self.item(row, 1).text()):
             # Make sure that the other columns in this row are enabled if not already.
             if not self.cellWidget(row, len(COL_NAMES)-1):
-                debug_print('dswdsdfsfsdfdfs')
                 self.set_editable_cells_in_row(row)
-            self.cellWidget(row, 4).query = self.convert_row_to_data(row)
+            self.cellWidget(row, 4).query = self.convert_row_to_query(row)
         else:
             # Blank menu text so treat it as a separator row
             self.set_noneditable_cells_in_row(row)
@@ -376,7 +375,7 @@ class MenuTableWidget(QTableWidget):
         image_combo = ImageComboBox(self, self.image_map, image)
         image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, row))
         self.setCellWidget(row, 3, image_combo)
-        if query==None: query = self.create_blank_row_data()
+        if query==None: query = self.create_blank_row_query()
         self.setCellWidget(row, 4, SettingsButton(self, self.plugin_action, query))
     
     def set_noneditable_cells_in_row(self, row):
@@ -419,17 +418,17 @@ class MenuTableWidget(QTableWidget):
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
-        self.populate_table_row(row, self.create_blank_row_data())
+        self.populate_table_row(row, self.create_blank_row_query())
         self.select_and_scroll_to_row(row)
     
     def copy_row(self):
         self.setFocus()
-        row_data = self.convert_row_to_data(self.currentRow())
-        row_data[KEY.MENU_TEXT] += ' ' + _('(copy)')
+        query = self.convert_row_to_query(self.currentRow())
+        query[KEY.MENU_TEXT] += ' ' + _('(copy)')
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
-        self.populate_table_row(row, row_data)
+        self.populate_table_row(row, query)
         self.select_and_scroll_to_row(row)
         self.resizeColumnsToContents()
     
@@ -523,48 +522,48 @@ class MenuTableWidget(QTableWidget):
         return image_map
     
     
-    def create_blank_row_data(self):
-        data = {}
-        data[KEY.MENU_ACTIVE] = True
-        data[KEY.MENU_TEXT] = ''
-        data[KEY.MENU_SUBMENU] = ''
-        data[KEY.MENU_IMAGE] = ''
-        data[KEY.MENU_SEARCH_REPLACES] = []
-        return data
+    def create_blank_row_query(self):
+        query = {}
+        query[KEY.MENU_ACTIVE] = True
+        query[KEY.MENU_TEXT] = ''
+        query[KEY.MENU_SUBMENU] = ''
+        query[KEY.MENU_IMAGE] = ''
+        query[KEY.MENU_SEARCH_REPLACES] = []
+        return query
     
-    def get_data(self):
-        data_items = []
+    def get_query_list(self):
+        query_list = []
         for row in range(self.rowCount()):
-            data_items.append(self.convert_row_to_data(row))
+            query_list.append(self.convert_row_to_query(row))
         
         # Remove any blank separator row items from at the start and the end
-        while len(data_items) > 0 and not data_items[-1][KEY.MENU_TEXT]:
-            data_items.pop()
-        while len(data_items) > 0 and not data_items[0][KEY.MENU_TEXT]:
-            data_items.pop(0)
-        return data_items
+        while len(query_list) > 0 and not query_list[-1][KEY.MENU_TEXT]:
+            query_list.pop()
+        while len(query_list) > 0 and not query_list[0][KEY.MENU_TEXT]:
+            query_list.pop(0)
+        return query_list
     
-    def convert_row_to_data(self, row):
-        data = self.create_blank_row_data()
-        data[KEY.MENU_ACTIVE] = self.item(row, 0).checkState() == Qt.Checked
-        data[KEY.MENU_TEXT] = unicode(self.item(row, 1).text()).strip()
-        data[KEY.MENU_SUBMENU] = unicode(self.item(row, 2).text()).strip()
-        if data[KEY.MENU_TEXT]:
-            data[KEY.MENU_IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
-            data[KEY.MENU_SEARCH_REPLACES] = self.cellWidget(row, 4).query[KEY.MENU_SEARCH_REPLACES]
-        return data
+    def convert_row_to_query(self, row):
+        query = self.create_blank_row_query()
+        query[KEY.MENU_ACTIVE] = self.item(row, 0).checkState() == Qt.Checked
+        query[KEY.MENU_TEXT] = unicode(self.item(row, 1).text()).strip()
+        query[KEY.MENU_SUBMENU] = unicode(self.item(row, 2).text()).strip()
+        if query[KEY.MENU_TEXT]:
+            query[KEY.MENU_IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
+            query[KEY.MENU_SEARCH_REPLACES] = self.cellWidget(row, 4).query[KEY.MENU_SEARCH_REPLACES]
+        return query
     
-    def get_selected_data(self):
-        data_items = []
+    def get_selected_query(self):
+        query_list = []
         for row in self.selectionModel().selectedRows():
-            data_items.append(self.convert_row_to_data(row.row()))
-        return data_items
+            query_list.append(self.convert_row_to_query(row.row()))
+        return query_list
     
-    def append_data(self, data_items):
-        for data in reversed(data_items):
+    def append_query_list(self, query_list):
+        for query in reversed(query_list):
             row = self.currentRow() + 1
             self.insertRow(row)
-            self.populate_table_row(row, data)
+            self.populate_table_row(row, query)
 
 class ImageComboBox(NoWheelComboBox):
     def __init__(self, parent, image_map, selected_text):
@@ -585,12 +584,7 @@ class SettingsButton(QToolButton):
         self.config_dialog = parent
         self.plugin_action = plugin_action
         
-        query_list_clean = []
-        for qu in query[KEY.MENU_SEARCH_REPLACES]:
-            if query_isValid(qu):
-                query_list_clean.append(qu)
-        
-        query[KEY.MENU_SEARCH_REPLACES] = query_list_clean
+        query[KEY.MENU_SEARCH_REPLACES] = clean_operation_list(query[KEY.MENU_SEARCH_REPLACES])
         
         self.query = query
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -602,18 +596,18 @@ class SettingsButton(QToolButton):
         self.clicked.connect(self._clicked)
     
     def _clicked(self):
-        d = ConfigSearchReplaceWidget(self, self.plugin_action, query=self.query)
+        d = ConfigOperationListWidget(self, self.plugin_action, query=self.query)
         if d.exec_() == d.Accepted:
-            self.query[KEY.MENU_SEARCH_REPLACES] = d.query_list
+            self.query[KEY.MENU_SEARCH_REPLACES] = d.operation_list
             self.update_text()
             
-            if len(d.query_list)==0:
+            if len(d.operation_list)==0:
                 debug_print('Saving a empty list')
             else:
                 txt = 'Saved operation list:'
-                for i, query in enumerate(d.query_list, 1):
-                    txt += '\nOperation {:d} > {:s}'.format(i, query_string(query))
-                txt += '\n[  '+ ',\n'.join( [str(query) for query in d.query_list] ) +'  ]\n'
+                for i, operation in enumerate(d.operation_list, 1):
+                    txt += '\nOperation {:d} > {:s}'.format(i, operation_string(operation))
+                txt += '\n[  '+ ',\n'.join( [str(operation) for operation in d.operation_list] ) +'  ]\n'
                 debug_print(txt)
                 
             
@@ -723,12 +717,11 @@ class ImageDialog(QDialog):
 
 COL_CONFIG = [_('Columns'), _('Search mode'), _('Search'), _('Replace')]
 
-class ConfigSearchReplaceWidget(Dialog):
-    def __init__(self, parent, plugin_action, query=None):
+class ConfigOperationListWidget(Dialog):
+    def __init__(self, parent, plugin_action, query):
         self.plugin_action = plugin_action
         name = query[KEY.MENU_TEXT]
-        self.query_list = query[KEY.MENU_SEARCH_REPLACES]
-        if self.query_list == None: self.query_list = []
+        self.operation_list = clean_operation_list(query[KEY.MENU_SEARCH_REPLACES])
         title = _('List of Search/Replace operations')
         if name:
             title = _('List of Search/Replace operations for {:s}').format(name)
@@ -752,8 +745,8 @@ class ConfigSearchReplaceWidget(Dialog):
         table_layout = QHBoxLayout()
         layout.addLayout(table_layout)
         
-        # Create a table the user can edit the data values in
-        self._table = SearchReplaceTableWidget(self.plugin_action, self.query_list, self)
+        # Create a table the user can edit the operation list
+        self._table = OperationListTableWidget(self.plugin_action, self.operation_list, self)
         heading_label.setBuddy(self._table)
         table_layout.addWidget(self._table)
         
@@ -806,7 +799,7 @@ class ConfigSearchReplaceWidget(Dialog):
         layout.addWidget(self.bb)
     
     def accept(self):
-        self.query_list = self._table.get_data()
+        self.operation_list = self._table.get_operation_list()
         Dialog.accept(self)
         
     
@@ -838,10 +831,10 @@ class ConfigSearchReplaceWidget(Dialog):
             
             if KEY.MENU_SEARCH_REPLACES not in import_config:
                 return error_dialog(self, _('Import failed'), _('This is not a valid JSON file'), show=True)
-            data_items = import_config[KEY.MENU_SEARCH_REPLACES]
-            table.append_data(data_items)
+            operation_list = import_config[KEY.MENU_SEARCH_REPLACES]
+            table.append_operation_list(operation_list)
             
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(data_items), json_path),
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(operation_list), json_path),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
@@ -859,8 +852,8 @@ class ConfigSearchReplaceWidget(Dialog):
     
     def export_operations(self):
         table = self._table
-        data_items = table.get_selected_data()
-        if len(data_items) == 0:
+        operation_list = table.get_selected_operation()
+        if len(operation_list) == 0:
             return error_dialog(self, _('Export failed'), _('No operations selected to export'), show=True)
         json_path = self.pick_json_to_export()
         if not json_path:
@@ -874,9 +867,9 @@ class ConfigSearchReplaceWidget(Dialog):
         try:
             
             export_config = JSONConfig(json_name)
-            export_config[KEY.MENU_SEARCH_REPLACES] = data_items
+            export_config[KEY.MENU_SEARCH_REPLACES] = operation_list
             shutil.copyfile(json_temp, json_path)
-            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(data_items), json_path),
+            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
@@ -893,45 +886,41 @@ class ConfigSearchReplaceWidget(Dialog):
         return fd.get_files()[0]
 
 
-class ReadOnlySearchReplaceTableWidgetItem(ReadOnlyTableWidgetItem):
-    def __init__(self, text, query):
+class ReadOnlyOperationWidgetItem(ReadOnlyTableWidgetItem):
+    def __init__(self, text, operation):
         ReadOnlyTableWidgetItem.__init__(self, text)
-        self.query = query
+        self.operation = operation
 
-class SearchReplaceTableWidget(QTableWidget):
-    def __init__(self, plugin_action, query_list=None, *args):
+class OperationListTableWidget(QTableWidget):
+    def __init__(self, plugin_action, operation_list=None, *args):
         QTableWidget.__init__(self, *args)
         self.plugin_action = plugin_action
-        self.populate_table(query_list)
+        self.populate_table(operation_list)
         self.itemDoubleClicked.connect(self.settingsDoubleClicked)
     
-    def populate_table(self, query_list=None):
+    def populate_table(self, operation_list=None):
         self.clear()
-        if query_list == None: query_list = []
         self.setAlternatingRowColors(True)
         self.setColumnCount(len(COL_CONFIG))
         self.setHorizontalHeaderLabels(COL_CONFIG)
         self.verticalHeader().setDefaultSectionSize(24)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         
-        query_list_clean = []
-        for query in query_list:
-            if query_isValid(query):
-                query_list_clean.append(query)
+        operation_list = clean_operation_list(operation_list)
             
-        self.setRowCount(len(query_list_clean))
-        for row, query in enumerate(query_list_clean):
-            self.populate_table_row(row, query)
+        self.setRowCount(len(operation_list))
+        for row, operation in enumerate(operation_list):
+            self.populate_table_row(row, operation)
         
         self.resizeColumnsToContents()
         self.setSortingEnabled(False)
         self.setMinimumSize(800, 0)
         self.selectRow(0)
     
-    def populate_table_row(self, row, query):
+    def populate_table_row(self, row, operation):
         self.blockSignals(True)
         
-        self.setItem(row, 0, ReadOnlySearchReplaceTableWidgetItem('', query))
+        self.setItem(row, 0, ReadOnlyOperationWidgetItem('', operation))
         
         for i in range(1, len(COL_CONFIG)):
             item = ReadOnlyTableWidgetItem('')
@@ -942,17 +931,17 @@ class SearchReplaceTableWidget(QTableWidget):
         self.blockSignals(False)
     
     def update_row(self, row):
-        query = self.item(row, 0).query
-        column = query[KEY_QUERY.SEARCH_FIELD]
-        field = query[KEY_QUERY.DESTINATION_FIELD]
+        operation = self.item(row, 0).operation
+        column = operation[KEY_OPERATION.SEARCH_FIELD]
+        field = operation[KEY_OPERATION.DESTINATION_FIELD]
         if field and field != column:
             column += ' => '+ field
             
         self.item(row, 0).setText(column)
          
-        self.item(row, 1).setText(query[KEY_QUERY.SEARCH_MODE])
-        self.item(row, 2).setText(query[KEY_QUERY.SEARCH_FOR])
-        self.item(row, 3).setText(query[KEY_QUERY.REPLACE_WITH])
+        self.item(row, 1).setText(operation[KEY_OPERATION.SEARCH_MODE])
+        self.item(row, 2).setText(operation[KEY_OPERATION.SEARCH_FOR])
+        self.item(row, 3).setText(operation[KEY_OPERATION.REPLACE_WITH])
         self.resizeColumnsToContents()
     
     def add_row(self):
@@ -961,16 +950,16 @@ class SearchReplaceTableWidget(QTableWidget):
         row = self.currentRow() + 1
         self.insertRow(row)
         
-        self.populate_table_row(row, self.create_blank_row_data())
+        self.populate_table_row(row, self.create_blank_row_operation())
         self.select_and_scroll_to_row(row)
     
     def copy_row(self):
         self.setFocus()
-        row_data = self.convert_row_to_data(self.currentRow())
+        operation_list = self.convert_row_to_operation(self.currentRow())
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
-        self.populate_table_row(row, row_data)
+        self.populate_table_row(row, operation_list)
         self.select_and_scroll_to_row(row)
     
     def delete_rows(self):
@@ -1049,42 +1038,41 @@ class SearchReplaceTableWidget(QTableWidget):
         self.scrollToItem(self.currentItem())
     
     
-    def create_blank_row_data(self):
-        return get_default_query(self.plugin_action)
+    def create_blank_row_operation(self):
+        return get_default_operation(self.plugin_action)
     
-    def get_data(self):
-        data_items = []
+    def get_operation_list(self):
+        operation_list = []
         for row in range(self.rowCount()):
-            query = self.convert_row_to_data(row)
-            if query_isValid(query):
-                data_items.append(query)
-                
-        return data_items
+            operation = self.convert_row_to_operation(row)
+            operation_list.append(operation)
+       
+        return clean_operation_list(operation_list)
     
-    def convert_row_to_data(self, row):
-        return self.item(row, 0).query
+    def convert_row_to_operation(self, row):
+        return self.item(row, 0).operation
     
-    def get_selected_data(self):
-        data_items = []
+    def get_selected_operation(self):
+        operation_list = []
         for row in self.selectionModel().selectedRows():
-            data_items.append(self.convert_row_to_data(row.row()))
-        return data_items
+            operation_list.append(self.convert_row_to_operation(row.row()))
+        return clean_operation_list(operation_list)
     
-    def append_data(self, data_items):
-        for data in reversed(data_items):
+    def append_operation_list(self, operation_list):
+        for operation in reversed(operation_list):
             row = self.currentRow() + 1
             self.insertRow(row)
-            self.populate_table_row(row, data)
+            self.populate_table_row(row, operation)
     
     
     def settingsDoubleClicked(self):
         self.setFocus()
         row = self.currentRow()
         
-        query = self.item(row, 0).query
+        operation = self.item(row, 0).operation
         
-        d = SearchReplaceDialog(self, self.plugin_action, query)
+        d = SearchReplaceDialog(self, self.plugin_action, operation)
         if d.exec_() == d.Accepted:
-            self.item(row, 0).query = d.query
+            self.item(row, 0).operation = d.operation
             self.update_row(row)
 

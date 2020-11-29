@@ -25,13 +25,13 @@ except ImportError:
 
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version, isosx, isnewosx
-from calibre.gui2 import error_dialog
+from calibre.gui2 import error_dialog, warning_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget, query_isValid, query_string, KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -80,7 +80,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions = []
         
         for query in query_list:
-            if query[KEY.MENU_ACTIVE]:
+            if not query_hasError(query) and query[KEY.MENU_ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
         
         self.menu.addSeparator()
@@ -107,9 +107,8 @@ class MassSearchReplaceAction(InterfaceAction):
         if not menu_text:
             parent_menu.addSeparator()
         elif len(query[KEY.MENU_SEARCH_REPLACES])>0:
-            
             if sub_menu_text:
-                debug_print('Rebuilding menu for: {:s}>{:s}'.format(sub_menu_text, menu_text))
+                debug_print('Rebuilding menu for: {:s} > {:s}'.format(sub_menu_text, menu_text))
             else:
                 debug_print('Rebuilding menu for: {:s}'.format(menu_text))
             
@@ -124,13 +123,6 @@ class MassSearchReplaceAction(InterfaceAction):
     
     
     def run_SearchReplace(self, query):
-        
-        # check querys for errors
-        if check_query(query) is not True:
-            return error_dialog(self.gui, _('Config Error'),
-                _('Validating the configuration settings before running failed.\nThe JSON file of plugin settings contains errors.'),
-                show=True)
-        
         
         if not self.is_library_selected:
             return error_dialog(self.gui, _('No selected book'),
@@ -152,22 +144,21 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(self.gui)
 
 
-def check_query(query):
+def query_hasError(query):
     try:
         val = query[KEY.MENU_ACTIVE]
-        val = query[KEY.MENU_IMAGE]
+        val = query[KEY.MENU_TEXT]
         val = query[KEY.MENU_SUBMENU]
+        val = query[KEY.MENU_IMAGE]
         
-        query_name = query[KEY.MENU_TEXT]
-        for search_replace in query[KEY.MENU_SEARCH_REPLACES]:
-            for key in KEY_QUERY.ALL:
-                if key not in search_replace.keys():
-                    debug_print('query "{:s}": settings are not valide, "{:s}" is missing'.format(query_name, key))
-                    return False
-    except Exception as e:
-        debug_print('Exception when checking query: {0}'.format(e))
-        return False
-    return True
+        for operation in query[KEY.MENU_SEARCH_REPLACES]:
+            err = operation_testGetError(operation)
+            if err:
+                raise err
+            
+    except Exception as ex:
+        return ex
+    return None
 
 
 class SearchReplacesProgressDialog(QProgressDialog):
@@ -195,9 +186,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.menu_text = query[KEY.MENU_TEXT]
         
         # name of the search/replace
-        self.search_replaces = query[KEY.MENU_SEARCH_REPLACES]
+        self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
         # Count of search/replace
-        self.search_replaces_count = len(self.search_replaces)
+        self.search_replaces_count = len(self.operation_list)
         
         # Count of search/replace
         self.total_operation_count = self.book_count*self.search_replaces_count
@@ -219,7 +210,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         self.hide()
         debug_print('Launch Search/Replace for {:d} books.'.format(self.book_count))
-        debug_print(str(self.search_replaces)+'\n')
+        debug_print(str(self.operation_list)+'\n')
         
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
@@ -234,18 +225,22 @@ class SearchReplacesProgressDialog(QProgressDialog):
             debug_print('Search/Replace launched for {:d} books.'.format(self.book_count))
             debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
             debug_print('Search/Replace execute in {:0.3f} seconds.'.format(self.time_execut))
-            debug_print('{0}\n'.format(self.search_replaces))
+            debug_print('{0}\n'.format(self.operation_list))
         
     def _run_search_replaces(self):
         start = time.time()
         try:
             self.setValue(0)
             
-            s_r = SearchReplaceWidget(self.plugin_action)
-            s_r.resize(QSize(0, 0))
+            alreadyRaiseError = False
+            
+            s_r = SearchReplaceWidget_NoWindows(self.plugin_action)
+            s_r_load_settings = s_r.load_settings
+            sr_testGetError = s_r.testGetError
             
             sr_search_replace = s_r.search_replace
             sr_updated_fields = s_r.updated_fields
+            sr_close = s_r.close
             del s_r
             
             for num, book_id in enumerate(self.book_ids, 1):
@@ -258,15 +253,22 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 debug_print('Search/Replace for '+book_info)
                 
-                for sr_op, query in enumerate(self.search_replaces, 1):
-                    if query_isValid(query):
+                for sr_op, operation in enumerate(self.operation_list, 1):
+                    s_r_load_settings(operation)
+                    err = sr_testGetError()
+                    
+                    if not alreadyRaiseError and err:
+                        alreadyRaiseError = True
+                        warning_dialog(self.gui, _('Invalid operation'),
+                                _('An invalid operation was detected:\n{0}\n\nOther errors may exist. Check and correct the operations in the plugin configuration window.').format(err),
+                                show=True, show_copy_button=True)
+                    
+                    if not err:
                         
-                        srt_setting = query_string(query)
-                        
-                        if sr_op==len(self.search_replaces): nl ='\n'
+                        if sr_op==len(self.operation_list): nl ='\n'
                         else: nl =''
                         
-                        debug_print('Operation N°{:d} > {:s}'.format(sr_op, srt_setting)+nl)
+                        debug_print('Operation N°{:d} > {:s}'.format(sr_op, operation_string(operation))+nl)
                         self.setLabelText(_('Book {:d} of {:d}. Search/Replace {:d} on {:d}.').format(num, self.book_count, sr_op, self.search_replaces_count))
                         
                         if self.total_operation_count < 100:
@@ -278,7 +280,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             self.close()
                             return
                         
-                        sr_search_replace(book_id, query)
+                        sr_search_replace(book_id)
                         
                 
             
@@ -302,6 +304,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
         except Exception as e:
             self.exception = e;
+        
+        sr_close()
         
         self.time_execut = round(time.time() - start, 3)
         self.db.clean()
