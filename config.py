@@ -484,8 +484,10 @@ class MenuTableWidget(QTableWidget):
     def swap_row_widgets(self, src_row, dest_row):
         self.blockSignals(True)
         self.insertRow(dest_row)
+        
         for col in range(0,3):
             self.setItem(dest_row, col, self.takeItem(src_row, col))
+        
         menu_text = unicode(self.item(dest_row, 1).text()).strip()
         if menu_text:
             for col in range(3, len(COL_NAMES)):
@@ -500,6 +502,7 @@ class MenuTableWidget(QTableWidget):
         else:
             # This is a separator row
             self.set_noneditable_cells_in_row(dest_row)
+        
         self.removeRow(src_row)
         self.blockSignals(False)
     
@@ -533,10 +536,12 @@ class MenuTableWidget(QTableWidget):
         data_items = []
         for row in range(self.rowCount()):
             data_items.append(self.convert_row_to_data(row))
-        # Remove any blank separator row items from the end as unneeded.
         
-        while len(data_items) > 0 and len(data_items[-1][KEY.MENU_TEXT]) == 0:
+        # Remove any blank separator row items from at the start and the end
+        while len(data_items) > 0 and not data_items[-1][KEY.MENU_TEXT]:
             data_items.pop()
+        while len(data_items) > 0 and not data_items[0][KEY.MENU_TEXT]:
+            data_items.pop(0)
         return data_items
     
     def convert_row_to_data(self, row):
@@ -1033,8 +1038,9 @@ class SearchReplaceTableWidget(QTableWidget):
         self.insertRow(dest_row)
         
         for col in range(0, len(COL_CONFIG)):
-            self.item(dest_row, col, self.cellItem(src_row, col))
-            
+            self.setItem(dest_row, col, self.takeItem(src_row, col))
+        
+        self.update_row(dest_row)
         self.removeRow(src_row)
         self.blockSignals(False)
     
