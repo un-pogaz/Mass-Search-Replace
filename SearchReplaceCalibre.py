@@ -74,7 +74,8 @@ class KEY_QUERY:
         SEARCH_MODE       ,
         STARTING_FROM     ,
     ]
-    
+
+TEMPLATE_FIELD = '{template}'
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QWidget):
@@ -406,7 +407,7 @@ class MetadataBulkWidget(QWidget):
             if fm[f]['datatype'] == 'composite':
                 self.all_fields.append(f)
         self.all_fields.sort()
-        self.all_fields.insert(1, '{template}')
+        self.all_fields.insert(1, TEMPLATE_FIELD)
         self.writable_fields.sort()
         self.search_field.setMaxVisibleItems(25)
         self.destination_field.setMaxVisibleItems(25)
@@ -536,7 +537,7 @@ class MetadataBulkWidget(QWidget):
     
     def s_r_get_field(self, mi, field):
         if field:
-            if field == '{template}':
+            if field == TEMPLATE_FIELD:
                 v = SafeFormat().safe_format(
                     unicode_type(self.s_r_template.text()), mi, _('S/R TEMPLATE ERROR'), mi)
                 return [v]
@@ -689,7 +690,7 @@ class MetadataBulkWidget(QWidget):
             return ''
         dest = self.s_r_df_itemdata(None)
         if dest == '':
-            if (src == '{template}' or
+            if (src == TEMPLATE_FIELD or
                         self.db.metadata_for_field(src)['datatype'] == 'composite'):
                 raise Exception(_('You must specify a destination when source is '
                                   'a composite field or a template'))
@@ -979,10 +980,6 @@ class MetadataBulkWidget(QWidget):
         if original != val:
             self.set_field_calls[dest][book_id] = val
     
-    def validate(self, settings):
-        if self.s_r_error:
-            return False
-    
     def get_query(self):
         query = {}
         query[KEY_QUERY.NAME] = unicode_type(self.query_field.currentText())
@@ -1001,6 +998,9 @@ class MetadataBulkWidget(QWidget):
         query[KEY_QUERY.RESULTS_COUNT] = self.results_count.value()
         query[KEY_QUERY.STARTING_FROM] = self.starting_from.value()
         query[KEY_QUERY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
+        
+        if query[KEY_QUERY.SEARCH_FIELD] != TEMPLATE_FIELD:
+            query[KEY_QUERY.S_R_TEMPLATE] = ''
         
         # to be used in validate method
         if self.s_r_error != None:

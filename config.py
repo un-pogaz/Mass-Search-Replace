@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time
+import os, time, shutil
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
@@ -33,6 +33,11 @@ except:
                           QTableWidgetItem, QAbstractItemView, QComboBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
+
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
 
 from functools import partial
 from calibre.constants import iswindows
@@ -151,7 +156,7 @@ class ConfigWidget(QWidget):
     
     def edit_shortcuts(self):
         self.save_settings()
-        self.plugin_action.build_menus()
+        self.plugin_action.rebuild_menus()
         d = KeyboardConfigDialog(self.plugin_action.gui, self.plugin_action.action_spec[0])
         if d.exec_() == d.Accepted:
             self.plugin_action.gui.keyboard.finalize()
@@ -203,10 +208,10 @@ class ConfigWidget(QWidget):
         try:
             # Read the .JSON file to add to the menus then delete it.
             import_config = JSONConfig(json)
-            menus_config = import_config[KEY.MASS_SEARCH_REPLACE]
+            data_items = import_config[KEY.MASS_SEARCH_REPLACE]
             # Now insert the menus into the table
-            table.append_data(menus_config)
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(menus_config)),
+            table.append_data(data_items)
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(data_items)),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Import failed'), e, show=True)
@@ -215,7 +220,7 @@ class ConfigWidget(QWidget):
                 os.remove(json_path)
     
     def pick_archive_to_import(self):
-        archives = choose_files(self, 'owp archive dialog', _('Select a menu file archive to import'),
+        archives = choose_files(self, 'owp archive dialog', _('Select a menu file archive to import...'),
                              filters=[('OWIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
         if not archives:
             return
@@ -226,7 +231,7 @@ class ConfigWidget(QWidget):
         table = self._table
         data_items = table.get_selected_data()
         if len(data_items) == 0:
-            return error_dialog(self, _('Export failed'), _('No menu items selected to export.'), show=True)
+            return error_dialog(self, _('Export failed'), _('No menu items selected to export'), show=True)
         archive_path = self.pick_archive_to_export()
         if not archive_path:
             return
@@ -265,7 +270,7 @@ class ConfigWidget(QWidget):
                 os.remove(json_path)
     
     def pick_archive_to_export(self):
-        fd = FileDialog(name='owp archive dialog', title=_('Save archive as'), filters=[('OWIP Files', ['zip'])],
+        fd = FileDialog(name='owp archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['zip'])],
                         parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
@@ -346,7 +351,8 @@ class MenuTableWidget(QTableWidget):
         
         if unicode(self.item(row, 1).text()):
             # Make sure that the other columns in this row are enabled if not already.
-            if not self.cellWidget(row, len(COL_NAMES)):
+            if not self.cellWidget(row, len(COL_NAMES)-1):
+                debug_print('dswdsdfsfsdfdfs')
                 self.set_editable_cells_in_row(row)
             self.cellWidget(row, 4).query = self.convert_row_to_data(row)
         else:
@@ -482,7 +488,7 @@ class MenuTableWidget(QTableWidget):
             self.setItem(dest_row, col, self.takeItem(src_row, col))
         menu_text = unicode(self.item(dest_row, 1).text()).strip()
         if menu_text:
-            for col in range(3,5):
+            for col in range(3, len(COL_NAMES)):
                 if col == 3:
                     # Image column has a combobox we have to recreate as cannot move widget (Qt crap)
                     icon_name = self.cellWidget(src_row, col).currentText()
@@ -490,7 +496,7 @@ class MenuTableWidget(QTableWidget):
                     image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, dest_row))
                     self.setCellWidget(dest_row, col, image_combo)
                 elif col == 4:
-                    self.setCellWidget(dest_row, col, SettingsButton(self, self.plugin_action, self.item(src_row, 5)))
+                    self.setCellWidget(dest_row, col, SettingsButton(self, self.plugin_action, self.cellWidget(src_row, col).query))
         else:
             # This is a separator row
             self.set_noneditable_cells_in_row(dest_row)
@@ -628,7 +634,7 @@ class ImageDialog(QDialog):
         grid.addWidget(self._radio_web, 0, 0)
         grid.addWidget(self._web_domain_edit, 0, 1)
         grid.addWidget(QLabel('e.g. www.amazon.com'), 0, 2)
-        self._radio_file = QRadioButton('From .png &file', self)
+        self._radio_file = QRadioButton(_('From .png &file'), self)
         self._input_file_edit = QLineEdit(self)
         self._input_file_edit.setMinimumSize(200, 0)
         self._radio_file.setFocusProxy(self._input_file_edit)
@@ -788,12 +794,99 @@ class ConfigSearchReplaceWidget(Dialog):
         delete_button.clicked.connect(self._table.delete_rows)
         copy_button.clicked.connect(self._table.copy_row)
         
+        # Define a context menu for the table widget
+        self.create_context_menu(self._table)
+        
+        # -- Accept/Reject buttons --
         layout.addWidget(self.bb)
     
     def accept(self):
         self.query_list = self._table.get_data()
         Dialog.accept(self)
         
+    
+    
+    def create_context_menu(self, table):
+        table.setContextMenuPolicy(Qt.ActionsContextMenu)
+        act_import = QAction(get_icon(PLUGIN_ICONS[2]), _('&Import...'), table)
+        act_import.triggered.connect(self.import_operations)
+        table.addAction(act_import)
+        act_export = QAction(get_icon(PLUGIN_ICONS[3]), _('&Export...'), table)
+        act_export.triggered.connect(self.export_operations)
+        table.addAction(act_export)
+    
+    def import_operations(self):
+        table = self._table
+        json_path = self.pick_json_to_import()
+        if not json_path:
+            return
+        
+        json_name = 'zz_import_temp'
+        json_temp = os.path.join(config_dir, json_name+'.json')
+        if iswindows:
+            json_temp = os.path.normpath(json_temp)
+        
+        try:
+            
+            shutil.copyfile(json_path, json_temp)
+            import_config = JSONConfig(json_name)
+            
+            if KEY.MENU_SEARCH_REPLACES not in import_config:
+                return error_dialog(self, _('Import failed'), _('This is not a valid JSON file'), show=True)
+            data_items = import_config[KEY.MENU_SEARCH_REPLACES]
+            table.append_data(data_items)
+            
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(data_items), json_path),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Export failed'), e, show=True)
+        finally:
+            if os.path.exists(json_temp):
+                os.remove(json_temp)
+    
+    def pick_json_to_import(self):
+        archives = choose_files(self, 'json dialog', _('Select a JSON file to import...'),
+                             filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])], all_files=False, select_only_single_file=True)
+        if not archives:
+            return
+        f = archives[0]
+        return f
+    
+    def export_operations(self):
+        table = self._table
+        data_items = table.get_selected_data()
+        if len(data_items) == 0:
+            return error_dialog(self, _('Export failed'), _('No operations selected to export'), show=True)
+        json_path = self.pick_json_to_export()
+        if not json_path:
+            return
+        
+        json_name = 'zz_export_temp'
+        json_temp = os.path.join(config_dir, json_name+'.json')
+        if iswindows:
+            json_temp = os.path.normpath(json_temp)
+        
+        try:
+            
+            export_config = JSONConfig(json_name)
+            export_config[KEY.MENU_SEARCH_REPLACES] = data_items
+            shutil.copyfile(json_temp, json_path)
+            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(data_items), json_path),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Export failed'), e, show=True)
+        finally:
+            if os.path.exists(json_temp):
+                os.remove(json_temp)
+    
+    def pick_json_to_export(self):
+        fd = FileDialog(name='json dialog', title=_('Save the operations as...'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
+                        parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
+        fd.setParent(None)
+        if not fd.accepted:
+            return None
+        return fd.get_files()[0]
+
 
 class ReadOnlySearchReplaceTableWidgetItem(ReadOnlyTableWidgetItem):
     def __init__(self, text, query):
@@ -843,18 +936,6 @@ class SearchReplaceTableWidget(QTableWidget):
         
         self.blockSignals(False)
     
-    def get_data(self):
-        data_items = []
-        for row in range(self.rowCount()):
-            query = self.convert_row_to_data(row)
-            if query_isValid(query):
-                data_items.append(query)
-                
-        return data_items
-    
-    def convert_row_to_data(self, row):
-        return self.item(row, 0).query
-    
     def update_row(self, row):
         query = self.item(row, 0).query
         column = query[KEY_QUERY.SEARCH_FIELD]
@@ -867,10 +948,7 @@ class SearchReplaceTableWidget(QTableWidget):
         self.item(row, 1).setText(query[KEY_QUERY.SEARCH_MODE])
         self.item(row, 2).setText(query[KEY_QUERY.SEARCH_FOR])
         self.item(row, 3).setText(query[KEY_QUERY.REPLACE_WITH])
-        
-    
-    def create_blank_row_data(self):
-        return get_default_query(self.plugin_action)
+        self.resizeColumnsToContents()
     
     def add_row(self):
         self.setFocus()
@@ -963,6 +1041,34 @@ class SearchReplaceTableWidget(QTableWidget):
     def select_and_scroll_to_row(self, row):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
+    
+    
+    def create_blank_row_data(self):
+        return get_default_query(self.plugin_action)
+    
+    def get_data(self):
+        data_items = []
+        for row in range(self.rowCount()):
+            query = self.convert_row_to_data(row)
+            if query_isValid(query):
+                data_items.append(query)
+                
+        return data_items
+    
+    def convert_row_to_data(self, row):
+        return self.item(row, 0).query
+    
+    def get_selected_data(self):
+        data_items = []
+        for row in self.selectionModel().selectedRows():
+            data_items.append(self.convert_row_to_data(row.row()))
+        return data_items
+    
+    def append_data(self, data_items):
+        for data in reversed(data_items):
+            row = self.currentRow() + 1
+            self.insertRow(row)
+            self.populate_table_row(row, data)
     
     
     def settingsDoubleClicked(self):

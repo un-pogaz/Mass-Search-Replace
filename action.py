@@ -68,20 +68,19 @@ class MassSearchReplaceAction(InterfaceAction):
         self.query_menu = []
         sub_menus = {}
         
-        for action in self.menu_actions:
-            self.gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
+        for i, action in enumerate(self.menu_actions, 0):
+            if hasattr(action, 'calibre_shortcut_unique_name'):
+                self.gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
             # starting in calibre 2.10.0, actions are registers at
             # the top gui level for OSX' benefit.
-            if (isosx or isnewosx) and calibre_version >= (2,10,0):
+            if calibre_version >= (2,10,0) and i < len(self.menu_actions)-1:
                 self.gui.removeAction(action)
+            
+        
         self.menu_actions = []
         
         for query in query_list:
-            if query[KEY.MENU_ACTIVE] and len(query[KEY.MENU_SEARCH_REPLACES])>0:
-                if query[KEY.MENU_SUBMENU]:
-                    debug_print('Rebuilding menu for: {:s}>{:s}'.format(query[KEY.MENU_SUBMENU], query[KEY.MENU_TEXT]))
-                else:
-                    debug_print('Rebuilding menu for: {:s}'.format(query[KEY.MENU_TEXT]))
+            if query[KEY.MENU_ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
         
         self.menu.addSeparator()
@@ -94,6 +93,7 @@ class MassSearchReplaceAction(InterfaceAction):
     
     def append_menu_item_ex(self, parent_menu, sub_menus, menu_text, sub_menu_text, image_name, query):
         
+        ac = None
         if sub_menu_text:
             # Create the sub-menu if it does not exist
             if sub_menu_text not in sub_menus:
@@ -105,15 +105,22 @@ class MassSearchReplaceAction(InterfaceAction):
             parent_menu = sub_menus[sub_menu_text]
         
         if not menu_text:
-            ac = parent_menu.addSeparator()
-        else:
+            parent_menu.addSeparator()
+        elif len(query[KEY.MENU_SEARCH_REPLACES])>0:
+            
+            if sub_menu_text:
+                debug_print('Rebuilding menu for: {:s}>{:s}'.format(sub_menu_text, menu_text))
+            else:
+                debug_print('Rebuilding menu for: {:s}'.format(menu_text))
+            
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
                            unique_name=menu_text,
                            triggered=partial(self.run_SearchReplace, query))
+        
+        if ac:
             # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
             self.menu_actions.append(ac)
             self.query_menu.append((query, ac))
-        return ac
     
     
     def run_SearchReplace(self, query):
@@ -134,6 +141,7 @@ class MassSearchReplaceAction(InterfaceAction):
         if not rows or len(rows) == 0:
             return error_dialog(self.gui, _('No selected book'),
                 _('No book selected for Search/Replace.'), show=True)
+        
         book_ids = self.gui.library_view.get_selected_ids()
         
         srpg = SearchReplacesProgressDialog(self, book_ids, query)

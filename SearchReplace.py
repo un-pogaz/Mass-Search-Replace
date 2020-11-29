@@ -24,7 +24,7 @@ from calibre.gui2 import error_dialog, question_dialog, warning_dialog
 from calibre.gui2.widgets2 import Dialog
 
 from calibre_plugins.mass_search_replace.common_utils import debug_print
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_QUERY as CALIBRE_KEY_QUERY
+from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_QUERY as CALIBRE_KEY_QUERY, TEMPLATE_FIELD
 
 class KEY_QUERY():
     locals().update(vars(CALIBRE_KEY_QUERY))
@@ -46,9 +46,14 @@ def query_hasSearchField(query):
     return len(query[KEY_QUERY.SEARCH_FIELD])>0
 def query_hasError(query):
     return KEY_QUERY.S_R_ERROR in query
+def query_hasAllKey(query):
+    for key in KEY_QUERY.ALL:
+        if key not in query.keys():
+            return False
+    return True
 
 def query_isValid(query):
-    return query_hasSearchField(query) and not query_hasError(query)
+    return query_hasSearchField(query) and query_hasAllKey(query) and not query_hasError(query)
 
 
 def query_string(query):
@@ -62,6 +67,10 @@ def query_string(query):
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
+        
+        if not book_ids or len(book_ids)==0:
+            book_ids = plugin_action.gui.library_view.get_selected_ids();
+        
         MetadataBulkWidget.__init__(self, plugin_action, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
     
@@ -76,14 +85,14 @@ class SearchReplaceWidget(MetadataBulkWidget):
         self.do_search_replace(book_id)
 
 class SearchReplaceDialog(Dialog):
-    def __init__(self, parent, plugin_action, query):
+    def __init__(self, parent, plugin_action, query, book_ids=[]):
         self.plugin_action = plugin_action
         self.parent = parent
         self.query = query
+        self.widget = SearchReplaceWidget(self.plugin_action, book_ids)
         Dialog.__init__(self, _('Search/Replace configuration'), 'config_query_SearchReplace', parent)
 
     def setup_ui(self):
-        self.widget = SearchReplaceWidget(self.plugin_action)
         l = QVBoxLayout()
         self.setLayout(l)
         l.addWidget(self.widget)
