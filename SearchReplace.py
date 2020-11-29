@@ -113,7 +113,7 @@ class SearchReplaceDialog(Dialog):
         self.operation = operation
         self.widget = SearchReplaceWidget(self.plugin_action, book_ids)
         Dialog.__init__(self, _('Search/Replace configuration'), 'config_query_SearchReplace', parent)
-
+    
     def setup_ui(self):
         l = QVBoxLayout()
         self.setLayout(l)
@@ -122,7 +122,6 @@ class SearchReplaceDialog(Dialog):
         
         if self.operation:
             self.widget.load_settings(self.operation)
-        
     
     def accept(self):
         self.operation = self.widget.save_settings()

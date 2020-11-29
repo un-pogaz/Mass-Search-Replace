@@ -116,11 +116,10 @@ class TemplateBox(TemplateDialog):
         self.setWindowTitle(window_title)
         if template_text:
             self.textbox.insertPlainText(template_text)
-
+    
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()
         chk = check_template(self.template, self.plugin_action)
         if chk is True:
             QDialog.accept(self)
-
 

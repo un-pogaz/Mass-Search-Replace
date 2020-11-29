@@ -146,13 +146,12 @@ class ConfigWidget(QWidget):
         keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
         keyboard_layout.addWidget(keyboard_shortcuts_button)
         keyboard_layout.insertStretch(-1)
-        
     
     def save_settings(self):
         
         PREFS[KEY.MASS_SEARCH_REPLACE] = self._table.get_query_list()
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
-        
+    
     
     def edit_shortcuts(self):
         self.save_settings()
@@ -160,7 +159,7 @@ class ConfigWidget(QWidget):
         d = KeyboardConfigDialog(self.plugin_action.gui, self.plugin_action.action_spec[0])
         if d.exec_() == d.Accepted:
             self.plugin_action.gui.keyboard.finalize()
-        
+    
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
         act_add_image = QAction(get_icon(PLUGIN_ICONS[1]), _('&Add image...'), table)
@@ -303,8 +302,7 @@ class MenuQueryTableWidget(QTableWidget):
         
         self.populate_table(query_list)
         self.cellChanged.connect(self.cell_changed)
-        
-        
+    
     def populate_table(self, query_list=None):
         self.image_map = self.get_image_map()
         self.clear()
@@ -412,7 +410,7 @@ class MenuQueryTableWidget(QTableWidget):
             combo.blockSignals(True)
             combo.setCurrentIndex(idx)
             combo.blockSignals(False)
-
+    
     def add_row(self):
         self.setFocus()
         # We will insert a blank row below the currently selected row
@@ -595,6 +593,9 @@ class SettingsButton(QToolButton):
         self.setToolTip(_('Change operation list'))
         self.clicked.connect(self._clicked)
     
+    def update_text(self):
+        self.setText(_('{:d} operations').format(len(self.query[KEY.MENU_SEARCH_REPLACES])))
+    
     def _clicked(self):
         d = ConfigOperationListWidget(self, self.plugin_action, query=self.query)
         if d.exec_() == d.Accepted:
@@ -609,11 +610,6 @@ class SettingsButton(QToolButton):
                     txt += '\nOperation {:d} > {:s}'.format(i, operation_string(operation))
                 txt += '\n[  '+ ',\n'.join( [str(operation) for operation in d.operation_list] ) +'  ]\n'
                 debug_print(txt)
-                
-            
-    
-    def update_text(self):
-        self.setText(_('{:d} operations').format(len(self.query[KEY.MENU_SEARCH_REPLACES])))
 
 class ImageDialog(QDialog):
     def __init__(self, parent=None, resources_dir='', image_names=[]):
@@ -727,7 +723,7 @@ class ConfigOperationListWidget(Dialog):
             title = _('List of Search/Replace operations for {:s}').format(name)
         
         Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
-        
+    
     def setup_ui(self):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
@@ -801,7 +797,6 @@ class ConfigOperationListWidget(Dialog):
     def accept(self):
         self.operation_list = self._table.get_operation_list()
         Dialog.accept(self)
-        
     
     
     def create_context_menu(self, table):

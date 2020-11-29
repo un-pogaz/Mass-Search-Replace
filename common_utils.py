@@ -177,7 +177,7 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
         ac.setCheckable(True)
         if is_checked:
             ac.setChecked(True)
-
+    
     parent_menu.addAction(ac)
     return ac
 
