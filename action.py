@@ -154,7 +154,7 @@ def query_testGetError(query):
         for operation in query[KEY.MENU_SEARCH_REPLACES]:
             err = operation_testGetError(operation)
             if err:
-                raise err
+                return err
             
     except Exception as ex:
         return ex
