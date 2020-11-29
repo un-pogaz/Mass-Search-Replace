@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-11-29 14:03+0100\n"
+"POT-Creation-Date: 2020-11-29 18:08+0100\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,19 +19,23 @@ msgstr ""
 "X-Poedit-SearchPath-3: common_utils.py\n"
 "X-Poedit-SearchPath-4: SearchReplace.py\n"
 
-#: SearchReplace.py:93
-msgid "Search/Replace configuration"
+#: SearchReplace.py:48
+msgid "This operation is not valide, the \"{:s}\" key is missing."
 msgstr ""
 
-#: SearchReplace.py:109
+#: SearchReplace.py:50
 msgid "You must specify the target \"Search field\"."
 msgstr ""
 
 #: SearchReplace.py:115
+msgid "Search/Replace configuration"
+msgstr ""
+
+#: SearchReplace.py:134 action.py:262
 msgid "Invalid operation"
 msgstr ""
 
-#: SearchReplace.py:116
+#: SearchReplace.py:135
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
@@ -47,37 +51,36 @@ msgstr ""
 msgid "&Customize plugin..."
 msgstr ""
 
-#: action.py:130
-msgid "Config Error"
-msgstr ""
-
-#: action.py:131
-msgid ""
-"Validating the configuration settings before running failed.\n"
-"The JSON file of plugin settings contains errors."
-msgstr ""
-
-#: action.py:136 action.py:142
+#: action.py:128 action.py:134
 msgid "No selected book"
 msgstr ""
 
-#: action.py:137 action.py:143
+#: action.py:129 action.py:135
 msgid "No book selected for Search/Replace."
 msgstr ""
 
-#: action.py:208
+#: action.py:199
 msgid "Cancel"
 msgstr ""
 
-#: action.py:210
+#: action.py:201
 msgid "Mass Search/Replace Progress"
 msgstr ""
 
-#: action.py:270
+#: action.py:263
+#, python-brace-format
+msgid ""
+"An invalid operation was detected:\n"
+"{0}\n"
+"\n"
+"Other errors may exist. Check and correct the operations in the plugin configuration window."
+msgstr ""
+
+#: action.py:272
 msgid "Book {:d} of {:d}. Search/Replace {:d} on {:d}."
 msgstr ""
 
-#: action.py:296
+#: action.py:298
 msgid "Update the library for {:d} books..."
 msgstr ""
 
@@ -137,15 +140,15 @@ msgstr ""
 msgid "&Open images folder"
 msgstr ""
 
-#: config.py:175 config.py:814
+#: config.py:175 config.py:809
 msgid "&Import..."
 msgstr ""
 
-#: config.py:178 config.py:817
+#: config.py:178 config.py:812
 msgid "&Export..."
 msgstr ""
 
-#: config.py:202 config.py:217 config.py:838
+#: config.py:202 config.py:217 config.py:833
 msgid "Import failed"
 msgstr ""
 
@@ -153,11 +156,11 @@ msgstr ""
 msgid "This is not a valid OWIP export archive"
 msgstr ""
 
-#: config.py:214 config.py:842
+#: config.py:214 config.py:837
 msgid "Import completed"
 msgstr ""
 
-#: config.py:214 config.py:842
+#: config.py:214 config.py:837
 msgid "{:d} menu items imported"
 msgstr ""
 
@@ -165,7 +168,7 @@ msgstr ""
 msgid "Select a menu file archive to import..."
 msgstr ""
 
-#: config.py:234 config.py:267 config.py:845 config.py:862 config.py:880
+#: config.py:234 config.py:267 config.py:840 config.py:857 config.py:875
 msgid "Export failed"
 msgstr ""
 
@@ -173,7 +176,7 @@ msgstr ""
 msgid "No menu items selected to export"
 msgstr ""
 
-#: config.py:264 config.py:877
+#: config.py:264 config.py:872
 msgid "Export completed"
 msgstr ""
 
@@ -207,165 +210,165 @@ msgstr ""
 msgid "Operation"
 msgstr ""
 
-#: config.py:428
+#: config.py:427
 msgid "(copy)"
 msgstr ""
 
-#: config.py:441
+#: config.py:440
 msgid "Are you sure you want to delete this menu item?"
 msgstr ""
 
-#: config.py:443
+#: config.py:442
 msgid "Are you sure you want to delete the selected {:d} menu items?"
 msgstr ""
 
-#: config.py:444 config.py:699 config.py:982
+#: config.py:443 config.py:695 config.py:973
 msgid "Are you sure?"
 msgstr ""
 
-#: config.py:599
+#: config.py:595
 msgid "Change operation list"
 msgstr ""
 
-#: config.py:620
+#: config.py:616
 msgid "{:d} operations"
 msgstr ""
 
-#: config.py:627
+#: config.py:623
 msgid "Add New Image"
 msgstr ""
 
-#: config.py:630
+#: config.py:626
 msgid "&Select image source"
 msgstr ""
 
-#: config.py:633
+#: config.py:629
 msgid "From &web domain favicon"
 msgstr ""
 
-#: config.py:640
+#: config.py:636
 msgid "From .png &file"
 msgstr ""
 
-#: config.py:653
+#: config.py:649
 msgid "&Save as filename:"
 msgstr ""
 
-#: config.py:677
+#: config.py:673
 msgid "menu icon dialog"
 msgstr ""
 
-#: config.py:677
+#: config.py:673
 msgid "Select a .png file for the menu icon"
 msgstr ""
 
-#: config.py:683 config.py:691 config.py:694 config.py:706 config.py:713
-#: config.py:715 config.py:717
+#: config.py:679 config.py:687 config.py:690 config.py:702 config.py:709
+#: config.py:711 config.py:713
 msgid "Cannot import image"
 msgstr ""
 
-#: config.py:683 config.py:715
+#: config.py:679 config.py:711
 msgid "Source image must be a .png file."
 msgstr ""
 
-#: config.py:691
+#: config.py:687
 msgid "You must specify a filename to save as."
 msgstr ""
 
-#: config.py:694
+#: config.py:690
 msgid "The save as filename should consist of a filename only."
 msgstr ""
 
-#: config.py:699
+#: config.py:695
 msgid "An image with this name already exists - overwrite it?"
 msgstr ""
 
-#: config.py:706
+#: config.py:702
 msgid "You must specify a web domain url"
 msgstr ""
 
-#: config.py:713
+#: config.py:709
 msgid "You must specify a source file."
 msgstr ""
 
-#: config.py:717
+#: config.py:713
 msgid "Source image does not exist!"
 msgstr ""
 
-#: config.py:722
+#: config.py:718
 msgid "Columns"
 msgstr ""
 
-#: config.py:722
+#: config.py:718
 msgid "Search mode"
 msgstr ""
 
-#: config.py:722
+#: config.py:718
 msgid "Search"
 msgstr ""
 
-#: config.py:722
+#: config.py:718
 msgid "Replace"
 msgstr ""
 
-#: config.py:730
+#: config.py:725
 msgid "List of Search/Replace operations"
 msgstr ""
 
-#: config.py:732
+#: config.py:727
 msgid "List of Search/Replace operations for {:s}"
 msgstr ""
 
-#: config.py:742
+#: config.py:737
 msgid "Select and configure the order of execution of the operations of Search/Replace operations:"
 msgstr ""
 
-#: config.py:762
+#: config.py:757
 msgid "Move operation up"
 msgstr ""
 
-#: config.py:769
+#: config.py:764
 msgid "Add operation"
 msgstr ""
 
-#: config.py:776
+#: config.py:771
 msgid "Copy operation"
 msgstr ""
 
-#: config.py:783
+#: config.py:778
 msgid "Delete operation"
 msgstr ""
 
-#: config.py:790
+#: config.py:785
 msgid "Move operation down"
 msgstr ""
 
-#: config.py:838
+#: config.py:833
 msgid "This is not a valid JSON file"
 msgstr ""
 
-#: config.py:851
+#: config.py:846
 msgid "Select a JSON file to import..."
 msgstr ""
 
-#: config.py:862
+#: config.py:857
 msgid "No operations selected to export"
 msgstr ""
 
-#: config.py:877
+#: config.py:872
 msgid ""
 "{:d} operations exported to\n"
 "{:s}"
 msgstr ""
 
-#: config.py:886
+#: config.py:881
 msgid "Save the operations as..."
 msgstr ""
 
-#: config.py:979
+#: config.py:970
 msgid "Are you sure you want to delete this operation?"
 msgstr ""
 
-#: config.py:981
+#: config.py:972
 msgid "Are you sure you want to delete the selected {:d} operations?"
 msgstr ""
