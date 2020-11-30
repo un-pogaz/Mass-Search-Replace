@@ -51,7 +51,20 @@ from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, C
                                                               get_icon, debug_print)
 
 
-PLUGIN_ICONS = ['images/plugin.png', 'images/image_add.png', 'images/export.png', 'images/import.png', 'dialog_warning.png']
+class ICON:
+    PLUGIN    = 'images/plugin.png'
+    ADD_IMAGE = 'images/image_add.png'
+    EXPORT    = 'images/export.png'
+    IMPORT    = 'images/import.png'
+    WARNING   = 'images/warning.png'
+    
+    ALL = [
+        PLUGIN,
+        ADD_IMAGE,
+        EXPORT,
+        IMPORT,
+        WARNING,
+    ]
 
 class KEY:
     MASS_SEARCH_REPLACE = 'MassSearch-Replace'
@@ -85,8 +98,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        debug_print('initial_query_list')
-        self.initial_query_list = PREFS[KEY.MASS_SEARCH_REPLACE].copy()
+        query_list = PREFS[KEY.MASS_SEARCH_REPLACE]
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
@@ -98,7 +110,7 @@ class ConfigWidget(QWidget):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the query list
-        self._table = MenuQueryTableWidget(plugin_action, self.initial_query_list, self)
+        self._table = MenuQueryTableWidget(plugin_action, query_list, self)
         heading_label.setBuddy(self._table)
         table_layout.addWidget(self._table)
         
@@ -172,7 +184,7 @@ class ConfigWidget(QWidget):
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
-        act_add_image = QAction(get_icon(PLUGIN_ICONS[1]), _('&Add image...'), table)
+        act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image...'), table)
         act_add_image.triggered.connect(table.display_add_new_image_dialog)
         table.addAction(act_add_image)
         act_open = QAction(get_icon('document_open.png'), _('&Open images folder'), table)
@@ -181,10 +193,10 @@ class ConfigWidget(QWidget):
         sep2 = QAction(table)
         sep2.setSeparator(True)
         table.addAction(sep2)
-        act_import = QAction(get_icon(PLUGIN_ICONS[2]), _('&Import...'), table)
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), table)
         act_import.triggered.connect(self.import_menus)
         table.addAction(act_import)
-        act_export = QAction(get_icon(PLUGIN_ICONS[3]), _('&Export...'), table)
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), table)
         act_export.triggered.connect(self.export_menus)
         table.addAction(act_export)
     
@@ -628,7 +640,7 @@ class SettingsButton(QToolButton):
                 break
         
         if self._hasError:
-            self.setIcon(get_icon('dialog_warning.png'))
+            self.setIcon(get_icon(ICON.WARNING))
         else:
             self.setIcon(get_icon('gear.png'))
     
@@ -773,7 +785,7 @@ class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
     def hasError(self):
         self._hasError = not operation_isFullValid(self._operation, self.plugin_action)
         if self._hasError:
-            self.setIcon(get_icon('dialog_warning.png'))
+            self.setIcon(get_icon(ICON.WARNING))
         else:
             self.setIcon(get_icon())
     
@@ -870,10 +882,10 @@ class ConfigOperationListWidget(Dialog):
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
-        act_import = QAction(get_icon(PLUGIN_ICONS[2]), _('&Import...'), table)
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), table)
         act_import.triggered.connect(self.import_operations)
         table.addAction(act_import)
-        act_export = QAction(get_icon(PLUGIN_ICONS[3]), _('&Export...'), table)
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), table)
         act_export.triggered.connect(self.export_operations)
         table.addAction(act_export)
     

@@ -98,12 +98,12 @@ def operation_isFullValid(operation, plugin_action):
 
 
 def operation_para_list(operation):
-    column = operation[KEY_OPERATION.SEARCH_FIELD]
-    field = operation[KEY_OPERATION.DESTINATION_FIELD]
+    column = operation.get(KEY_OPERATION.SEARCH_FIELD, '')
+    field = operation.get(KEY_OPERATION.DESTINATION_FIELD, '')
     if (field and field != column):
         column += ' => '+ field
     
-    return [ column, operation[KEY_OPERATION.SEARCH_MODE], operation[KEY_OPERATION.SEARCH_FOR], operation[KEY_OPERATION.REPLACE_WITH] ]
+    return [ column, operation.get(KEY_OPERATION.SEARCH_MODE, ''), operation.get(KEY_OPERATION.SEARCH_FOR, ''), operation.get(KEY_OPERATION.REPLACE_WITH, '') ]
 
 def operation_string(operation):
     return '"'+ '" | "'.join(operation_para_list(operation))+'"'
@@ -171,7 +171,7 @@ class SearchReplaceDialog(Dialog):
         if err:
             if question_dialog(self.parent, _('Invalid operation'),
                              _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
-                             default_yes=True, show_copy_button=True, override_icon=get_icon('dialog_warning.png')):
+                             default_yes=True, show_copy_button=True, override_icon=get_icon('images/warning.png')):
                 
                 Dialog.reject(self)
                 return

@@ -29,7 +29,7 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
-from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
+from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError, operation_testFullError
 
@@ -47,12 +47,12 @@ class MassSearchReplaceAction(InterfaceAction):
         self.is_library_selected = True
         self.menu = QMenu(self.gui)
         
-        icon_resources = self.load_resources(PLUGIN_ICONS)
+        icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
         
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
-        self.qaction.setIcon(get_icon(PLUGIN_ICONS[0]))
+        self.qaction.setIcon(get_icon(ICON.PLUGIN))
     
     def initialization_complete(self):
         # we implement here to have access to current_db
@@ -196,7 +196,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
         
         self.setWindowTitle(_('Mass Search/Replace Progress'))
-        self.setWindowIcon(get_icon(PLUGIN_ICONS[0]))
+        self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
         self.setMinimumWidth(500)
@@ -232,8 +232,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
         QProgressDialog.close(self)
     
     def _run_search_replaces(self):
-        start = time.time()
         try:
+            start = time.time()
             self.setValue(0)
             
             for num, book_id in enumerate(self.book_ids, 1):
@@ -257,7 +257,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         if question_dialog(self.gui, _('Invalid operation'),
                                 _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation?\n'
                                   'Other errors may exist and will be ignoreds.').format(err),
-                                default_yes=False, show_copy_button=True, override_icon=get_icon('dialog_warning.png') ):
+                                default_yes=False, show_copy_button=True, override_icon=get_icon(ICON.WARNING) ):
                             
                             self.operationError = True
                             
@@ -266,6 +266,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             return
                     
                     if not err:
+                        
                         
                         if sr_op==len(self.operation_list): nl ='\n'
                         else: nl =''
@@ -304,9 +305,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
             
+            self.time_execut = round(time.time() - start, 3)
+            
         except Exception as e:
             self.exception = e;
         
-        self.time_execut = round(time.time() - start, 3)
         self.hide()
         return
