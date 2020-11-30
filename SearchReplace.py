@@ -3,7 +3,7 @@
 from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
 
-__license__ = 'GPL v3'
+__license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
@@ -23,36 +23,43 @@ from calibre import prints
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog
 
-from calibre_plugins.mass_search_replace.common_utils import debug_print
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_OPERATION as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
+from calibre_plugins.mass_search_replace.common_utils import debug_print, get_icon
+from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_OPERATION as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD
+from calibre_plugins.mass_search_replace.templates import check_template
+
 
 class KEY_OPERATION():
     locals().update(vars(KEY_QUERY))
 
 _default_operation = None
+_s_r = None
 
 def get_default_operation(plugin_action):
         global _default_operation
-        if not _default_operation:
-            s_r = SearchReplaceWidget_NoWindows(plugin_action)
-            _default_operation = s_r.save_settings()
-            s_r.close()
-            del s_r
+        global _s_r
+        if not _s_r or not _default_operation:
+            _s_r = SearchReplaceWidget_NoWindows(plugin_action)
+            _default_operation = _s_r.save_settings()
         
         return _default_operation
 
+def clean_empty_operation(operation_list, plugin_action):
+    if not operation_list: operation_list = []
+    rlst = []
+    for operation in operation_list:
+        if operation and operation != get_default_operation(plugin_action):
+            rlst.append(operation)
+    
+    return rlst
 
 def operation_testGetError(operation):
-    
     difference = set(KEY_OPERATION.ALL).difference(operation.keys())
     for key in difference:
-        debug_print('operation.keys()',difference)
-        debug_print('difference',difference)
         return Exception(_('Invalid operation, the "{:s}" key is missing.').format(key))
-    if len(operation[KEY_OPERATION.SEARCH_FIELD])==0:
-        return Exception(_('You must specify the target "Search field".'))
     if KEY_OPERATION.S_R_ERROR in operation:
         return operation[KEY_OPERATION.S_R_ERROR]
+    if len(operation[KEY_OPERATION.SEARCH_FIELD])==0:
+        return Exception(_('You must specify the target "Search field".'))
     return None
 
 def operation_isValid(operation):
@@ -77,23 +84,31 @@ def operation_testGetLocalizedFieldError(operation):
 def operation_isValidLocalizedField(operation):
     return operation_testGetLocalizedFieldError(operation) == None
 
+def operation_testFullError(operation, plugin_action):
+    err = operation_testGetLocalizedFieldError(operation)
+    if err:
+        return err
+    get_default_operation(plugin_action)
+    global _s_r
+    _s_r.load_settings(operation)
+    return _s_r.testGetError()
+
+def operation_isFullValid(operation, plugin_action):
+    return operation_testFullError(operation, plugin_action) == None
+
 
 def operation_para_list(operation):
-    return {
-            KEY_OPERATION.SEARCH_FIELD      : operation[KEY_OPERATION.SEARCH_FIELD],
-            KEY_OPERATION.DESTINATION_FIELD : operation[KEY_OPERATION.DESTINATION_FIELD],
-            KEY_OPERATION.SEARCH_MODE       : operation[KEY_OPERATION.SEARCH_MODE],
-            KEY_OPERATION.SEARCH_FOR        : operation[KEY_OPERATION.SEARCH_FOR],
-            KEY_OPERATION.REPLACE_WITH      : operation[KEY_OPERATION.REPLACE_WITH]
-        }
-def operation_string(operation):
-    para_list = operation_para_list(operation)
-    column = para_list[KEY_OPERATION.SEARCH_FIELD]
-    field = para_list[KEY_OPERATION.DESTINATION_FIELD]
+    column = operation[KEY_OPERATION.SEARCH_FIELD]
+    field = operation[KEY_OPERATION.DESTINATION_FIELD]
     if (field and field != column):
         column += ' => '+ field
     
-    return '"'+ '" | "'.join([column, para_list[KEY_OPERATION.SEARCH_MODE], para_list[KEY_OPERATION.SEARCH_FOR], para_list[KEY_OPERATION.REPLACE_WITH] ])+'"'
+    return [ column, operation[KEY_OPERATION.SEARCH_MODE], operation[KEY_OPERATION.SEARCH_FOR], operation[KEY_OPERATION.REPLACE_WITH] ]
+
+def operation_string(operation):
+    return '"'+ '" | "'.join(operation_para_list(operation))+'"'
+
+
 
 
 def SearchReplaceWidget_NoWindows(plugin_action):
@@ -155,12 +170,12 @@ class SearchReplaceDialog(Dialog):
         
         if err:
             if question_dialog(self.parent, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed.\n{:s}\nResume to the editing?\nElse, the changes will be discard.').format(str(err)),
-                             default_yes=True, show_copy_button=True, override_icon=QIcon(I('dialog_warning.png'))):
+                             _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
+                             default_yes=True, show_copy_button=True, override_icon=get_icon('dialog_warning.png')):
                 
+                Dialog.reject(self)
                 return
             else:
-                Dialog.reject(self)
                 return
         
         self.operation = self.widget.save_settings()

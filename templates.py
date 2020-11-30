@@ -43,7 +43,7 @@ TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
 try:
     load_translations()
 except NameError:
-    prints("ActionsChain/templates.py - exception when loading translations")
+    pass
 
 def check_template(template, plugin_action, print_error=True):
     gui = plugin_action.gui

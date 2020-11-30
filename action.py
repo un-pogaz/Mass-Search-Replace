@@ -31,7 +31,7 @@ from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError, operation_testGetLocalizedFieldError
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError, operation_testFullError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -50,7 +50,6 @@ class MassSearchReplaceAction(InterfaceAction):
         icon_resources = self.load_resources(PLUGIN_ICONS)
         set_plugin_icon_resources(self.name, icon_resources)
         
-        
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(PLUGIN_ICONS[0]))
@@ -68,14 +67,13 @@ class MassSearchReplaceAction(InterfaceAction):
         self.query_menu = []
         sub_menus = {}
         
+        
         for i, action in enumerate(self.menu_actions, 0):
             if hasattr(action, 'calibre_shortcut_unique_name'):
                 self.gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
-            # starting in calibre 2.10.0, actions are registers at
-            # the top gui level for OSX' benefit.
-            if calibre_version >= (2,10,0) and i < len(self.menu_actions)-1:
+            # starting in calibre 2.10.0, actions are registers at the top gui level for OSX' benefit.
+            if calibre_version >= (2,10,0) :
                 self.gui.removeAction(action)
-            
         
         self.menu_actions = []
         
@@ -87,7 +85,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         ac = create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
                                              triggered=self.show_configuration,
-                                             shortcut=False)
+                                             unique_name='Customize plugin')
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
@@ -108,13 +106,15 @@ class MassSearchReplaceAction(InterfaceAction):
             parent_menu.addSeparator()
         elif len(query[KEY.MENU_SEARCH_REPLACES])>0:
             if sub_menu_text:
-                debug_print('Rebuilding menu for: {:s} > {:s}'.format(sub_menu_text, menu_text))
+                unique_name = '{:s} > {:s}'.format(sub_menu_text, menu_text)
             else:
-                debug_print('Rebuilding menu for: {:s}'.format(menu_text))
+                unique_name = '{:s}'.format(menu_text)
+                
+            debug_print('Rebuilding menu for:',unique_name)
             
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
-                           unique_name=menu_text,
-                           triggered=partial(self.run_SearchReplace, query))
+                           triggered=partial(self.run_SearchReplace, query),
+                           unique_name=unique_name, shortcut_name=unique_name)
         
         if ac:
             # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
@@ -145,19 +145,11 @@ class MassSearchReplaceAction(InterfaceAction):
 
 
 def query_testGetError(query):
-    try:
-        val = query[KEY.MENU_ACTIVE]
-        val = query[KEY.MENU_TEXT]
-        val = query[KEY.MENU_SUBMENU]
-        val = query[KEY.MENU_IMAGE]
-        
-        for operation in query[KEY.MENU_SEARCH_REPLACES]:
-            err = operation_testGetError(operation)
-            if err:
-                return err
-            
-    except Exception as ex:
-        return ex
+    
+    difference = set(KEY.ALL).difference(query)
+    for key in difference:
+        return Exception(_('This operation is not valide, the "{:s}" key is missing.').format(key))
+    
     return None
 
 
@@ -193,6 +185,11 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # Count of search/replace
         self.total_operation_count = self.book_count*self.search_replaces_count
         
+        # Search/Replace Widget
+        self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action)
+        
+        self.operationError = False
+        
         # Exception
         self.exception = None
         
@@ -225,23 +222,19 @@ class SearchReplacesProgressDialog(QProgressDialog):
             debug_print('Search/Replace launched for {:d} books.'.format(self.book_count))
             debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
             debug_print('Search/Replace execute in {:0.3f} seconds.'.format(self.time_execut))
+            if self.operationError:
+                debug_print('!! An invalid operation was detected.'.format(self.time_execut))
             debug_print('{0}\n'.format(self.operation_list))
-        
+    
+    def close(self):
+        self.db.clean()
+        self.s_r.close()
+        QProgressDialog.close(self)
+    
     def _run_search_replaces(self):
         start = time.time()
         try:
             self.setValue(0)
-            
-            alreadyRaiseError = False
-            
-            s_r = SearchReplaceWidget_NoWindows(self.plugin_action)
-            s_r_load_settings = s_r.load_settings
-            sr_testGetError = s_r.testGetError
-            
-            sr_search_replace = s_r.search_replace
-            sr_updated_fields = s_r.updated_fields
-            sr_close = s_r.close
-            del s_r
             
             for num, book_id in enumerate(self.book_ids, 1):
                 
@@ -255,22 +248,21 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 for sr_op, operation in enumerate(self.operation_list, 1):
                     
-                    err = operation_testGetLocalizedFieldError(operation)
+                    err = operation_testFullError(operation, self.plugin_action)
                     if not err:
-                        s_r_load_settings(operation)
-                        err = sr_testGetError()
+                        self.s_r.load_settings(operation)
+                        err = self.s_r.testGetError()
                     
-                    if not alreadyRaiseError and err:
+                    if not self.operationError and err:
                         if question_dialog(self.gui, _('Invalid operation'),
-                                _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation? Other errors may exist and will be ignoreds.').format(err),
+                                _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation?\n'
+                                  'Other errors may exist and will be ignoreds.').format(err),
                                 default_yes=False, show_copy_button=True, override_icon=get_icon('dialog_warning.png') ):
                             
-                            alreadyRaiseError = True
+                            self.operationError = True
                             
                         else:
                             self.close()
-                            self.db.clean()
-                            sr_close()
                             return
                     
                     if not err:
@@ -288,16 +280,14 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         if self.wasCanceled():
                             self.close()
-                            self.db.clean()
-                            sr_close()
                             return
                         
-                        sr_search_replace(book_id)
+                        self.s_r.search_replace(book_id)
                         
                 
             
             lst_id= []
-            for field, book_id_val_map in sr_updated_fields.items():
+            for field, book_id_val_map in self.s_r.updated_fields.items():
                 lst_id += book_id_val_map.keys()
             self.fields_update = len(lst_id)
             
@@ -309,7 +299,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 debug_print('Update the database for {:d} books...\n'.format(self.books_update))
                 self.setLabelText(_('Update the library for {:d} books...').format(self.books_update))
                 
-                for field, book_id_val_map in sr_updated_fields.items():
+                for field, book_id_val_map in self.s_r.updated_fields.items():
                     self.dbA.set_field(field, book_id_val_map)
                 
                 self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
@@ -317,8 +307,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
         except Exception as e:
             self.exception = e;
         
-        sr_close()
         self.time_execut = round(time.time() - start, 3)
-        self.db.clean()
         self.hide()
         return
