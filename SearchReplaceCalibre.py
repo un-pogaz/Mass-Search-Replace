@@ -937,11 +937,11 @@ class MetadataBulkWidget(QWidget):
         mi = self.db.new_api.get_proxy_metadata(book_id)
         
         #edit the metadata object with the stored edited field
-        for dest in self.set_field_calls:
+        if dest in self.set_field_calls:
             if book_id in self.set_field_calls[dest]:
-                store = str(self.set_field_calls[dest][book_id])
+                store = self.set_field_calls[dest][book_id]
                 mi.set(dest, store)
-                
+        
         original = mi.get(dest)
         
         val = self.s_r_do_regexp(mi)
@@ -975,8 +975,8 @@ class MetadataBulkWidget(QWidget):
                 val = None
             if dest == 'rating' and val:
                 val = (int(val) // 2) * 2
-                
         
+        #add the result value only if different of the original
         if original != val:
             self.set_field_calls[dest][book_id] = val
     
