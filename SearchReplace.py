@@ -43,9 +43,12 @@ def get_default_operation(plugin_action):
 
 
 def operation_testGetError(operation):
-    for key in KEY_OPERATION.ALL:
-        if key not in operation.keys():
-            return Exception(_('This operation is not valide, the "{:s}" key is missing.').format(key))
+    
+    difference = set(KEY_OPERATION.ALL).difference(operation.keys())
+    for key in difference:
+        debug_print('operation.keys()',difference)
+        debug_print('difference',difference)
+        return Exception(_('Invalid operation, the "{:s}" key is missing.').format(key))
     if len(operation[KEY_OPERATION.SEARCH_FIELD])==0:
         return Exception(_('You must specify the target "Search field".'))
     if KEY_OPERATION.S_R_ERROR in operation:
@@ -71,17 +74,9 @@ def operation_testGetLocalizedFieldError(operation):
     
     return None
 
-def operation_isLocalizedFieldValid(operation):
+def operation_isValidLocalizedField(operation):
     return operation_testGetLocalizedFieldError(operation) == None
 
-def clean_operation_list(operation_list):
-    if operation_list == None: operation_list = []
-    rslt = []
-    for operation in operation_list:
-        if operation_isValid(operation):
-            rslt.append(operation)
-    
-    return rslt
 
 def operation_para_list(operation):
     return {

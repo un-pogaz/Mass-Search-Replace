@@ -46,7 +46,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_operation, clean_operation_list, operation_string, operation_para_list, KEY_OPERATION
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_operation, operation_string, operation_para_list, KEY_OPERATION
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
@@ -59,6 +59,14 @@ class KEY:
     MENU_TEXT = 'Text'
     MENU_SUBMENU = 'SubMenu'
     MENU_SEARCH_REPLACES = 'Search-Replaces'
+    
+    ALL = [
+        MENU_ACTIVE,
+        MENU_TEXT,
+        MENU_SUBMENU,
+        MENU_IMAGE,
+        MENU_SEARCH_REPLACES,
+    ]
 
 
 # This is where all preferences for this plugin are stored
@@ -581,8 +589,6 @@ class SettingsButton(QToolButton):
         self.config_dialog = parent
         self.plugin_action = plugin_action
         
-        query[KEY.MENU_SEARCH_REPLACES] = clean_operation_list(query[KEY.MENU_SEARCH_REPLACES])
-        
         self.query = query
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
@@ -715,7 +721,7 @@ class ConfigOperationListWidget(Dialog):
     def __init__(self, parent, plugin_action, query):
         self.plugin_action = plugin_action
         name = query[KEY.MENU_TEXT]
-        self.operation_list = clean_operation_list(query[KEY.MENU_SEARCH_REPLACES])
+        self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
         title = _('List of Search/Replace operations')
         if name:
             title = _('List of Search/Replace operations for {:s}').format(name)
@@ -899,8 +905,6 @@ class OperationListTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         
-        operation_list = clean_operation_list(operation_list)
-            
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
             self.populate_table_row(row, operation)
@@ -1040,7 +1044,7 @@ class OperationListTableWidget(QTableWidget):
             operation = self.convert_row_to_operation(row)
             operation_list.append(operation)
        
-        return clean_operation_list(operation_list)
+        return operation_list
     
     def convert_row_to_operation(self, row):
         return self.item(row, 0).operation
@@ -1049,7 +1053,7 @@ class OperationListTableWidget(QTableWidget):
         operation_list = []
         for row in self.selectionModel().selectedRows():
             operation_list.append(self.convert_row_to_operation(row.row()))
-        return clean_operation_list(operation_list)
+        return operation_list
     
     def append_operation_list(self, operation_list):
         for operation in reversed(operation_list):
