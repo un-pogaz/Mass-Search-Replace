@@ -88,7 +88,7 @@ def set_plugin_icon_resources(name, resources):
     plugin_icon_resources = resources
 
 
-def get_icon(icon_name):
+def get_icon(icon_name=None):
     '''
     Retrieve a QIcon for the named image from the zip file if it exists,
     or if not then from Calibre's image cache.
@@ -662,4 +662,4 @@ class regexException(BaseException):
     
     def __str__(self):
         return self.msg
-        
+

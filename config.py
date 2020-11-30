@@ -22,14 +22,14 @@ try:
     from PyQt5 import Qt as QtGui
     from PyQt5 import QtCore
     from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-                          QIcon, QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
+                          QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
                           QTableWidgetItem, QAbstractItemView, QComboBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
 except:
     from PyQt4 import QtGui, QtCore
     from PyQt4.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-                          QIcon, QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
+                          QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
                           QTableWidgetItem, QAbstractItemView, QComboBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
@@ -46,12 +46,11 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_operation, clean_operation_list, operation_string, KEY_OPERATION
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, get_default_operation, clean_operation_list, operation_string, operation_para_list, KEY_OPERATION
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTableWidgetItem,
                                                               get_icon, debug_print)
 
 PLUGIN_ICONS = ['images/plugin.png', 'images/image_add.png', 'images/export.png', 'images/import.png']
-
 
 class KEY:
     MASS_SEARCH_REPLACE = 'MassSearch-Replace'
@@ -97,35 +96,35 @@ class ConfigWidget(QWidget):
         table_layout.addLayout(button_layout)
         move_up_button = QtGui.QToolButton(self)
         move_up_button.setToolTip(_('Move menu item up'))
-        move_up_button.setIcon(QIcon(I('arrow-up.png')))
+        move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QtGui.QToolButton(self)
         add_button.setToolTip(_('Add menu item'))
-        add_button.setIcon(QIcon(I('plus.png')))
+        add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QtGui.QToolButton(self)
         copy_button.setToolTip(_('Copy menu item'))
-        copy_button.setIcon(QIcon(I('edit-copy.png')))
+        copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QtGui.QToolButton(self)
         delete_button.setToolTip(_('Delete menu item'))
-        delete_button.setIcon(QIcon(I('minus.png')))
+        delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QtGui.QToolButton(self)
         move_down_button.setToolTip(_('Move menu item down'))
-        move_down_button.setIcon(QIcon(I('arrow-down.png')))
+        move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)
         
         move_up_button.clicked.connect(self._table.move_rows_up)
@@ -319,7 +318,7 @@ class MenuQueryTableWidget(QTableWidget):
         
         self.resizeColumnsToContents()
         self.setSortingEnabled(False)
-        self.setMinimumSize(800, 0)
+        self.setMinimumSize(600, 0)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.selectRow(0)
     
@@ -383,7 +382,7 @@ class MenuQueryTableWidget(QTableWidget):
             item = QTableWidgetItem()
             item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
             self.setItem(row, col, item)
-        self.item(row, 1).setIcon(QIcon())
+        self.item(row, 1).setIcon(get_icon())
     
     def display_add_new_image_dialog(self, select_in_combo=False, combo=None):
         add_image_dialog = ImageDialog(self, self.resources_dir, get_image_names(self.image_map))
@@ -688,8 +687,7 @@ class ImageDialog(QDialog):
             os.makedirs(self.resources_dir)
         dest_path = os.path.join(self.resources_dir, self.new_image_name)
         if save_name in self.image_names or os.path.exists(dest_path):
-            if not question_dialog(self, _('Are you sure?'), _('An image with this name already exists - overwrite it?'),
-                    show_copy_button=False):
+            if not question_dialog(self, _('Are you sure?'), _('An image with this name already exists - overwrite it?'), show_copy_button=False):
                 return
         
         if self._radio_web.isChecked():
@@ -751,35 +749,35 @@ class ConfigOperationListWidget(Dialog):
         table_layout.addLayout(button_layout)
         move_up_button = QtGui.QToolButton(self)
         move_up_button.setToolTip(_('Move operation up'))
-        move_up_button.setIcon(QIcon(I('arrow-up.png')))
+        move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QtGui.QToolButton(self)
         add_button.setToolTip(_('Add operation'))
-        add_button.setIcon(QIcon(I('plus.png')))
+        add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QtGui.QToolButton(self)
         copy_button.setToolTip(_('Copy operation'))
-        copy_button.setIcon(QIcon(I('edit-copy.png')))
+        copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QtGui.QToolButton(self)
         delete_button.setToolTip(_('Delete operation'))
-        delete_button.setIcon(QIcon(I('minus.png')))
+        delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QtGui.QToolButton(self)
         move_down_button.setToolTip(_('Move operation down'))
-        move_down_button.setIcon(QIcon(I('arrow-down.png')))
+        move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)
         
         move_up_button.clicked.connect(self._table.move_rows_up)

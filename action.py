@@ -25,13 +25,13 @@ except ImportError:
 
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version, isosx, isnewosx
-from calibre.gui2 import error_dialog, warning_dialog
+from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import PLUGIN_ICONS, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError, operation_testGetLocalizedFieldError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -216,9 +216,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.exec_()
         
         if self.wasCanceled():
-            debug_print('Mass Search/Replace as cancelled. No change.')
+            debug_print('Mass Search/Replace was cancelled. No change.')
         elif self.exception:
-            debug_print('Mass Search/Replace a was interupted. An exception has occurred:')
+            debug_print('Mass Search/Replace was interupted. An exception has occurred:')
             debug_print(self.exception)
             raise self.exception
         else:
@@ -254,14 +254,24 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 debug_print('Search/Replace for '+book_info)
                 
                 for sr_op, operation in enumerate(self.operation_list, 1):
-                    s_r_load_settings(operation)
-                    err = sr_testGetError()
+                    
+                    err = operation_testGetLocalizedFieldError(operation)
+                    if not err:
+                        s_r_load_settings(operation)
+                        err = sr_testGetError()
                     
                     if not alreadyRaiseError and err:
-                        alreadyRaiseError = True
-                        warning_dialog(self.gui, _('Invalid operation'),
-                                _('An invalid operation was detected:\n{0}\n\nOther errors may exist. Check and correct the operations in the plugin configuration window.').format(err),
-                                show=True, show_copy_button=True)
+                        if question_dialog(self.gui, _('Invalid operation'),
+                                _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation? Other errors may exist and will be ignoreds.').format(err),
+                                default_yes=False, show_copy_button=True, override_icon=get_icon('dialog_warning.png') ):
+                            
+                            alreadyRaiseError = True
+                            
+                        else:
+                            self.close()
+                            self.db.clean()
+                            sr_close()
+                            return
                     
                     if not err:
                         
@@ -278,6 +288,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         if self.wasCanceled():
                             self.close()
+                            self.db.clean()
+                            sr_close()
                             return
                         
                         sr_search_replace(book_id)
@@ -306,7 +318,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
             self.exception = e;
         
         sr_close()
-        
         self.time_execut = round(time.time() - start, 3)
         self.db.clean()
         self.hide()
