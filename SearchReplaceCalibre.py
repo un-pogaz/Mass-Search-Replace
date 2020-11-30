@@ -985,7 +985,8 @@ class MetadataBulkWidget(QWidget):
                 val = (int(val) // 2) * 2
         
         #add the result value only if different of the original
-        if original != val:
+        # and if it is not a pair None/''
+        if original != val and not (original == None and val == '' or original == '' and val == None):
             self.set_field_calls[dest][book_id] = val
     
     def get_query(self):
