@@ -110,7 +110,6 @@ def operation_string(operation):
 
 
 
-
 def SearchReplaceWidget_NoWindows(plugin_action):
     rslt = SearchReplaceWidget(plugin_action)
     rslt.resize(QSize(0, 0))

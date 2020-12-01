@@ -23,6 +23,7 @@ try:
 except ImportError:
     from PyQt4.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
+from calibre import prints
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version, isosx, isnewosx
 from calibre.gui2 import error_dialog, question_dialog
@@ -31,7 +32,7 @@ from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError, operation_testFullError
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetLocalizedFieldError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -180,10 +181,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # name of the search/replace
         self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
         # Count of search/replace
-        self.search_replaces_count = len(self.operation_list)
+        self.operation_count = len(self.operation_list)
         
         # Count of search/replace
-        self.total_operation_count = self.book_count*self.search_replaces_count
+        self.total_operation_count = self.book_count*self.operation_count
         
         # Search/Replace Widget
         self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action)
@@ -193,21 +194,20 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # Exception
         self.exception = None
         
-        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
+        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, self.gui)
         
         self.setWindowTitle(_('Mass Search/Replace Progress'))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
         self.setMinimumWidth(500)
-        self.setMinimumDuration(100)
+        self.setMinimumDuration(10)
         
         self.setAutoClose(True)
         self.setAutoReset(False)
         
         self.hide()
-        debug_print('Launch Search/Replace for {:d} books.'.format(self.book_count))
-        debug_print(str(self.operation_list)+'\n')
+        debug_print('Launch Search/Replace for {:d} books.\n'.format(self.book_count))
         
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
@@ -219,12 +219,11 @@ class SearchReplacesProgressDialog(QProgressDialog):
             debug_print(self.exception)
             raise self.exception
         else:
-            debug_print('Search/Replace launched for {:d} books.'.format(self.book_count))
+            debug_print('Search/Replace launched for {:d} books with {:d} operatin.'.format(self.book_count, self.operation_count))
             debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
-            debug_print('Search/Replace execute in {:0.3f} seconds.'.format(self.time_execut))
             if self.operationError:
                 debug_print('!! An invalid operation was detected.'.format(self.time_execut))
-            debug_print('{0}\n'.format(self.operation_list))
+            debug_print('Search/Replace execute in {:0.3f} seconds.\n'.format(self.time_execut))
     
     def close(self):
         self.db.clean()
@@ -234,56 +233,62 @@ class SearchReplacesProgressDialog(QProgressDialog):
     def _run_search_replaces(self):
         try:
             start = time.time()
+            print(time.time())
             self.setValue(0)
+            self.show()
             
-            for num, book_id in enumerate(self.book_ids, 1):
+            for op, operation in enumerate(self.operation_list, 1):
                 
-                # update Progress
-                self.setValue(num)
+                debug_print('Operation {:d}/{:d} > {:s}'.format(op, self.operation_count, operation_string(operation)))
+                err = operation_testGetLocalizedFieldError(operation)
+                if not err:
+                    self.s_r.load_settings(operation)
+                    err = self.s_r.testGetError()
                 
-                miA = self.dbA.get_proxy_metadata(book_id)
-                book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
-                
-                debug_print('Search/Replace for '+book_info)
-                
-                for sr_op, operation in enumerate(self.operation_list, 1):
-                    
-                    err = operation_testFullError(operation, self.plugin_action)
-                    if not err:
-                        self.s_r.load_settings(operation)
-                        err = self.s_r.testGetError()
-                    
-                    if not self.operationError and err:
+                if err:
+                    debug_print('!! Invalide operation\n{0}\n'.format(err))
+                    if not self.operationError:
+                        
+                        start_dialog =  time.time()
                         if question_dialog(self.gui, _('Invalid operation'),
                                 _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation?\n'
-                                  'Other errors may exist and will be ignoreds.').format(err),
+                                'Other errors may exist and will be ignoreds.').format(err),
                                 default_yes=False, show_copy_button=True, override_icon=get_icon(ICON.WARNING) ):
                             
                             self.operationError = True
+                            start = start + (time.time() - start_dialog)
                             
                         else:
                             self.close()
                             return
-                    
-                    if not err:
+                
+                if not err:
+                    for num, book_id in enumerate(self.book_ids, 1):
                         
-                        
-                        if sr_op==len(self.operation_list): nl ='\n'
-                        else: nl =''
-                        
-                        debug_print('Operation N°{:d} > {:s}'.format(sr_op, operation_string(operation))+nl)
-                        self.setLabelText(_('Book {:d} of {:d}. Search/Replace {:d} on {:d}.').format(num, self.book_count, sr_op, self.search_replaces_count))
+                        #update Progress
+                        self.setLabelText(_('Operation  {:d} of {:d}. Book {:d} of {:d}.').format(op, self.operation_count, num, self.book_count))
+                        self.setValue( ((op-1)*self.book_count) + num )
                         
                         if self.total_operation_count < 100:
                             self.hide()
                         else:
                             self.show()
                         
+                        miA = self.dbA.get_proxy_metadata(book_id)
+                        book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
+                        
+                        if num==self.book_count: nl ='\n'
+                        else: nl =''
+                        
+                        debug_print('Book '+book_info+nl)
+                        
+                        
                         if self.wasCanceled():
                             self.close()
                             return
                         
                         self.s_r.search_replace(book_id)
+                        
                         
                 
             
@@ -299,6 +304,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 debug_print('Update the database for {:d} books...\n'.format(self.books_update))
                 self.setLabelText(_('Update the library for {:d} books...').format(self.books_update))
+                self.setValue(self.total_operation_count)
                 
                 for field, book_id_val_map in self.s_r.updated_fields.items():
                     self.dbA.set_field(field, book_id_val_map)
