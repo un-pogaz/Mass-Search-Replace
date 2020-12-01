@@ -4,7 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
 
 __license__   = 'GPL v3'
-__copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
+__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 import regex, numbers
@@ -33,6 +33,9 @@ from calibre.utils.titlecase import titlecase
 from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
 from calibre.gui2.widgets2 import Dialog
 from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
+
+from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
+import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
 
 
 TEMPLATE_FIELD = '{template}'
@@ -100,12 +103,14 @@ class KEY_OPERATION:
         REPLACE_MODE : S_R_REPLACE_MODES,
         SEARCH_MODE  : S_R_MATCH_MODES,
     }
+    
 
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
         QWidget.__init__(self)
+        self.plugin_action = plugin_action
         self.gui = plugin_action.gui
         self.db = self.gui.current_db
         self.ids = book_ids
@@ -343,6 +348,16 @@ class MetadataBulkWidget(QWidget):
         self.xlabel_41.setBuddy(self.multiple_separator)
         self.label_31.setBuddy(self.test_text)
         
+        # un_pogaz template_button
+        self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
+        self.template_button.setObjectName("template_button")
+        self.template_button.setIcon(QIcon(I('template_funcs.png')))
+        self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
+        self.template_button.clicked.connect(self.openTemplateBox)
+        self.vargrid.addWidget(self.template_button, 5, 2, 1, 1)
+        ###
+        
         self.retranslateUi()
     
     def retranslateUi(self):
@@ -533,6 +548,7 @@ class MetadataBulkWidget(QWidget):
         self.search_field.setCurrentIndex(0)
         self.s_r_search_field_changed(0)
     
+    
     def s_r_sf_itemdata(self, idx):
         if idx is None:
             idx = self.search_field.currentIndex()
@@ -592,11 +608,13 @@ class MetadataBulkWidget(QWidget):
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
         self.template_label.setVisible(False)
+        self.template_button.setVisible(False) #un_pogaz template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
-        if idx == 1:  # Template
+        if  unicode_type(self.search_field.currentText()) == TEMPLATE_FIELD: ## idx == 1 # Template
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
+            self.template_button.setVisible(True) #un_pogaz template_button
         elif self.s_r_sf_itemdata(idx) == 'identifiers':
             self.s_r_src_ident_label.setVisible(True)
             self.s_r_src_ident.setVisible(True)
@@ -631,8 +649,11 @@ class MetadataBulkWidget(QWidget):
         self.s_r_paint_results(None)
     
     def s_r_search_mode_changed(self, val):
+        
+        search = self.search_field.currentText()
         self.search_field.clear()
         self.destination_field.clear()
+        
         if val == 0:
             for f in self.writable_fields:
                 self.search_field.addItem(f if f != 'sort' else 'title_sort', f)
@@ -660,6 +681,9 @@ class MetadataBulkWidget(QWidget):
             self.replace_mode_label.setVisible(True)
             self.comma_separated.setVisible(True)
             self.s_r_heading.setText('<p>'+self.main_heading + self.regexp_heading)
+        
+        self.search_field.setCurrentText(search)
+        
         self.s_r_paint_results(None)
     
     def s_r_separator_changed(self, txt):
@@ -758,57 +782,6 @@ class MetadataBulkWidget(QWidget):
         if self.comma_separated.isChecked():
             return ','
         return ''
-    
-    def s_r_paint_results(self, txt):
-        self.s_r_error = None
-        self.s_r_set_colors()
-        flags = regex.FULLCASE | regex.UNICODE
-        
-        if self.case_sensitive.isChecked():
-            flags |= regex.IGNORECASE
-        
-        try:
-            stext = unicode_type(self.search_for.text())
-            if not stext:
-                raise Exception(_('You must specify a search expression in the "Search for" field'))
-            if self.search_mode.currentIndex() == 0:
-                self.s_r_obj = regex.compile(regex.escape(stext), flags | regex.V1)
-            else:
-                try:
-                    self.s_r_obj = regex.compile(stext, flags | regex.V1)
-                except regex.error:
-                    self.s_r_obj = regex.compile(stext, flags)
-        except Exception as e:
-            self.s_r_obj = None
-            self.s_r_error = e
-            self.s_r_set_colors()
-            return
-        
-        try:
-            self.test_result.setText(self.s_r_obj.sub(self.s_r_func,
-                                     unicode_type(self.test_text.text())))
-        except Exception as e:
-            self.s_r_error = e
-            self.s_r_set_colors()
-            return
-        
-        for i in range(0,self.s_r_number_of_books):
-            mi = self.db.get_metadata(self.ids[i], index_is_id=True)
-            wr = getattr(self, 'book_%d_result'%(i+1))
-            try:
-                result = self.s_r_do_regexp(mi)
-                t = self.s_r_do_destination(mi, result)
-                if len(t) > 1 and self.destination_field_fm['is_multiple']:
-                    t = t[self.starting_from.value()-1:
-                          self.starting_from.value()-1 + self.results_count.value()]
-                    t = unicode_type(self.multiple_separator.text()).join(t)
-                else:
-                    t = self.s_r_replace_mode_separator().join(t)
-                wr.setText(t)
-            except Exception as e:
-                self.s_r_error = e
-                self.s_r_set_colors()
-                break
     
     def s_r_remove_query(self, *args):
         if self.query_field.currentIndex() == 0:
@@ -933,6 +906,85 @@ class MetadataBulkWidget(QWidget):
     # }}}
     
     
+    def s_r_paint_results(self, txt):
+        QApplication.processEvents()
+        self.s_r_error = None
+        self.s_r_set_colors()
+        flags = regex.FULLCASE | regex.UNICODE
+        
+        if self.case_sensitive.isChecked():
+            flags |= regex.IGNORECASE
+        
+        
+        #extend try catch -by un_pogaz
+        try:
+            
+            stext = unicode_type(self.search_field.currentText())
+            if not stext:
+                raise Exception(CalibreText.SEARCH_FIELD)
+            
+            stext = unicode_type(self.replace_mode.currentText())
+            if not stext:
+                    raise Exception(CalibreText.EMPTY_FIELD.format(CalibreText.FIELD_NAME.REPLACE_MODE))
+                
+            stext = unicode_type(self.search_mode.currentText())
+            if not stext:
+                    raise Exception(CalibreText.EMPTY_FIELD.format(CalibreText.FIELD_NAME.SEARCH_MODE))
+            
+            
+            
+        except Exception as e:
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        
+        try:
+            
+            stext = unicode_type(self.search_for.text())
+            if not stext:
+                raise Exception(_('You must specify a search expression in the "Search for" field'))
+            if self.search_mode.currentIndex() == 0:
+                self.s_r_obj = regex.compile(regex.escape(stext), flags | regex.V1)
+            else:
+                try:
+                    self.s_r_obj = regex.compile(stext, flags | regex.V1)
+                except regex.error:
+                    self.s_r_obj = regex.compile(stext, flags)
+        except Exception as e:
+            self.s_r_obj = None
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        try:
+            self.test_result.setText(self.s_r_obj.sub(self.s_r_func,
+                                     unicode_type(self.test_text.text())))
+        except Exception as e:
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        
+        for i in range(0,self.s_r_number_of_books):
+            mi = self.db.get_metadata(self.ids[i], index_is_id=True)
+            wr = getattr(self, 'book_%d_result'%(i+1))
+            try:
+                result = self.s_r_do_regexp(mi)
+                t = self.s_r_do_destination(mi, result)
+                if len(t) > 1 and self.destination_field_fm['is_multiple']:
+                    t = t[self.starting_from.value()-1:
+                          self.starting_from.value()-1 + self.results_count.value()]
+                    t = unicode_type(self.multiple_separator.text()).join(t)
+                else:
+                    t = self.s_r_replace_mode_separator().join(t)
+                wr.setText(t)
+            except Exception as e:
+                self.s_r_error = e
+                self.s_r_set_colors()
+                break
+    
+    
     def do_search_replace(self, book_id):
         source = self.s_r_sf_itemdata(None)
         if not source or not self.s_r_obj:
@@ -989,7 +1041,7 @@ class MetadataBulkWidget(QWidget):
         if original != val and not (original == None and val == '' or original == '' and val == None):
             self.set_field_calls[dest][book_id] = val
     
-    def get_query(self):
+    def _get_query_without_error(self):
         query = {}
         query[KEY_OPERATION.NAME] = unicode_type(self.query_field.currentText())
         query[KEY_OPERATION.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
@@ -1008,12 +1060,18 @@ class MetadataBulkWidget(QWidget):
         query[KEY_OPERATION.STARTING_FROM] = self.starting_from.value()
         query[KEY_OPERATION.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
         
+        return query
+    
+    def get_query(self):
+        query = self._get_query_without_error()
+        
         if query[KEY_OPERATION.SEARCH_FIELD] != TEMPLATE_FIELD:
             query[KEY_OPERATION.S_R_TEMPLATE] = ''
         
         # to be used in validate method
         if self.s_r_error != None:
             query[KEY_OPERATION.S_R_ERROR] = self.s_r_error
+         
         return query
     
     def load_query(self, query):
@@ -1061,3 +1119,11 @@ class MetadataBulkWidget(QWidget):
             set_value(self.starting_from, KEY_OPERATION.STARTING_FROM)
             set_text(self.multiple_separator, KEY_OPERATION.MULTIPLE_SEPARATOR)
     
+    def openTemplateBox(self):
+        
+        temp = TemplateBox(self.gui, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
+        temp.exec_()
+        if temp.template_is_valide() and temp.template:
+            self.s_r_template.setText(temp.template)
+        
+        QApplication.processEvents()

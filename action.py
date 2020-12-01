@@ -32,7 +32,7 @@ from calibre.library import current_library_name
 
 from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetLocalizedFieldError
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -84,6 +84,13 @@ class MassSearchReplaceAction(InterfaceAction):
         
         self.menu.addSeparator()
         
+        ac = create_menu_action_unique(self, self.menu, _('&Quick Search/Replace...'), ICON.PLUGIN,
+                                             triggered=self.quickSearchReplace,
+                                             unique_name='Quick Search/Replace')
+        self.menu_actions.append(ac)
+        
+        self.menu.addSeparator()
+        
         ac = create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
                                              triggered=self.show_configuration,
                                              unique_name='Customize plugin')
@@ -122,6 +129,9 @@ class MassSearchReplaceAction(InterfaceAction):
             self.menu_actions.append(ac)
             self.query_menu.append((query, ac))
     
+    def quickSearchReplace(self, parameter_list):
+        debug_print('quickSearchReplace')
+        pass
     
     def run_SearchReplace(self, query):
         
@@ -149,7 +159,7 @@ def query_testGetError(query):
     
     difference = set(KEY.ALL).difference(query)
     for key in difference:
-        return Exception(_('This operation is not valide, the "{:s}" key is missing.').format(key))
+        return Exception(_('Invalide configuration, the "{:s}" key is missing.').format(key))
     
     return None
 
@@ -233,14 +243,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
     def _run_search_replaces(self):
         try:
             start = time.time()
-            print(time.time())
             self.setValue(0)
             self.show()
             
             for op, operation in enumerate(self.operation_list, 1):
                 
                 debug_print('Operation {:d}/{:d} > {:s}'.format(op, self.operation_count, operation_string(operation)))
-                err = operation_testGetLocalizedFieldError(operation)
+                err = operation_testGetError(operation)
                 if not err:
                     self.s_r.load_settings(operation)
                     err = self.s_r.testGetError()
@@ -251,8 +260,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         start_dialog =  time.time()
                         if question_dialog(self.gui, _('Invalid operation'),
-                                _('An invalid operation was detected:\n{0}\n\nDo you want to continue the Search/Replace operation?\n'
-                                'Other errors may exist and will be ignoreds.').format(err),
+                                _('An invalid operation was detected:\n{0}\n\n'
+                                  'Do you want to continue running Mass Search/Replace?\n'
+                                  'Other errors may exist and will be ignoreds.').format(err),
                                 default_yes=False, show_copy_button=True, override_icon=get_icon(ICON.WARNING) ):
                             
                             self.operationError = True
@@ -266,7 +276,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     for num, book_id in enumerate(self.book_ids, 1):
                         
                         #update Progress
-                        self.setLabelText(_('Operation  {:d} of {:d}. Book {:d} of {:d}.').format(op, self.operation_count, num, self.book_count))
+                        self.setLabelText(_('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(op, self.operation_count, num, self.book_count))
                         self.setValue( ((op-1)*self.book_count) + num )
                         
                         if self.total_operation_count < 100:

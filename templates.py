@@ -32,10 +32,10 @@ from calibre import prints
 from calibre.constants import DEBUG
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.book.formatter import SafeFormat
-from calibre.gui2 import error_dialog
+from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
 
-from calibre_plugins.action_chains.common_utils import get_icon
+from calibre_plugins.mass_search_replace.common_utils import get_icon
 
 TEMPLATE_PREFIX = 'TEMPLATE: '
 TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
@@ -45,7 +45,7 @@ try:
 except NameError:
     pass
 
-def check_template(template, plugin_action, print_error=True):
+def check_template(template, plugin_action, show_error=False):
     gui = plugin_action.gui
     db = gui.current_db
     error_msgs = [
@@ -63,28 +63,28 @@ def check_template(template, plugin_action, print_error=True):
         mi = db.get_metadata(book_id, index_is_id=True, get_user_categories=True)
     except:
         mi = MetaInformation(_('Unknown'))
-    # add any extra fields by actions that define update_metadata
-    plugin_action.update_metadata(mi)
+    ## add any extra fields by actions that define update_metadata
+    #plugin_action.update_metadata(mi)
     #
     output = SafeFormat().safe_format(template, mi, TEMPLATE_ERROR, mi)
     for msg in error_msgs:
         if output.lower().find(msg.lower()) != -1:
-            error = _('Running the template: {} returned an error:\n{}').format(template, output.lstrip(TEMPLATE_ERROR))
-            if print_error:
-                return error_dialog(gui, _('Template Error'), error, show=True)
-            return _('Template Error'), error
+            error = output.lstrip(TEMPLATE_ERROR)
+            if show_error:
+                error_dialog(gui, _('Template Error'),
+                        _('Running the template returned an error:') +'\n'+ str(error),
+                        show=True)
+            return error
     return True
 
+
 class TemplateBox(TemplateDialog):
-    def __init__(
-        self,
-        parent,
-        plugin_action,
-        template_text=''
-    ):
+    def __init__(self, parent, plugin_action, template_text=''):
         self.plugin_action = plugin_action
         self.gui = plugin_action.gui
         self.db = self.gui.current_db
+        self.template = template_text
+        
         rows = self.gui.current_view().selectionModel().selectedRows()
         if rows:
             index = rows[0]
@@ -95,8 +95,8 @@ class TemplateBox(TemplateDialog):
                 mi = self.db.get_metadata(book_id, index_is_id=True, get_user_categories=True)
             except:
                 mi = MetaInformation(_('Unknown'))
-        # add any extra fields by actions that define update_metadata
-        plugin_action.update_metadata(mi)
+        ## add any extra fields by actions that define update_metadata
+        #plugin_action.update_metadata(mi)
         #
         if not template_text:
             text = _('Enter a template to test using data from the selected book')
@@ -117,9 +117,22 @@ class TemplateBox(TemplateDialog):
         if template_text:
             self.textbox.insertPlainText(template_text)
     
+    def template_is_valide(self):
+        return check_template(self.template, self.plugin_action) is True
+    
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()
-        chk = check_template(self.template, self.plugin_action)
-        if chk is True:
+        rslt = check_template(self.template, self.plugin_action)
+        if rslt is True:
             QDialog.accept(self)
+        else:
+            
+            if question_dialog(self.gui, _('Template Error'),
+                        _('Running the template returned an error:') +'\n'+ str(rslt) +'\n'+ _('Do you want discard the changes?'),
+                        default_yes=True, show_copy_button=True, override_icon=get_icon('images/warning.png')):
+               
+                QDialog.reject(self)
+                return
+            else:
+                return
 

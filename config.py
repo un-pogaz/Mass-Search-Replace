@@ -444,7 +444,10 @@ class MenuQueryTableWidget(QTableWidget):
     
     def copy_row(self):
         self.setFocus()
-        query = self.convert_row_to_query(self.currentRow())
+        currentRow = self.currentRow()
+        if currentRow < 0:
+            return
+        query = self.convert_row_to_query(currentRow)
         query[KEY.MENU_TEXT] += ' ' + _('(copy)')
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
@@ -1019,7 +1022,10 @@ class OperationListTableWidget(QTableWidget):
     
     def copy_row(self):
         self.setFocus()
-        operation = self.convert_row_to_operation(self.currentRow())
+        currentRow = self.currentRow()
+        if currentRow < 0:
+            return
+        operation = self.convert_row_to_operation(currentRow)
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
