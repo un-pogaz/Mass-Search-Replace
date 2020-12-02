@@ -30,9 +30,9 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
-from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY, ConfigOperationListDialog, get_default_query
+from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY, ERROR_STRATEGY, ConfigOperationListDialog, get_default_query
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -50,6 +50,11 @@ class MassSearchReplaceAction(InterfaceAction):
         
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
+        
+        error_strategy = PREFS[KEY.ERROR_STRATEGY]
+        if error_strategy not in ERROR_STRATEGY.LIST.keys():
+            PREFS[KEY.ERROR_STRATEGY] = PREFS.defaults[KEY.ERROR_STRATEGY]
+        
         
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
@@ -175,7 +180,7 @@ class MassSearchReplaceAction(InterfaceAction):
 
 def query_testGetError(query):
     
-    difference = set(KEY.ALL).difference(query)
+    difference = set(KEY.ALL_MENU).difference(query)
     for key in difference:
         return Exception(_('Invalide configuration, the "{:s}" key is missing.').format(key))
     
@@ -206,8 +211,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # is a quick Search/Replace
         self.quickSearchReplace = query[KEY.MENU_TEXT] == None
         
-        # name of the search/replace
-        self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
+        
+        # operation list of search/replace
+        self.operation_list = operation_list_active(query[KEY.MENU_SEARCH_REPLACES])
+        
         # Count of search/replace
         self.operation_count = len(self.operation_list)
         
@@ -259,6 +266,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         QProgressDialog.close(self)
     
     def _run_search_replaces(self):
+        lst_id = []
         try:
             start = time.time()
             self.setValue(0)
@@ -321,9 +329,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         self.s_r.search_replace(book_id)
                         
                         
-                
             
-            lst_id= []
+            
+            lst_id = []
             for field, book_id_val_map in self.s_r.updated_fields.items():
                 lst_id += book_id_val_map.keys()
             self.fields_update = len(lst_id)
@@ -349,3 +357,5 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         self.hide()
         return
+    
+    

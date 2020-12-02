@@ -29,8 +29,9 @@ from calibre_plugins.mass_search_replace.templates import TemplateBox, check_tem
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
 
 
-class KEY_OPERATION():
+class KEY_OPERATION:
     locals().update(vars(KEY_QUERY))
+    ACTIVE = '_MSR:Active'
 
 _default_operation = None
 _s_r = None
@@ -41,17 +42,47 @@ def get_default_operation(plugin_action):
         if not _s_r or not _default_operation:
             _s_r = SearchReplaceWidget_NoWindows(plugin_action)
             _default_operation = _s_r.save_settings()
+            
+            _default_operation[KEY_OPERATION.ACTIVE] = True
         
         return _default_operation.copy()
 
-def clean_empty_operation(operation_list, plugin_action):
-    if not operation_list: operation_list = []
+def operation_ConvertError(operation):
+    err = operation.get(KEY_OPERATION.S_R_ERROR, None)
+    if err:
+        operation[KEY_OPERATION.S_R_ERROR] = str(err)
+    return operation
+
+def operation_list_ConvertError(operation_list):
     rlst = []
     for operation in operation_list:
-        if operation and operation != get_default_operation(plugin_action):
+        rlst.append(operation_ConvertError(operation))
+    return rlst
+
+def clean_empty_operation(operation_list, plugin_action):
+    if not operation_list: operation_list = []
+    default = get_default_operation(plugin_action)
+    operation_list = operation_list_ConvertError(operation_list)
+    rlst = []
+    for operation in operation_list:
+        for key in KEY_OPERATION.ALL:
+            if operation[key] != default[key]:
+                rlst.append(operation)
+                break
+    
+    return rlst
+
+def operation_is_active(operation):
+    return operation.get(KEY_OPERATION.ACTIVE, True)
+
+def operation_list_active(operation_list):
+    rlst = []
+    for operation in operation_list:
+        if operation_is_active(operation):
             rlst.append(operation)
     
     return rlst
+
 
 def operation_testGetError(operation, plugin_action):
     
@@ -61,7 +92,8 @@ def operation_testGetError(operation, plugin_action):
         return TypeError
     
     if KEY_OPERATION.S_R_ERROR in operation:
-        return operation[KEY_OPERATION.S_R_ERROR]
+        return Exception(str(operation[KEY_OPERATION.S_R_ERROR]))
+            
     
     difference = set(KEY_OPERATION.ALL).difference(operation.keys())
     for key in difference:

@@ -46,8 +46,8 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, get_default_operation, operation_string, operation_para_list, operation_isFullValid, clean_empty_operation
-from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem , TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem,
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, clean_empty_operation
+from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
                                                               get_icon, debug_print)
 
 
@@ -74,7 +74,7 @@ class KEY:
     MENU_SUBMENU = 'SubMenu'
     MENU_SEARCH_REPLACES = 'Search-Replaces'
     
-    ALL = [
+    ALL_MENU = [
         MENU_ACTIVE,
         MENU_TEXT,
         MENU_SUBMENU,
@@ -83,6 +83,60 @@ class KEY:
     ]
     
     QUICK = 'Quick'
+    
+    ERROR_STRATEGY = 'ErrorStrategy'
+
+class ERROR_STRATEGY:
+    
+    RESTORE = 'restore'
+    RESTORE_NAME = _('Restore the library (recommended)')
+    RESTORE_DESC = _('Stop Mass Search/Replace and restore the library to its original state.')
+    
+    STOP = 'stop'
+    STOP_NAME = _('Interrupt execution')
+    STOP_DESC = _('Stop Mass Search/Replace and display the error normally without further action.')
+    
+    RESTORE_FIELD = 'restore columns'
+    RESTORE_FIELD_NAME = _('Restore the problematic columns')
+    RESTORE_FIELD_DESC = _('Stop Mass Search/Replace and restore only the problematic columns.\n'
+                           'The other columns modified before the error will be updated normally.')
+    
+    CONTINUE_FIELD = 'continue restore'
+    CONTINUE_FIELD_NAME = _('Continue safely')
+    CONTINUE_FIELD_DESC = _('When an error occurs, restore the problematic columns, then move on to the next field.')
+    
+    
+    safely_txt = _('Update the fields one by one. This may be slower than other strategy.')
+    
+    SAFELY = 'safely stop'
+    SAFELY_NAME = _('Run safely (slower)')
+    SAFELY_DESC =safely_txt+'\n'+ _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.')
+    
+    SAFELY_CONTINUE = 'safely continue'
+    SAFELY_CONTINUE_NAME = _('Always run safely (slower not recomanded)')
+    SAFELY_CONTINUE_DESC = safely_txt+'\n'+_('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
+    
+    
+    LIST = {
+            RESTORE: [RESTORE_NAME, RESTORE_DESC],
+            STOP: [STOP_NAME, STOP_DESC],
+            #RESTORE_FIELD: [RESTORE_FIELD_NAME, RESTORE_FIELD_DESC],
+            SAFELY: [SAFELY_NAME, SAFELY_DESC],
+            SAFELY_CONTINUE: [SAFELY_CONTINUE_NAME, SAFELY_CONTINUE_DESC],
+    }
+    
+    
+
+
+# This is where all preferences for this plugin are stored
+PREFS = JSONConfig('plugins/Mass Search-Replace')
+# Set defaults
+PREFS.defaults[KEY.MENU] = []
+PREFS.defaults[KEY.QUICK] = []
+PREFS.defaults[KEY.ERROR_STRATEGY] = ERROR_STRATEGY.RESTORE
+
+OWIP = 'owip'
+
 
 def get_default_query():
     query = {}
@@ -92,14 +146,6 @@ def get_default_query():
     query[KEY.MENU_IMAGE] = ''
     query[KEY.MENU_SEARCH_REPLACES] = []
     return query
-
-# This is where all preferences for this plugin are stored
-PREFS = JSONConfig('plugins/Mass Search-Replace')
-# Set defaults
-PREFS.defaults[KEY.MENU] = []
-PREFS.defaults[KEY.QUICK] = []
-
-OWIP = 'owip'
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -179,6 +225,12 @@ class ConfigWidget(QWidget):
         keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
         keyboard_layout.addWidget(keyboard_shortcuts_button)
         keyboard_layout.insertStretch(-1)
+        
+        
+        error_button = QPushButton(_('Error strategy...'), self)
+        error_button.setToolTip(_('Define the strategy when a error occurs during the library update'))
+        error_button.clicked.connect(self.edit_error_strategy)
+        keyboard_layout.addWidget(error_button)
     
     
     def save_settings(self):
@@ -192,6 +244,11 @@ class ConfigWidget(QWidget):
         d = KeyboardConfigDialog(self.plugin_action.gui, self.plugin_action.action_spec[0])
         if d.exec_() == d.Accepted:
             self.plugin_action.gui.keyboard.finalize()
+    
+    def edit_error_strategy(self):
+        d = ErrorStrategyDialog(self.plugin_action.gui, self.plugin_action)
+        if d.exec_() == d.Accepted:
+            PREFS[KEY.ERROR_STRATEGY] = d.error_strategy
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -621,22 +678,31 @@ class SettingsButton(QToolButton):
         self._query = query
         self._initial_query = query.copy()
         self._hasError = False
-        self._changed = False
         self.setQuery(query)
     
     
     def setQuery(self, query):
         self._query = query
-        self._changed = self._query != self._initial_query
         self.updateText()
         self.hasError()
     
     def getQuery(self):
-        return self._query
+        return self._query.copy()
     
     def updateText(self):
-        txt = _('{:d} operations').format(len(self.getOperationList()))
-        if self.getChanged():
+        count = len(self.getOperationList())
+        active = 0
+        for operation in self.getOperationList():
+            if operation_is_active(operation):
+                active += 1
+        
+        txt = ''
+        if active < count:
+            txt = _('{:d}/{:d} operations').format(active, count)
+        else:
+            txt = _('{:d} operations').format(count)
+        
+        if self.getHasChanged():
             txt+='*'
         self.setText(txt)
     
@@ -652,15 +718,15 @@ class SettingsButton(QToolButton):
         else:
             self.setIcon(get_icon('gear.png'))
     
+    def getHasChanged(self):
+        return self._query != self._initial_query
+    
     def setOperationList(self, operation_list):
         self._query[KEY.MENU_SEARCH_REPLACES] = operation_list
         self.setQuery(self._query)
     
     def getOperationList(self):
-        return self._query[KEY.MENU_SEARCH_REPLACES]
-    
-    def getChanged(self):
-        return self._changed
+        return self._query[KEY.MENU_SEARCH_REPLACES].copy()
     
     def _clicked(self):
         d = ConfigOperationListDialog(self, self.plugin_action, query=self.getQuery())
@@ -766,9 +832,10 @@ class ImageDialog(QDialog):
             return self.accept()
 
 
-class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
+class OperationWidgetItem(QTableWidgetItem):
     def __init__(self, plugin_action, operation):
-        ReadOnlyTextIconWidgetItem.__init__(self, None, get_icon())
+        QTableWidgetItem.__init__(self, '')
+        self.setFlags(Qt.ItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
         self.plugin_action = plugin_action
         self._operation = operation
         self._hasError = False
@@ -777,7 +844,19 @@ class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
     def setOperation(self, operation):
         if not operation: operation = get_default_operation()
         self._operation = operation
+        
+        checked = operation_is_active(self._operation)
+        if checked:
+            self.setCheckState(Qt.Checked)
+        else:
+            self.setCheckState(Qt.Unchecked)
+        
         self.hasError()
+    
+    def getOperation(self):
+        self._operation[KEY_OPERATION.ACTIVE] = Qt.Checked == self.checkState()
+        self._operation = operation_ConvertError(self._operation)
+        return self._operation.copy()
     
     def hasError(self):
         self._hasError = not operation_isFullValid(self._operation, self.plugin_action)
@@ -785,9 +864,6 @@ class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
             self.setIcon(get_icon(ICON.WARNING))
         else:
             self.setIcon(get_icon())
-    
-    def getOperation(self):
-        return self._operation
 
 COL_CONFIG = ['', _('Columns'), _('Search mode'), _('Search'), _('Replace')]
 
@@ -821,10 +897,10 @@ class ConfigOperationListDialog(Dialog):
         layout.addLayout(heading_layout)
         heading_label = QLabel(_('Select and configure the order of execution of the operations of Search/Replace operations:'), self)
         heading_layout.addWidget(heading_label)
-        help_label = QLabel(' ', self)
-        help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
-        help_label.setAlignment(Qt.AlignRight)
-        heading_layout.addWidget(help_label)
+        #help_label = QLabel(' ', self)
+        #help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
+        #help_label.setAlignment(Qt.AlignRight)
+        #heading_layout.addWidget(help_label)
         
         # Add a horizontal layout containing the table and the buttons next to it
         table_layout = QHBoxLayout()
@@ -1010,7 +1086,7 @@ class OperationListTableWidget(QTableWidget):
     def populate_table_row(self, row, operation):
         self.blockSignals(True)
         
-        self.setItem(row, 0, ReadOnlyOperationWidgetItem(self.plugin_action, operation))
+        self.setItem(row, 0, OperationWidgetItem(self.plugin_action, operation))
         
         for i in range(1, len(COL_CONFIG)):
             item = ReadOnlyTableWidgetItem('')
@@ -1156,8 +1232,47 @@ class OperationListTableWidget(QTableWidget):
         self.setFocus()
         row = self.currentRow()
         
-        d = SearchReplaceDialog(self, self.plugin_action, self.item(row, 0).getOperation())
+        src_operation = self.item(row, 0).getOperation()
+        d = SearchReplaceDialog(self, self.plugin_action, src_operation)
         if d.exec_() == d.Accepted:
+            d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
             self.item(row, 0).setOperation(d.operation)
             self.update_row(row)
 
+
+class ErrorStrategyDialog(Dialog):
+    def __init__(self, parent, plugin_action):
+        self.plugin_action = plugin_action
+        self.error_strategy = PREFS[KEY.ERROR_STRATEGY]
+        
+        title = _('Error Strategy Dialog')
+        Dialog.__init__(self, title, 'config_ErrorStrategy', parent)
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        
+        heading_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
+        layout.addWidget(heading_label)
+        
+        self.strategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_STRATEGY.LIST.items()}, self.error_strategy)
+        self.strategy.currentIndexChanged[int].connect(self.strategyIndexChanged)
+        layout.addWidget(self.strategy)
+        
+        self.desc = QTextEdit (' ', self)
+        layout.addWidget(self.desc)
+        
+        heading_label.setBuddy(self.strategy)
+        layout.insertStretch(-1)
+        
+        self.strategyIndexChanged(0)
+        
+        # -- Accept/Reject buttons --
+        layout.addWidget(self.bb)
+    
+    def strategyIndexChanged(self, idx):
+        self.desc.setText(ERROR_STRATEGY.LIST[self.strategy.selected_key()][1])
+    
+    def accept(self):
+        self.error_strategy = self.strategy.selected_key()
+        Dialog.accept(self)
