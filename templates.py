@@ -47,7 +47,7 @@ except NameError:
 
 def check_template(template, plugin_action, show_error=False):
     gui = plugin_action.gui
-    db = gui.current_db
+    db = plugin_action.gui.current_db
     error_msgs = [
         TEMPLATE_ERROR,
         'unknown function',
@@ -101,19 +101,12 @@ class TemplateBox(TemplateDialog):
         if not template_text:
             text = _('Enter a template to test using data from the selected book')
             text_is_placeholder = True
-            window_title = _('Add template')
         else:
             text = None
             text_is_placeholder = False
-            window_title = _('Edit Template')
-        TemplateDialog.__init__(
-            self,
-            parent,
-            text,
-            mi=mi,
-            text_is_placeholder=text_is_placeholder
-        )
-        self.setWindowTitle(window_title)
+         
+        TemplateDialog.__init__(self, parent, text, mi=mi, text_is_placeholder=text_is_placeholder)
+        self.setWindowTitle(_('Template editor'))
         if template_text:
             self.textbox.insertPlainText(template_text)
     
@@ -127,7 +120,7 @@ class TemplateBox(TemplateDialog):
             QDialog.accept(self)
         else:
             
-            if question_dialog(self.gui, _('Template Error'),
+            if question_dialog(self, _('Template Error'),
                         _('Running the template returned an error:') +'\n'+ str(rslt) +'\n'+ _('Do you want discard the changes?'),
                         default_yes=True, show_copy_button=True, override_icon=get_icon('images/warning.png')):
                

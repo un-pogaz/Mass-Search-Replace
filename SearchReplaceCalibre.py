@@ -1119,9 +1119,10 @@ class MetadataBulkWidget(QWidget):
             set_value(self.starting_from, KEY_OPERATION.STARTING_FROM)
             set_text(self.multiple_separator, KEY_OPERATION.MULTIPLE_SEPARATOR)
     
+    
     def openTemplateBox(self):
         
-        temp = TemplateBox(self.gui, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
+        temp = TemplateBox(self.plugin_action.gui, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
         temp.exec_()
         if temp.template_is_valide() and temp.template:
             self.s_r_template.setText(temp.template)

@@ -53,7 +53,13 @@ def clean_empty_operation(operation_list, plugin_action):
     
     return rlst
 
-def operation_testGetError(operation):
+def operation_testGetError(operation, plugin_action):
+    
+    db = plugin_action.gui.current_db
+    
+    if not operation:
+        return TypeError
+    
     if KEY_OPERATION.S_R_ERROR in operation:
         return operation[KEY_OPERATION.S_R_ERROR]
     
@@ -70,13 +76,28 @@ def operation_testGetError(operation):
     if operation[KEY_OPERATION.SEARCH_MODE] not in S_R_MATCH_MODES:
         return Exception(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_OPERATION.SEARCH_MODE]))
     
+    
+    #Field test
+    all_fields, writable_fields = TestField.get_possible_fields(db)
+    
+    search_field = operation[KEY_OPERATION.SEARCH_FIELD]
+    dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
+    
+    if search_field not in all_fields:
+        return Exception(_('Search field "{:s}" is not available for this library'.format(search_field)))
+        
+    if dest_field and (dest_field not in writable_fields):
+        return Exception(_('Destination field "{:s}" is not available for this library'.format(dest_field)))
+    
+    if dest_field == 'identifiers' or (search_field == 'identifiers' and dest_field == ''):
+        dest_ident = operation[KEY_OPERATION.S_R_DST_IDENT]
+        if not dest_ident or ( dest_ident == '*'):
+            return Exception(_('You must enter a valid destination identifier (not empty or *)'))
+    
     return None
 
-def operation_isValid(operation):
-    return operation_testGetError(operation) == None
-
 def operation_testFullError(operation, plugin_action):
-    err = operation_testGetError(operation)
+    err = operation_testGetError(operation, plugin_action)
     if err:
         return err
     get_default_operation(plugin_action)
@@ -114,6 +135,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
         
         MetadataBulkWidget.__init__(self, plugin_action, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
+        self.plugin_action = plugin_action
     
     def load_settings(self, operation):
         self.load_query(operation)
@@ -122,7 +144,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
         return self.get_query()
     
     def testGetError(self):
-        return operation_testGetError(self.get_query())
+        return operation_testGetError(self.get_query(), self.plugin_action)
     
     def search_replace(self, book_id, operation=None):
         if operation:
@@ -138,9 +160,11 @@ class SearchReplaceDialog(Dialog):
     def __init__(self, parent, plugin_action, operation=None, book_ids=[]):
         self.plugin_action = plugin_action
         self.parent = parent
+        if not operation:
+            operation = get_default_operation(plugin_action)
         self.operation = operation
         self.widget = SearchReplaceWidget(self.plugin_action, book_ids)
-        Dialog.__init__(self, _('Search/Replace configuration'), 'config_query_SearchReplace', parent)
+        Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace', parent)
     
     def setup_ui(self):
         l = QVBoxLayout()
@@ -156,8 +180,8 @@ class SearchReplaceDialog(Dialog):
         err = self.widget.testGetError()
         
         if err:
-            if question_dialog(self.parent, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed.\n{0}\nDo you want discard the changes?').format(err),
+            if question_dialog(self, _('Invalid operation'),
+                             _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
                              default_yes=True, show_copy_button=True, override_icon=get_icon('images/warning.png')):
                 
                 Dialog.reject(self)
@@ -166,42 +190,9 @@ class SearchReplaceDialog(Dialog):
                 return
         
         self.operation = self.widget.save_settings()
-        debug_print('Saved operation > {0:s}\n{1}\n'.format(operation_string(self.operation), self.operation))
+        debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
         Dialog.accept(self)
 
-
-
-    def validate(self, settings):
-        
-        if not settings:
-            return (_('Settings Error'), _('You must configure this action before running it'))
-        if settings.get('s_r_error'):
-            return (_('Wrong Expression'), error_message(settings['s_r_error']))
-        
-        all_fields, writable_fields = self.get_possible_fields()
-        
-        search_field = settings['search_field']
-        dest_field = settings['destination_field']
-        if not search_field:
-            return (_('Search field unavailable'), _('You must choose a search field'))
-        if search_field not in all_fields:
-            return (_('Search field unavailable'), _('Search field "{}" is not available for this library'.format(search_field)))
-        if search_field == '{template}':
-            dest_field = settings['destination_field']
-            if not dest_field:
-                return (_('Destination field empty'), _('Destination field cannot be empty if the search field is a template'))
-            if not dest_field in writable_fields:
-                return (_('Destination field unavailable'), _('Destination field "{}" is not available for this library'.format(dest_field)))
-            is_template_valid = check_template(settings['s_r_template'], self.plugin_action, print_error=False)
-            if is_template_valid is not True:
-                return is_template_valid
-        if dest_field == 'identifiers' or (search_field == 'identifiers' and dest_field == ''):
-            dest_ident = settings['s_r_dst_ident']
-            if not dest_ident or ( dest_ident == '*'):
-                return (_('Invalid identifier'), _('You must enter a valid destination identifier (not empty or *)'))
-        if dest_field and not ( dest_field in writable_fields ):
-            return (_('Destination field unavailable'), _('Destination field "{}" not available for this library'.format(dest_field)))
-        return True
 
 class TestField:
     
@@ -211,20 +202,16 @@ class TestField:
         fm = db.field_metadata
         for f in fm:
             if (f in ['author_sort'] or
-                    (fm[f]['datatype'] in ['text', 'series', 'enumeration', 'comments', 'rating'] and
-                    fm[f].get('search_terms', None) and
-                    f not in ['formats', 'ondevice', 'series_sort']) or
-                    (fm[f]['datatype'] in ['int', 'float', 'bool', 'datetime'] and
-                    f not in ['id', 'timestamp'])):
+                    (fm[f]['datatype'] in ['text', 'series', 'enumeration', 'comments', 'rating'] and fm[f].get('search_terms', None) and f not in ['formats', 'ondevice', 'series_sort']) or
+                    (fm[f]['datatype'] in ['int', 'float', 'bool', 'datetime'] and f not in ['id', 'timestamp'])):
                 all_fields.append(f)
                 writable_fields.append(f)
             if fm[f]['datatype'] == 'composite':
                 all_fields.append(f)
         all_fields.sort()
-        all_fields.insert(1, '{template}')
+        all_fields.insert(1, TEMPLATE_FIELD)
         writable_fields.sort()
         return all_fields, writable_fields
-    
     
     def get_possible_cols(db):
         standard = [
@@ -245,7 +232,6 @@ class TestField:
         ]                
         custom = sorted([ k for k,v in db.field_metadata.custom_field_metadata().items() if v['datatype'] not in [None,'composite'] ])
         return standard + custom
-    
     
     def is_enum(db, col_name, val):
         col_metadata = db.field_metadata.all_metadata()

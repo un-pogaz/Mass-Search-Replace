@@ -26,10 +26,10 @@ class FIELD_NAME:
     REPLACE_MODE = _('Replace mode')
     SEARCH_MODE = _('Search mode')
 
-TEMPLATE_BUTTON_ToolTip = _('template button ToolTip')
+TEMPLATE_BUTTON_ToolTip = _('Open the template editor')
 
 def getForInvalidValue(field, value):
-    return _('The operation field "{0:s}" contains a invalid value ({1}).').format(field, value)
+    return _('The operation field "{:s}" contains a invalid value ({:s}).').format(field, str(value))
 
 def getForLocalizedField(field, value):
     return getForInvalidValue(field, value)+'\n'+_('The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language.')
