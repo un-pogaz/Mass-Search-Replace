@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os
+import os, copy
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
@@ -42,7 +42,7 @@ def get_default_operation(plugin_action):
             _s_r = SearchReplaceWidget_NoWindows(plugin_action)
             _default_operation = _s_r.save_settings()
         
-        return _default_operation
+        return _default_operation.copy()
 
 def clean_empty_operation(operation_list, plugin_action):
     if not operation_list: operation_list = []

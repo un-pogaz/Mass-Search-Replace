@@ -30,7 +30,7 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 
-from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY
+from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY, ConfigOperationListDialog, get_default_query
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_string, operation_testGetError
 
@@ -63,7 +63,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
-        query_list = PREFS[KEY.MASS_SEARCH_REPLACE]
+        query_list = PREFS[KEY.MENU]
         self.menu.clear()
         self.query_menu = []
         sub_menus = {}
@@ -130,20 +130,33 @@ class MassSearchReplaceAction(InterfaceAction):
             self.query_menu.append((query, ac))
     
     def quickSearchReplace(self, parameter_list):
-        debug_print('quickSearchReplace')
-        pass
+        
+        query = get_default_query()
+        query[KEY.MENU_TEXT] = None
+        query[KEY.MENU_SEARCH_REPLACES] = PREFS[KEY.QUICK]
+        
+        d = ConfigOperationListDialog(self.menu, self, query=query)
+        
+        if len(d.operation_list)==0:
+            d.add_empty_operation()
+        
+        if d.exec_() == d.Accepted:
+            
+            if len(d.operation_list)>0:
+                query[KEY.MENU_SEARCH_REPLACES] = d.operation_list
+                PREFS[KEY.QUICK] = d.operation_list
+                
+                self.run_SearchReplace(query)
     
     def run_SearchReplace(self, query):
         
         if not self.is_library_selected:
-            return error_dialog(self.gui, _('No selected book'),
-                _('No book selected for Search/Replace.'), show=True)
-            return
+            return error_dialog(self.gui, _('No book selected'), _('No book selected'), show=True)
         
         rows = self.gui.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            return error_dialog(self.gui, _('No selected book'),
-                _('No book selected for Search/Replace.'), show=True)
+            return error_dialog(self.gui, _('No book selected'), _('No book selected'), show=True)
+        book_ids = self.gui.library_view.get_selected_ids()
         
         book_ids = self.gui.library_view.get_selected_ids()
         
@@ -173,9 +186,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.gui = plugin_action.gui
         
         # DB
-        self.db = self.gui.current_db
+        self.db = plugin_action.gui.current_db
         # DB API
-        self.dbA = self.gui.current_db.new_api
+        self.dbA = plugin_action.gui.current_db.new_api
         # liste of book id
         self.book_ids = book_ids
         # Count book
@@ -185,8 +198,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.books_update = 0
         self.fields_update = 0
         
-        # name of the search/replace
-        self.menu_text = query[KEY.MENU_TEXT]
+        # is a quick Search/Replace
+        self.quickSearchReplace = query[KEY.MENU_TEXT] == None
         
         # name of the search/replace
         self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
@@ -217,7 +230,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.setAutoReset(False)
         
         self.hide()
-        debug_print('Launch Search/Replace for {:d} books.\n'.format(self.book_count))
+        debug_print('Launch Search/Replace for {:d} books with {:d} operation.\n'.format(self.book_count, self.operation_count))
         
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
@@ -229,7 +242,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
             debug_print(self.exception)
             raise self.exception
         else:
-            debug_print('Search/Replace launched for {:d} books with {:d} operatin.'.format(self.book_count, self.operation_count))
+            debug_print('Search/Replace launched for {:d} books with {:d} operation.'.format(self.book_count, self.operation_count))
             debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
             if self.operationError:
                 debug_print('!! An invalid operation was detected.'.format(self.time_execut))
@@ -249,7 +262,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
             for op, operation in enumerate(self.operation_list, 1):
                 
                 debug_print('Operation {:d}/{:d} > {:s}'.format(op, self.operation_count, operation_string(operation)))
-                err = operation_testGetError(operation)
+                
+                err = operation_testGetError(operation, self.plugin_action)
                 if not err:
                     self.s_r.load_settings(operation)
                     err = self.s_r.testGetError()
@@ -260,9 +274,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         start_dialog =  time.time()
                         if question_dialog(self.gui, _('Invalid operation'),
-                                _('An invalid operation was detected:\n{0}\n\n'
+                                _('An invalid operation was detected:\n{:s}\n\n'
                                   'Do you want to continue running Mass Search/Replace?\n'
-                                  'Other errors may exist and will be ignoreds.').format(err),
+                                  'Other errors may exist and will be ignoreds.').format(str(err)),
                                 default_yes=False, show_copy_button=True, override_icon=get_icon(ICON.WARNING) ):
                             
                             self.operationError = True
@@ -276,8 +290,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     for num, book_id in enumerate(self.book_ids, 1):
                         
                         #update Progress
-                        self.setLabelText(_('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(op, self.operation_count, num, self.book_count))
                         self.setValue( ((op-1)*self.book_count) + num )
+                        self.setLabelText(_('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(op, self.operation_count, num, self.book_count))
                         
                         if self.total_operation_count < 100:
                             self.hide()
@@ -285,12 +299,14 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             self.show()
                         
                         miA = self.dbA.get_proxy_metadata(book_id)
-                        book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
+                        
+                        #Book num/book_count > "title" (author & author) {id: book_id}
+                        book_info = 'Book '+str(num)+'/'+str(self.book_count)+ ' > "'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') {id: '+str(book_id)+'}'
                         
                         if num==self.book_count: nl ='\n'
                         else: nl =''
                         
-                        debug_print('Book '+book_info+nl)
+                        debug_print(book_info+nl)
                         
                         
                         if self.wasCanceled():

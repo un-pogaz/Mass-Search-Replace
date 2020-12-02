@@ -67,7 +67,7 @@ class ICON:
     ]
 
 class KEY:
-    MASS_SEARCH_REPLACE = 'MassSearch-Replace'
+    MENU = 'Menu'
     MENU_ACTIVE = 'Active'
     MENU_IMAGE = 'Image'
     MENU_TEXT = 'Text'
@@ -81,6 +81,8 @@ class KEY:
         MENU_IMAGE,
         MENU_SEARCH_REPLACES,
     ]
+    
+    QUICK = 'Quick'
 
 def get_default_query():
     query = {}
@@ -94,7 +96,8 @@ def get_default_query():
 # This is where all preferences for this plugin are stored
 PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
-PREFS.defaults[KEY.MASS_SEARCH_REPLACE] = []
+PREFS.defaults[KEY.MENU] = []
+PREFS.defaults[KEY.QUICK] = []
 
 OWIP = 'owip'
 
@@ -106,7 +109,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        query_list = PREFS[KEY.MASS_SEARCH_REPLACE]
+        query_list = PREFS[KEY.MENU]
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
@@ -179,7 +182,7 @@ class ConfigWidget(QWidget):
     
     
     def save_settings(self):
-        PREFS[KEY.MASS_SEARCH_REPLACE] = self._table.get_query_list()
+        PREFS[KEY.MENU] = self._table.get_query_list()
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     
@@ -237,7 +240,7 @@ class ConfigWidget(QWidget):
         try:
             # Read the .JSON file to add to the menus then delete it.
             import_config = JSONConfig(json)
-            query_list = import_config[KEY.MASS_SEARCH_REPLACE]
+            query_list = import_config[KEY.MENU]
             # Now insert the menus into the table
             table.append_query_list(query_list)
             info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(query_list)),
@@ -280,7 +283,7 @@ class ConfigWidget(QWidget):
         
         json = os.path.join(table.resources_dir, OWIP)
         export_config = JSONConfig(json)
-        export_config[KEY.MASS_SEARCH_REPLACE] = query_list
+        export_config[KEY.MENU] = query_list
         json_path = os.path.join(table.resources_dir, OWIP+'.json')
         
         try:
@@ -660,18 +663,9 @@ class SettingsButton(QToolButton):
         return self._changed
     
     def _clicked(self):
-        d = ConfigOperationListWidget(self, self.plugin_action, query=self.getQuery())
+        d = ConfigOperationListDialog(self, self.plugin_action, query=self.getQuery())
         if d.exec_() == d.Accepted:
             self.setOperationList(d.operation_list)
-            
-            if len(self.getOperationList())==0:
-                debug_print('Saving a empty list')
-            else:
-                txt = 'Saved operation list:'
-                for i, operation in enumerate(self.getOperationList(), 1):
-                    txt += '\nOperation {:d} > {:s}'.format(i, operation_string(operation))
-                txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.getOperationList()] ) +'  ]\n'
-                debug_print(txt)
 
 class ImageDialog(QDialog):
     def __init__(self, parent=None, resources_dir='', image_names=[]):
@@ -772,8 +766,6 @@ class ImageDialog(QDialog):
             return self.accept()
 
 
-
-
 class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
     def __init__(self, plugin_action, operation):
         ReadOnlyTextIconWidgetItem.__init__(self, None, get_icon())
@@ -799,14 +791,17 @@ class ReadOnlyOperationWidgetItem(ReadOnlyTextIconWidgetItem):
 
 COL_CONFIG = ['', _('Columns'), _('Search mode'), _('Search'), _('Replace')]
 
-class ConfigOperationListWidget(Dialog):
+class ConfigOperationListDialog(Dialog):
     def __init__(self, parent, plugin_action, query):
         self.plugin_action = plugin_action
+        if not query: query = get_default_query()
         name = query[KEY.MENU_TEXT]
         sub_menu = query[KEY.MENU_SUBMENU]
         self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
         
-        if sub_menu:
+        if not name:
+            name = _('a quick Search/Replaces')
+        elif sub_menu:
             name = '{:s} > {:s}'.format(sub_menu, name)
         else:
             name = '{:s}'.format(name)
@@ -888,8 +883,20 @@ class ConfigOperationListWidget(Dialog):
     
     def accept(self):
         self.operation_list = self._table.get_operation_list()
+        
+        if len(self.operation_list)==0:
+            debug_print('Saving a empty list')
+        else:
+            txt = 'Saved operation list:'
+            for i, operation in enumerate(self.operation_list, 1):
+                txt += '\nOperation {:d} > {:s}'.format(i, operation_string(operation))
+            txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
+            debug_print(txt)
+        
         Dialog.accept(self)
     
+    def add_empty_operation(self):
+        self._table.add_row()
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
