@@ -86,14 +86,14 @@ class MassSearchReplaceAction(InterfaceAction):
         
         ac = create_menu_action_unique(self, self.menu, _('&Quick Search/Replace...'), ICON.PLUGIN,
                                              triggered=self.quickSearchReplace,
-                                             unique_name='Quick Search/Replace')
+                                             unique_name='&Quick Search/Replace')
         self.menu_actions.append(ac)
         
         self.menu.addSeparator()
         
         ac = create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
                                              triggered=self.show_configuration,
-                                             unique_name='Customize plugin')
+                                             unique_name='&Customize plugin')
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
@@ -151,11 +151,11 @@ class MassSearchReplaceAction(InterfaceAction):
     def run_SearchReplace(self, query):
         
         if not self.is_library_selected:
-            return error_dialog(self.gui, _('No book selected'), _('No book selected'), show=True)
+            return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
         
         rows = self.gui.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            return error_dialog(self.gui, _('No book selected'), _('No book selected'), show=True)
+            return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
         book_ids = self.gui.library_view.get_selected_ids()
         
         book_ids = self.gui.library_view.get_selected_ids()

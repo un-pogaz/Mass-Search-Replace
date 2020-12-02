@@ -799,14 +799,16 @@ class ConfigOperationListDialog(Dialog):
         sub_menu = query[KEY.MENU_SUBMENU]
         self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
         
+        title = ''
         if not name:
-            name = _('a quick Search/Replaces')
-        elif sub_menu:
-            name = '{:s} > {:s}'.format(sub_menu, name)
+            title = _('List of operations for a quick Search/Replaces')
         else:
-            name = '{:s}'.format(name)
-        
-        title = _('List of Search/Replace operations for {:s}').format(name)
+            if sub_menu:
+                name = '{:s} > {:s}'.format(sub_menu, name)
+            else:
+                name = '{:s}'.format(name)
+            
+            title = _('List of Search/Replace operations for {:s}').format(name)
         
         
         Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
