@@ -84,15 +84,15 @@ def operation_testGetError(operation, plugin_action):
     dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
     
     if search_field not in all_fields:
-        return Exception(_('Search field "{:s}" is not available for this library'.format(search_field)))
+        return Exception(_('Search field "{:s}" is not available for this library').format(search_field))
         
     if dest_field and (dest_field not in writable_fields):
-        return Exception(_('Destination field "{:s}" is not available for this library'.format(dest_field)))
+        return Exception(_('Destination field "{:s}" is not available for this library').format(dest_field))
     
-    if dest_field == 'identifiers' or (search_field == 'identifiers' and dest_field == ''):
-        dest_ident = operation[KEY_OPERATION.S_R_DST_IDENT]
-        if not dest_ident or ( dest_ident == '*'):
-            return Exception(_('You must enter a valid destination identifier (not empty or *)'))
+    if search_field == 'identifiers':
+        src_ident = operation[KEY_OPERATION.S_R_SRC_IDENT]
+        if src_ident not in TestField.get_possible_idents(db):
+            return Exception(_('Identifier type "{:s}" is not available for this library').format(src_ident))
     
     return None
 
@@ -212,6 +212,9 @@ class TestField:
         all_fields.insert(1, TEMPLATE_FIELD)
         writable_fields.sort()
         return all_fields, writable_fields
+    
+    def get_possible_idents(db):
+        return db.get_all_identifier_types()
     
     def get_possible_cols(db):
         standard = [

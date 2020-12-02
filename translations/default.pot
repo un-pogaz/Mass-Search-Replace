@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-02 14:19+0100\n"
+"POT-Creation-Date: 2020-12-02 16:40+0100\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -34,14 +34,14 @@ msgid "Destination field \"{:s}\" is not available for this library"
 msgstr ""
 
 #: SearchReplace.py:95
-msgid "You must enter a valid destination identifier (not empty or *)"
+msgid "Identifier type \"{:s}\" is not available for this library"
 msgstr ""
 
 #: SearchReplace.py:167
 msgid "Configuration of a Search/Replace operation"
 msgstr ""
 
-#: SearchReplace.py:183 action.py:276
+#: SearchReplace.py:183 action.py:281
 msgid "Invalid operation"
 msgstr ""
 
@@ -56,31 +56,35 @@ msgstr ""
 msgid "You must specify a \"Search field\""
 msgstr ""
 
-#: SearchReplaceCalibreText.py:22
-msgid "The field \"{:s}\" is not defined"
-msgstr ""
-
-#: SearchReplaceCalibreText.py:25
+#: SearchReplaceCalibreText.py:23
 msgid "Case to be applied"
 msgstr ""
 
-#: SearchReplaceCalibreText.py:26
+#: SearchReplaceCalibreText.py:24
 msgid "Replace mode"
 msgstr ""
 
-#: SearchReplaceCalibreText.py:27 config.py:792
+#: SearchReplaceCalibreText.py:25 config.py:792
 msgid "Search mode"
 msgstr ""
 
-#: SearchReplaceCalibreText.py:29
+#: SearchReplaceCalibreText.py:26
+msgid "Identifier type"
+msgstr ""
+
+#: SearchReplaceCalibreText.py:28
 msgid "Open the template editor"
 msgstr ""
 
-#: SearchReplaceCalibreText.py:32
+#: SearchReplaceCalibreText.py:31
+msgid "The field \"{:s}\" is not defined"
+msgstr ""
+
+#: SearchReplaceCalibreText.py:34
 msgid "The operation field \"{:s}\" contains a invalid value ({:s})."
 msgstr ""
 
-#: SearchReplaceCalibreText.py:35
+#: SearchReplaceCalibreText.py:37
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr ""
 
@@ -88,35 +92,35 @@ msgstr ""
 msgid "Applie a list of multiple saved Search/Replace operations"
 msgstr ""
 
-#: action.py:87
+#: action.py:88
 msgid "&Quick Search/Replace..."
 msgstr ""
 
-#: action.py:94
+#: action.py:95
 msgid "&Customize plugin..."
 msgstr ""
 
-#: action.py:154 action.py:158
+#: action.py:159 action.py:163
 msgid "Could not to launch Mass Search/Replace"
 msgstr ""
 
-#: action.py:154 action.py:158
+#: action.py:159 action.py:163
 msgid "No book selected"
 msgstr ""
 
-#: action.py:175
+#: action.py:180
 msgid "Invalide configuration, the \"{:s}\" key is missing."
 msgstr ""
 
-#: action.py:220
+#: action.py:225
 msgid "Cancel"
 msgstr ""
 
-#: action.py:222
+#: action.py:227
 msgid "Mass Search/Replace Progress"
 msgstr ""
 
-#: action.py:277
+#: action.py:282
 msgid ""
 "An invalid operation was detected:\n"
 "{:s}\n"
@@ -125,11 +129,11 @@ msgid ""
 "Other errors may exist and will be ignoreds."
 msgstr ""
 
-#: action.py:294
+#: action.py:299
 msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
 msgstr ""
 
-#: action.py:332
+#: action.py:337
 msgid "Update the library for {:d} books..."
 msgstr ""
 

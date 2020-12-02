@@ -611,7 +611,7 @@ class MetadataBulkWidget(QWidget):
         self.template_button.setVisible(False) #un_pogaz template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
-        if  unicode_type(self.search_field.currentText()) == TEMPLATE_FIELD: ## idx == 1 # Template
+        if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD: ## idx == 1 # Template 
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
             self.template_button.setVisible(True) #un_pogaz template_button
@@ -919,19 +919,21 @@ class MetadataBulkWidget(QWidget):
         #extend try catch -by un_pogaz
         try:
             
-            stext = unicode_type(self.search_field.currentText())
-            if not stext:
+            sftxt = unicode_type(self.search_field.currentText())
+            if not sftxt:
                 raise Exception(CalibreText.SEARCH_FIELD)
-            
-            stext = unicode_type(self.replace_mode.currentText())
-            if not stext:
-                    raise Exception(CalibreText.EMPTY_FIELD.format(CalibreText.FIELD_NAME.REPLACE_MODE))
                 
-            stext = unicode_type(self.search_mode.currentText())
-            if not stext:
-                    raise Exception(CalibreText.EMPTY_FIELD.format(CalibreText.FIELD_NAME.SEARCH_MODE))
+            smtxt = unicode_type(self.search_mode.currentText())
+            if not smtxt:
+                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.SEARCH_MODE))
             
+            rmtxt = unicode_type(self.replace_mode.currentText())
+            if not rmtxt:
+                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.REPLACE_MODE))
             
+            if sftxt == 'identifiers':
+                if not unicode_type(self.s_r_src_ident.currentText()):
+                    raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
             
         except Exception as e:
             self.s_r_error = e
@@ -1071,7 +1073,7 @@ class MetadataBulkWidget(QWidget):
         # to be used in validate method
         if self.s_r_error != None:
             query[KEY_OPERATION.S_R_ERROR] = self.s_r_error
-         
+        
         return query
     
     def load_query(self, query):

@@ -76,11 +76,12 @@ class MassSearchReplaceAction(InterfaceAction):
             if calibre_version >= (2,10,0) :
                 self.gui.removeAction(action)
         
+        debug_print('Rebuilding menu')
         self.menu_actions = []
         
         for query in query_list:
             if not query_testGetError(query) and query[KEY.MENU_ACTIVE]:
-                self.append_menu_item_ex(self.menu, sub_menus, query[KEY.MENU_TEXT], query[KEY.MENU_SUBMENU], query[KEY.MENU_IMAGE], query)
+                self.append_menu_item_ex(self.menu, sub_menus, query)
         
         self.menu.addSeparator()
         
@@ -97,7 +98,11 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
-    def append_menu_item_ex(self, parent_menu, sub_menus, menu_text, sub_menu_text, image_name, query):
+    def append_menu_item_ex(self, parent_menu, sub_menus, query):
+        
+        menu_text = query[KEY.MENU_TEXT]
+        sub_menu_text = query[KEY.MENU_SUBMENU]
+        image_name = query[KEY.MENU_IMAGE]
         
         ac = None
         if sub_menu_text:
@@ -117,7 +122,7 @@ class MassSearchReplaceAction(InterfaceAction):
                 unique_name = '{:s} > {:s}'.format(sub_menu_text, menu_text)
             else:
                 unique_name = '{:s}'.format(menu_text)
-                
+            
             debug_print('Rebuilding menu for:',unique_name)
             
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
