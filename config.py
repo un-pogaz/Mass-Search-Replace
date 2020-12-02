@@ -82,6 +82,14 @@ class KEY:
         MENU_SEARCH_REPLACES,
     ]
 
+def get_default_query():
+    query = {}
+    query[KEY.MENU_ACTIVE] = True
+    query[KEY.MENU_TEXT] = ''
+    query[KEY.MENU_SUBMENU] = ''
+    query[KEY.MENU_IMAGE] = ''
+    query[KEY.MENU_SEARCH_REPLACES] = []
+    return query
 
 # This is where all preferences for this plugin are stored
 PREFS = JSONConfig('plugins/Mass Search-Replace')
@@ -547,13 +555,7 @@ class MenuQueryTableWidget(QTableWidget):
     
     
     def create_blank_row_query(self):
-        query = {}
-        query[KEY.MENU_ACTIVE] = True
-        query[KEY.MENU_TEXT] = ''
-        query[KEY.MENU_SUBMENU] = ''
-        query[KEY.MENU_IMAGE] = ''
-        query[KEY.MENU_SEARCH_REPLACES] = []
-        return query
+        return get_default_query()
     
     def get_query_list(self):
         query_list = []
@@ -801,10 +803,16 @@ class ConfigOperationListWidget(Dialog):
     def __init__(self, parent, plugin_action, query):
         self.plugin_action = plugin_action
         name = query[KEY.MENU_TEXT]
+        sub_menu = query[KEY.MENU_SUBMENU]
         self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
-        title = _('List of Search/Replace operations')
-        if name:
-            title = _('List of Search/Replace operations for {:s}').format(name)
+        
+        if sub_menu:
+            name = '{:s} > {:s}'.format(sub_menu, name)
+        else:
+            name = '{:s}'.format(name)
+        
+        title = _('List of Search/Replace operations for {:s}').format(name)
+        
         
         Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
     
