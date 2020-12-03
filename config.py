@@ -21,14 +21,14 @@ from collections import OrderedDict
 try:
     from PyQt5 import Qt as QtGui
     from PyQt5 import QtCore
-    from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+    from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
                           QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
                           QTableWidgetItem, QAbstractItemView, QComboBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
 except:
     from PyQt4 import QtGui, QtCore
-    from PyQt4.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+    from PyQt4.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
                           QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
                           QTableWidgetItem, QAbstractItemView, QComboBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
@@ -88,41 +88,30 @@ class KEY:
 
 class ERROR_STRATEGY:
     
+    INTERRUPT = 'interrupt'
+    INTERRUPT_NAME = _('Interrupt execution')
+    INTERRUPT_DESC = _('Stop Mass Search/Replace and display the error normally without further action.')
+    
     RESTORE = 'restore'
-    RESTORE_NAME = _('Restore the library (recommended)')
+    RESTORE_NAME = _('Restore the library')
     RESTORE_DESC = _('Stop Mass Search/Replace and restore the library to its original state.')
     
-    STOP = 'stop'
-    STOP_NAME = _('Interrupt execution')
-    STOP_DESC = _('Stop Mass Search/Replace and display the error normally without further action.')
     
-    RESTORE_FIELD = 'restore columns'
-    RESTORE_FIELD_NAME = _('Restore the problematic columns')
-    RESTORE_FIELD_DESC = _('Stop Mass Search/Replace and restore only the problematic columns.\n'
-                           'The other columns modified before the error will be updated normally.')
-    
-    CONTINUE_FIELD = 'continue restore'
-    CONTINUE_FIELD_NAME = _('Continue safely')
-    CONTINUE_FIELD_DESC = _('When an error occurs, restore the problematic columns, then move on to the next field.')
-    
-    
-    safely_txt = _('Update the fields one by one. This may be slower than other strategy.')
+    safely_txt = _('Updates the fields one by one. This operation can be slower than other strategies.')
     
     SAFELY = 'safely stop'
-    SAFELY_NAME = _('Run safely (slower)')
-    SAFELY_DESC =safely_txt+'\n'+ _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.')
+    SAFELY_NAME = _('Carefully executed (slower)')
+    SAFELY_DESC = safely_txt+'\n'+ _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.')
     
-    SAFELY_CONTINUE = 'safely continue'
-    SAFELY_CONTINUE_NAME = _('Always run safely (slower not recomanded)')
-    SAFELY_CONTINUE_DESC = safely_txt+'\n'+_('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
-    
+    DONT_STOP = 'don\'t stop'
+    DONT_STOP_NAME = _('Don\'t stop (slower, not recomanded)')
+    DONT_STOP_DESC = safely_txt+'\n'+_('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
     
     LIST = {
+            INTERRUPT: [INTERRUPT_NAME, INTERRUPT_DESC],
             RESTORE: [RESTORE_NAME, RESTORE_DESC],
-            STOP: [STOP_NAME, STOP_DESC],
-            #RESTORE_FIELD: [RESTORE_FIELD_NAME, RESTORE_FIELD_DESC],
             SAFELY: [SAFELY_NAME, SAFELY_DESC],
-            SAFELY_CONTINUE: [SAFELY_CONTINUE_NAME, SAFELY_CONTINUE_DESC],
+            DONT_STOP: [DONT_STOP_NAME, DONT_STOP_DESC],
     }
     
     
@@ -133,7 +122,7 @@ PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
 PREFS.defaults[KEY.MENU] = []
 PREFS.defaults[KEY.QUICK] = []
-PREFS.defaults[KEY.ERROR_STRATEGY] = ERROR_STRATEGY.RESTORE
+PREFS.defaults[KEY.ERROR_STRATEGY] = ERROR_STRATEGY.INTERRUPT
 
 OWIP = 'owip'
 
@@ -707,19 +696,34 @@ class SettingsButton(QToolButton):
         self.setText(txt)
     
     def hasError(self):
-        self._hasError = False
+        hasError = False
         for operation in self.getOperationList():
             if not operation_isFullValid(operation, self.plugin_action):
-                self._hasError = True
+                hasError = True
                 break
         
-        if self._hasError:
+        if hasError:
             self.setIcon(get_icon(ICON.WARNING))
         else:
             self.setIcon(get_icon('gear.png'))
+        
+        return hasError
     
     def getHasChanged(self):
-        return self._query != self._initial_query
+        op_lst = self.getOperationList()
+        initial_op_lst = self._initial_query[KEY.MENU_SEARCH_REPLACES]
+        if len(op_lst) != len(initial_op_lst):
+            return True
+        
+        for i in range(0, len(op_lst)):
+            if operation_is_active(op_lst[i]) != operation_is_active(initial_op_lst[i]):
+                return True
+            
+            for key in KEY_OPERATION.ALL:
+                if op_lst[i][key] != initial_op_lst[i][key]:
+                    return True
+        
+        return False
     
     def setOperationList(self, operation_list):
         self._query[KEY.MENU_SEARCH_REPLACES] = operation_list
@@ -1245,7 +1249,7 @@ class ErrorStrategyDialog(Dialog):
         self.plugin_action = plugin_action
         self.error_strategy = PREFS[KEY.ERROR_STRATEGY]
         
-        title = _('Error Strategy Dialog')
+        title = _('Error Strategy')
         Dialog.__init__(self, title, 'config_ErrorStrategy', parent)
     
     def setup_ui(self):
@@ -1260,6 +1264,7 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(self.strategy)
         
         self.desc = QTextEdit (' ', self)
+        self.desc.setReadOnly(True)
         layout.addWidget(self.desc)
         
         heading_label.setBuddy(self.strategy)
@@ -1274,5 +1279,6 @@ class ErrorStrategyDialog(Dialog):
         self.desc.setText(ERROR_STRATEGY.LIST[self.strategy.selected_key()][1])
     
     def accept(self):
+        
         self.error_strategy = self.strategy.selected_key()
         Dialog.accept(self)

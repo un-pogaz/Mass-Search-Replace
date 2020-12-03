@@ -663,3 +663,33 @@ class regexException(BaseException):
     def __str__(self):
         return self.msg
 
+
+def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_msg=None, show=True):
+    
+    from polyglot.io import PolyglotStringIO
+    import traceback
+    from calibre import as_unicode, prepare_string_for_xml
+    
+    sio = PolyglotStringIO(errors='replace')
+    try:
+        from calibre.debug import print_basic_debug_info
+        print_basic_debug_info(out=sio)
+    except:
+        pass
+    
+    traceback.print_exception(type(exception), exception, exception.__traceback__, file=sio)
+    
+    fe = sio.getvalue()
+    
+    if not custome_title:
+        custome_title = _('Unhandled exception')
+    
+    if custome_msg:
+        custome_msg = '<span>' + prepare_string_for_xml(as_unicode(custome_msg +'\n')).replace('\n', '<br>')
+    else:
+        custome_msg = ''
+    
+    msg = custome_msg + '<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception)))
+    
+    return error_dialog(parent, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
+

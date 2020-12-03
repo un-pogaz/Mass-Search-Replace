@@ -115,17 +115,5 @@ class TemplateBox(TemplateDialog):
     
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()
-        rslt = check_template(self.template, self.plugin_action)
-        if rslt is True:
-            QDialog.accept(self)
-        else:
-            
-            if question_dialog(self, _('Template Error'),
-                        _('Running the template returned an error:') +'\n'+ str(rslt) +'\n'+ _('Do you want discard the changes?'),
-                        default_yes=True, show_copy_button=True, override_icon=get_icon('images/warning.png')):
-               
-                QDialog.reject(self)
-                return
-            else:
-                return
+        QDialog.accept(self)
 
