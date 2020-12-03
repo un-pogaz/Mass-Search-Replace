@@ -88,9 +88,9 @@ class MassSearchReplaceAction(InterfaceAction):
             if calibre_version >= (2,10,0) :
                 self.gui.removeAction(action)
         
-        debug_print('Rebuilding menu')
         self.menu_actions = []
         
+        debug_print('Rebuilding menu')
         for query in query_list:
             if not query_testGetError(query) and query[KEY.MENU_ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, query)
@@ -263,13 +263,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
         
-        debug_print('QTimer end')
-        self.close()
-    
-    def close(self):
-        self.db.clean()
-        self.s_r.close()
-        
         if self.exception_list:
             pass
         
@@ -297,8 +290,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
             debug_print('Search/Replace launched for {:d} books with {:d} operation.'.format(self.book_count, self.operation_count))
             debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
+            if self.operationErrorList:
+                debug_print('!! An invalid operation was detected.'.format(self.time_execut))
             debug_print('Search/Replace execute in {:0.3f} seconds.\n'.format(self.time_execut))
-            
             
             if self.exception_safely:
                 debug_print('!! {:d} exceptions have occurred.'.format(len(self.exception)))
@@ -310,8 +304,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
                               det_msg=det_msg, show=True, show_copy_button=True)
             
             elif self.operationErrorList:
-                debug_print('!! An invalid operation was detected.'.format(self.time_execut))
-                
                 det_msg= '\n'.join( 'Operation {:d}/{:d} > {:s}'.format(n, self.operation_count, err) for n, err in self.operationErrorList)
                 
                 warning_dialog(self.gui, _('Invalid operation'),
@@ -319,6 +311,11 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             det_msg=det_msg, show=True, show_copy_button=True)
             
         
+        self.close()
+    
+    def close(self):
+        self.db.clean()
+        self.s_r.close()
         QProgressDialog.close(self)
     
     
@@ -343,7 +340,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     debug_print('!! Invalide operation: {0}\n'.format(err))
                     self.operationErrorList.append((op, str(err)))
                 
-                yuio = frer
                 
                 if len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ABORT:
                     return
@@ -461,7 +457,5 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
             self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
         
-        
         self.time_execut = round(time.time() - start, 3)
-        debug_print('finally')
-        
+        return
