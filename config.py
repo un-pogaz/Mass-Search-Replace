@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time, shutil
+import os, time, shutil, copy
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
@@ -16,8 +16,6 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from six import text_type as unicode
-from collections import OrderedDict
 try:
     from PyQt5 import Qt as QtGui
     from PyQt5 import QtCore
@@ -665,7 +663,7 @@ class SettingsButton(QToolButton):
         self.clicked.connect(self._clicked)
         
         self._query = query
-        self._initial_query = query.copy()
+        self._initial_query = copy.deepcopy(query.copy())
         self._hasError = False
         self.setQuery(query)
     
