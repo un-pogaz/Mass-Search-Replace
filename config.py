@@ -82,9 +82,10 @@ class KEY:
     
     QUICK = 'Quick'
     
-    ERROR_STRATEGY = 'ErrorStrategy'
+    ERROR_UPDATE = 'ErrorStrategyUpdate'
+    ERROR_OPERATION = 'ErrorStrategyOperation'
 
-class ERROR_STRATEGY:
+class ERROR_UPDATE:
     
     INTERRUPT = 'interrupt'
     INTERRUPT_NAME = _('Interrupt execution')
@@ -111,16 +112,34 @@ class ERROR_STRATEGY:
             SAFELY: [SAFELY_NAME, SAFELY_DESC],
             DONT_STOP: [DONT_STOP_NAME, DONT_STOP_DESC],
     }
-    
-    
 
+class ERROR_OPERATION:
+    
+    ABORT = 'abort'
+    ABORT_NAME = _('Abbort execution')
+    ABORT_DESC = _('Stop Mass Search/Replace and display the error normally without further action.')
+    
+    ASK = 'ask'
+    ASK_NAME = _('Asked if continue')
+    ASK_DESC = _('Stop Mass Search/Replace and restore the library to its original state.')
+    
+    HIDE = 'hide'
+    HIDE_NAME = _('Hidden')
+    HIDE_DESC = _('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
+    
+    LIST = {
+            ABORT: [ABORT_NAME, ABORT_DESC],
+            ASK: [ASK_NAME, ASK_DESC],
+            HIDE: [HIDE_NAME, HIDE_DESC],
+    }
 
 # This is where all preferences for this plugin are stored
 PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
 PREFS.defaults[KEY.MENU] = []
 PREFS.defaults[KEY.QUICK] = []
-PREFS.defaults[KEY.ERROR_STRATEGY] = ERROR_STRATEGY.INTERRUPT
+PREFS.defaults[KEY.ERROR_UPDATE] = ERROR_UPDATE.INTERRUPT
+PREFS.defaults[KEY.ERROR_OPERATION] = ERROR_OPERATION.HIDE
 
 OWIP = 'owip'
 
@@ -235,7 +254,8 @@ class ConfigWidget(QWidget):
     def edit_error_strategy(self):
         d = ErrorStrategyDialog(self.plugin_action.gui, self.plugin_action)
         if d.exec_() == d.Accepted:
-            PREFS[KEY.ERROR_STRATEGY] = d.error_strategy
+            PREFS[KEY.ERROR_UPDATE] = d.error_update
+            PREFS[KEY.ERROR_OPERATION] = d.error_operation
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -1245,7 +1265,8 @@ class OperationListTableWidget(QTableWidget):
 class ErrorStrategyDialog(Dialog):
     def __init__(self, parent, plugin_action):
         self.plugin_action = plugin_action
-        self.error_strategy = PREFS[KEY.ERROR_STRATEGY]
+        self.error_update = PREFS[KEY.ERROR_UPDATE]
+        self.error_operation = PREFS[KEY.ERROR_OPERATION]
         
         title = _('Error Strategy')
         Dialog.__init__(self, title, 'config_ErrorStrategy', parent)
@@ -1254,29 +1275,52 @@ class ErrorStrategyDialog(Dialog):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        heading_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
-        layout.addWidget(heading_label)
+        operation_label = QLabel(_('Set the strategy when an invalid operation was detected:'), self)
+        layout.addWidget(operation_label)
         
-        self.strategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_STRATEGY.LIST.items()}, self.error_strategy)
-        self.strategy.currentIndexChanged[int].connect(self.strategyIndexChanged)
-        layout.addWidget(self.strategy)
+        self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_OPERATION.LIST.items()}, self.error_operation)
+        self.operationStrategy.currentIndexChanged[int].connect(self.operationStrategyIndexChanged)
+        layout.addWidget(self.operationStrategy)
+        
+        layout.addWidget(QLabel (' ', self))
+        
+        update_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
+        layout.addWidget(update_label)
+        
+        self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_UPDATE.LIST.items()}, self.error_update)
+        self.updateStrategy.currentIndexChanged[int].connect(self.updateStrategyIndexChanged)
+        layout.addWidget(self.updateStrategy)
         
         self.desc = QTextEdit (' ', self)
         self.desc.setReadOnly(True)
         layout.addWidget(self.desc)
         
-        heading_label.setBuddy(self.strategy)
+        update_label.setBuddy(self.updateStrategy)
+        update_label.setBuddy(self.updateStrategy)
         layout.insertStretch(-1)
         
-        self.strategyIndexChanged(0)
+        self.operationStrategyIndexChanged(0)
+        self.updateStrategyIndexChanged(0)
         
         # -- Accept/Reject buttons --
         layout.addWidget(self.bb)
     
-    def strategyIndexChanged(self, idx):
-        self.desc.setText(ERROR_STRATEGY.LIST[self.strategy.selected_key()][1])
+    
+    def operationStrategyIndexChanged(self, idx):
+        error_operation = self.operationStrategy.selected_key()
+        if error_operation not in ERROR_OPERATION.LIST.keys():
+            error_operation = PREFS.defaults[KEY.ERROR_OPERATION]
+        
+        self.desc.setText(ERROR_OPERATION.LIST[error_operation][1])
+    
+    def updateStrategyIndexChanged(self, idx):
+        error_update = self.updateStrategy.selected_key()
+        if error_update not in ERROR_UPDATE.LIST.keys():
+            error_update = PREFS.defaults[KEY.ERROR_UPDATE]
+        self.desc.setText(ERROR_UPDATE.LIST[error_update][1])
     
     def accept(self):
         
-        self.error_strategy = self.strategy.selected_key()
+        self.error_update = self.updateStrategy.selected_key()
+        self.error_operation = self.operationStrategy.selected_key()
         Dialog.accept(self)
