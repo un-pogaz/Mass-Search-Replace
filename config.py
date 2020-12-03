@@ -116,16 +116,16 @@ class ERROR_UPDATE:
 class ERROR_OPERATION:
     
     ABORT = 'abort'
-    ABORT_NAME = _('Abbort execution')
-    ABORT_DESC = _('Stop Mass Search/Replace and display the error normally without further action.')
+    ABORT_NAME = _('Abbort')
+    ABORT_DESC = _('If an invalid operation is detected, abort the changes.')
     
     ASK = 'ask'
-    ASK_NAME = _('Asked if continue')
-    ASK_DESC = _('Stop Mass Search/Replace and restore the library to its original state.')
+    ASK_NAME = _('Asked')
+    ASK_DESC = _('If an invalid operation is detected, asked whether to continue or abort the changes.')
     
     HIDE = 'hide'
     HIDE_NAME = _('Hidden')
-    HIDE_DESC = _('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
+    HIDE_DESC = _('Ignore all invalid operations.')
     
     LIST = {
             ABORT: [ABORT_NAME, ABORT_DESC],
@@ -139,7 +139,7 @@ PREFS = JSONConfig('plugins/Mass Search-Replace')
 PREFS.defaults[KEY.MENU] = []
 PREFS.defaults[KEY.QUICK] = []
 PREFS.defaults[KEY.ERROR_UPDATE] = ERROR_UPDATE.INTERRUPT
-PREFS.defaults[KEY.ERROR_OPERATION] = ERROR_OPERATION.HIDE
+PREFS.defaults[KEY.ERROR_OPERATION] = ERROR_OPERATION.ASK
 
 OWIP = 'owip'
 
@@ -1275,12 +1275,14 @@ class ErrorStrategyDialog(Dialog):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        operation_label = QLabel(_('Set the strategy when an invalid operation was detected:'), self)
+        operation_label = QLabel(_('Set the strategy when an invalid operation has detected:'), self)
         layout.addWidget(operation_label)
         
         self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_OPERATION.LIST.items()}, self.error_operation)
         self.operationStrategy.currentIndexChanged[int].connect(self.operationStrategyIndexChanged)
         layout.addWidget(self.operationStrategy)
+        
+        operation_label.setBuddy(self.operationStrategy)
         
         layout.addWidget(QLabel (' ', self))
         
@@ -1291,16 +1293,14 @@ class ErrorStrategyDialog(Dialog):
         self.updateStrategy.currentIndexChanged[int].connect(self.updateStrategyIndexChanged)
         layout.addWidget(self.updateStrategy)
         
+        update_label.setBuddy(self.updateStrategy)
+        
+        
         self.desc = QTextEdit (' ', self)
         self.desc.setReadOnly(True)
         layout.addWidget(self.desc)
         
-        update_label.setBuddy(self.updateStrategy)
-        update_label.setBuddy(self.updateStrategy)
         layout.insertStretch(-1)
-        
-        self.operationStrategyIndexChanged(0)
-        self.updateStrategyIndexChanged(0)
         
         # -- Accept/Reject buttons --
         layout.addWidget(self.bb)
