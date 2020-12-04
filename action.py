@@ -269,7 +269,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         elif self.exception_list:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg='Unhandled exception\n')
+            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Unhandled exception')+'\n')
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0]))
@@ -303,14 +303,14 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 warning_dialog(self.gui, _('Exceptions during the library update'),
                             _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
-                              det_msg=det_msg, show=True, show_copy_button=True)
+                              det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
             
             elif self.operationErrorList:
                 det_msg= '\n'.join( 'Operation {:d}/{:d} > {:s}'.format(n, self.operation_count, err) for n, err in self.operationErrorList)
                 
                 warning_dialog(self.gui, _('Invalid operation'),
                             _('{:d} invalid operations has detected and have been ignored.').format(len(self.operationErrorList)),
-                            det_msg=det_msg, show=True, show_copy_button=True)
+                            det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
             
         
         self.close()

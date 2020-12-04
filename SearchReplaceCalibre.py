@@ -361,7 +361,6 @@ class MetadataBulkWidget(QWidget):
         self.retranslateUi()
     
     def retranslateUi(self):
-        
         self.xlabel_22.setText(_("&Load search/replace:"))
         self.query_field.setToolTip(_("Select saved search/replace to load."))
         self.save_button.setToolTip(_("Save current search/replace"))
@@ -521,7 +520,10 @@ class MetadataBulkWidget(QWidget):
         self.case_sensitive.stateChanged.connect(self.s_r_paint_results)
         self.s_r_src_ident.currentIndexChanged[int].connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
-        self.s_r_template.lost_focus.connect(self.s_r_template_changed)
+        
+        
+        self.s_r_template.textChanged.connect(self.s_r_template_changed) #un_pogaz template_button
+        #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
         self.search_for.completer().setCaseSensitivity(Qt.CaseSensitive)
@@ -547,7 +549,6 @@ class MetadataBulkWidget(QWidget):
         self.query_field.setCurrentIndex(0)
         self.search_field.setCurrentIndex(0)
         self.s_r_search_field_changed(0)
-    
     
     def s_r_sf_itemdata(self, idx):
         if idx is None:
@@ -598,8 +599,9 @@ class MetadataBulkWidget(QWidget):
     def s_r_display_bounds_changed(self, i):
         self.s_r_search_field_changed(self.search_field.currentIndex())
     
-    def s_r_template_changed(self):
-        self.s_r_search_field_changed(self.search_field.currentIndex())
+    def s_r_template_changed(self, *args):
+        #self.s_r_search_field_changed(self.search_field.currentIndex())
+        self.s_r_paint_results(None) #un_pogaz template_button
     
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
@@ -649,7 +651,6 @@ class MetadataBulkWidget(QWidget):
         self.s_r_paint_results(None)
     
     def s_r_search_mode_changed(self, val):
-        
         search = self.search_field.currentText()
         self.search_field.clear()
         self.destination_field.clear()
@@ -907,7 +908,6 @@ class MetadataBulkWidget(QWidget):
     
     
     def s_r_paint_results(self, txt):
-        QApplication.processEvents()
         self.s_r_error = None
         self.s_r_set_colors()
         flags = regex.FULLCASE | regex.UNICODE
@@ -934,6 +934,11 @@ class MetadataBulkWidget(QWidget):
             if sftxt == 'identifiers':
                 if not unicode_type(self.s_r_src_ident.currentText()):
                     raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
+            
+            if sftxt == TEMPLATE_FIELD:
+                error = check_template(self.s_r_template.text(), self.plugin_action)
+                if error is not True:
+                    raise Exception(_('S/R TEMPLATE ERROR')+': '+ str(error))
             
         except Exception as e:
             self.s_r_error = e
@@ -1124,10 +1129,9 @@ class MetadataBulkWidget(QWidget):
     
     def openTemplateBox(self):
         
-        temp = TemplateBox(self.plugin_action.gui, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
+        temp = TemplateBox(self, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
         temp.exec_()
         if temp.template:
             self.s_r_template.setText(temp.template)
         
         self.s_r_template_changed()  # simulate gain/loss of focus
-        QApplication.processEvents()

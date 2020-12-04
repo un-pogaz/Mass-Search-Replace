@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-04 00:24+0100\n"
-"PO-Revision-Date: 2020-12-04 00:46+0100\n"
+"POT-Creation-Date: 2020-12-04 12:29+0100\n"
+"PO-Revision-Date: 2020-12-04 12:29+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -122,6 +122,10 @@ msgstr "Annuler"
 msgid "Mass Search/Replace Progress"
 msgstr "Progression de Mass Search/Replace"
 
+#: action.py:272 common_utils.py:685
+msgid "Unhandled exception"
+msgstr "Exception non gérée"
+
 #: action.py:277
 msgid ""
 "A invalid operations has detected:\n"
@@ -199,10 +203,6 @@ msgstr "Raccourcis clavier"
 #: common_utils.py:576
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
-
-#: common_utils.py:685
-msgid "Unhandled exception"
-msgstr "Exception non gérée"
 
 #: config.py:91
 msgid "Interrupt execution"
