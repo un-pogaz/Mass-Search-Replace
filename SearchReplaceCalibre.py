@@ -521,7 +521,6 @@ class MetadataBulkWidget(QWidget):
         self.s_r_src_ident.currentIndexChanged[int].connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        
         self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) #un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
