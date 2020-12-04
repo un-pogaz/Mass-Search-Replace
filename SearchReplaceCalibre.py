@@ -22,7 +22,7 @@ from PyQt5.Qt import (QApplication, Qt, QWidget, QGridLayout, QHBoxLayout, QVBox
                       QIcon, QTreeWidgetItem, QTreeWidget, QAbstractItemView, QModelIndex)
                       
 from calibre import prints
-from calibre.constants import iswindows, isosx
+from calibre.constants import iswindows, isosx, numeric_version as calibre_version
 from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
@@ -522,7 +522,7 @@ class MetadataBulkWidget(QWidget):
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
         
-        self.s_r_template.textChanged.connect(self.s_r_template_changed) #un_pogaz template_button
+        self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) #un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
@@ -693,8 +693,15 @@ class MetadataBulkWidget(QWidget):
     def s_r_set_colors(self):
         if self.s_r_error is not None:
             self.test_result.setText(error_message(self.s_r_error))
-        self.test_result.setStyleSheet(
-                QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
+            col = 'rgba(255, 0, 0, 20%)'
+        else:
+            col = 'rgba(0, 255, 0, 20%)'
+            
+        if calibre_version >= (5,0,0):
+            self.test_result.setStyleSheet(QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
+        else:
+            self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
+        
         for i in range(0,self.s_r_number_of_books):
             getattr(self, 'book_%d_result'%(i+1)).setText('')
     

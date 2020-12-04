@@ -26,6 +26,7 @@ from calibre.gui2.widgets2 import Dialog
 from calibre_plugins.mass_search_replace.common_utils import debug_print, get_icon
 from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_OPERATION as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD
 from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
+from calibre_plugins.mass_search_replace.TestField import get_possible_fields, get_possible_idents
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
 
 
@@ -45,7 +46,7 @@ def get_default_operation(plugin_action):
             
             _default_operation[KEY_OPERATION.ACTIVE] = True
         
-        return _default_operation.copy()
+        return copy.copy(_default_operation)
 
 def operation_ConvertError(operation):
     err = operation.get(KEY_OPERATION.S_R_ERROR, None)
@@ -110,7 +111,7 @@ def operation_testGetError(operation, plugin_action):
     
     
     #Field test
-    all_fields, writable_fields = TestField.get_possible_fields(db)
+    all_fields, writable_fields = get_possible_fields(db)
     
     search_field = operation[KEY_OPERATION.SEARCH_FIELD]
     dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
@@ -123,7 +124,7 @@ def operation_testGetError(operation, plugin_action):
     
     if search_field == 'identifiers':
         src_ident = operation[KEY_OPERATION.S_R_SRC_IDENT]
-        if src_ident not in TestField.get_possible_idents(db):
+        if src_ident not in get_possible_idents(db):
             return Exception(_('Identifier type "{:s}" is not available for this library').format(src_ident))
     
     return None
@@ -224,67 +225,3 @@ class SearchReplaceDialog(Dialog):
         self.operation = self.widget.save_settings()
         debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
         Dialog.accept(self)
-
-
-class TestField:
-    
-    def get_possible_fields(db):
-        all_fields = []
-        writable_fields = []
-        fm = db.field_metadata
-        for f in fm:
-            if (f in ['author_sort'] or
-                    (fm[f]['datatype'] in ['text', 'series', 'enumeration', 'comments', 'rating'] and fm[f].get('search_terms', None) and f not in ['formats', 'ondevice', 'series_sort']) or
-                    (fm[f]['datatype'] in ['int', 'float', 'bool', 'datetime'] and f not in ['id', 'timestamp'])):
-                all_fields.append(f)
-                writable_fields.append(f)
-            if fm[f]['datatype'] == 'composite':
-                all_fields.append(f)
-        all_fields.sort()
-        all_fields.insert(1, TEMPLATE_FIELD)
-        writable_fields.sort()
-        return all_fields, writable_fields
-    
-    def get_possible_idents(db):
-        return db.get_all_identifier_types()
-    
-    def get_possible_cols(db):
-        standard = [
-            'title',
-            'authors',
-            'tags',
-            'series',
-            'publisher',
-            'pubdate',
-            'rating',
-            'languages',
-            'last_modified',
-            'timestamp',
-            'comments',
-            'author_sort',
-            'sort',
-            'marked'
-        ]                
-        custom = sorted([ k for k,v in db.field_metadata.custom_field_metadata().items() if v['datatype'] not in [None,'composite'] ])
-        return standard + custom
-    
-    def is_enum(db, col_name, val):
-        col_metadata = db.field_metadata.all_metadata()
-        col_type = col_metadata['datatype']
-        if not col_type == 'enumeration':
-            raise ValueError
-        vals = col_metadata['display']['enum_values'] + ['']
-        if not val in vals:
-            raise ValueError
-        else:
-            return val
-    
-    def is_bool(val):
-        if unicode(val).lower() in ['yes','y','true','1']:
-            return True
-        elif unicode(val).lower() in ['no','n','false','0']:
-            return False
-        elif unicode(val).strip() == '':
-            return ''
-        else:
-            raise ValueError

@@ -683,7 +683,7 @@ class SettingsButton(QToolButton):
         self.clicked.connect(self._clicked)
         
         self._query = query
-        self._initial_query = copy.deepcopy(query.copy())
+        self._initial_query = copy.deepcopy(query)
         self._hasError = False
         self.setQuery(query)
     
@@ -694,7 +694,7 @@ class SettingsButton(QToolButton):
         self.hasError()
     
     def getQuery(self):
-        return self._query.copy()
+        return copy.copy(self._query)
     
     def updateText(self):
         count = len(self.getOperationList())
@@ -748,7 +748,7 @@ class SettingsButton(QToolButton):
         self.setQuery(self._query)
     
     def getOperationList(self):
-        return self._query[KEY.MENU_SEARCH_REPLACES].copy()
+        return copy.copy(self._query[KEY.MENU_SEARCH_REPLACES])
     
     def _clicked(self):
         d = ConfigOperationListDialog(self, self.plugin_action, query=self.getQuery())
@@ -878,7 +878,7 @@ class OperationWidgetItem(QTableWidgetItem):
     def getOperation(self):
         self._operation[KEY_OPERATION.ACTIVE] = Qt.Checked == self.checkState()
         self._operation = operation_ConvertError(self._operation)
-        return self._operation.copy()
+        return copy.copy(self._operation)
     
     def hasError(self):
         self._hasError = not operation_isFullValid(self._operation, self.plugin_action)
@@ -1320,7 +1320,6 @@ class ErrorStrategyDialog(Dialog):
         self.desc.setText(ERROR_UPDATE.LIST[error_update][1])
     
     def accept(self):
-        
         self.error_update = self.updateStrategy.selected_key()
         self.error_operation = self.operationStrategy.selected_key()
         Dialog.accept(self)
