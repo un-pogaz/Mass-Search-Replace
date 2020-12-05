@@ -44,7 +44,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, clean_empty_operation
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, clean_empty_operation
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
                                                               get_icon, debug_print)
 
@@ -396,29 +396,28 @@ class MenuQueryTableWidget(QTableWidget):
         self.resources_dir = os.path.join(config_dir, 'resources/images')
         if iswindows:
             self.resources_dir = os.path.normpath(self.resources_dir)
+        self.image_map = self.get_image_map()
         
-        self.cellChanged.connect(self.cell_changed)
+        self.setAlternatingRowColors(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSortingEnabled(False)
+        self.setMinimumSize(600, 0)
         
         self.populate_table(query_list)
+        
+        self.cellChanged.connect(self.cell_changed)
     
     def populate_table(self, query_list=None):
-        self.image_map = self.get_image_map()
         self.clear()
-        self.setAlternatingRowColors(True)
-        if query_list == None: query_list = []
-        self.setRowCount(len(query_list))
-        
         self.setColumnCount(len(COL_NAMES))
         self.setHorizontalHeaderLabels(COL_NAMES)
         self.verticalHeader().setDefaultSectionSize(24)
         
+        if query_list == None: query_list = []
+        self.setRowCount(len(query_list))
         for row, query in enumerate(query_list, 0):
             self.populate_table_row(row, query)
         
-        self.resizeColumnsToContents()
-        self.setSortingEnabled(False)
-        self.setMinimumSize(600, 0)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.selectRow(0)
     
     def populate_table_row(self, row, query):
@@ -435,6 +434,7 @@ class MenuQueryTableWidget(QTableWidget):
             # Make all the later column cells non-editable
             self.set_noneditable_cells_in_row(row)
         
+        self.resizeColumnsToContents()
         self.blockSignals(False)
     
     def cell_changed(self, row, col):
@@ -887,7 +887,7 @@ class OperationWidgetItem(QTableWidgetItem):
         else:
             self.setIcon(get_icon())
 
-COL_CONFIG = ['', _('Columns'), _('Search mode'), _('Search'), _('Replace')]
+COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 
 class ConfigOperationListDialog(Dialog):
     def __init__(self, parent, plugin_action, query):
@@ -1084,25 +1084,27 @@ class OperationListTableWidget(QTableWidget):
     def __init__(self, plugin_action, operation_list=None, *args):
         QTableWidget.__init__(self, *args)
         self.plugin_action = plugin_action
+        
+        self.setAlternatingRowColors(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSortingEnabled(False)
+        self.setMinimumSize(800, 0)
+        
         self.populate_table(operation_list)
+        
         self.itemDoubleClicked.connect(self.settingsDoubleClicked)
     
     def populate_table(self, operation_list=None):
         self.clear()
-        self.setAlternatingRowColors(True)
         self.setColumnCount(len(COL_CONFIG))
         self.setHorizontalHeaderLabels(COL_CONFIG)
         self.verticalHeader().setDefaultSectionSize(24)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
         
         operation_list = clean_empty_operation(operation_list, self.plugin_action)
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
             self.populate_table_row(row, operation)
         
-        self.resizeColumnsToContents()
-        self.setSortingEnabled(False)
-        self.setMinimumSize(800, 0)
         self.selectRow(0)
     
     def populate_table_row(self, row, operation):
@@ -1114,17 +1116,25 @@ class OperationListTableWidget(QTableWidget):
             item = ReadOnlyTableWidgetItem('')
             self.setItem(row, i, item)
         
+        as_template = False
+        for i_row in range(self.rowCount()):
+            item = self.item(i_row, 0)
+            if item and item.getOperation()[KEY_OPERATION.SEARCH_FIELD] == TEMPLATE_FIELD:
+                as_template = True
+                break
+        
+        self.setColumnHidden(2, not as_template)
+        
         self.update_row(row)
         
+        self.resizeColumnsToContents()
         self.blockSignals(False)
     
     def update_row(self, row):
-        operation = self.item(row, 0).getOperation()
+        operation = self.convert_row_to_operation(row)
         
         for col, val in enumerate(operation_para_list(operation), 1):
             self.item(row, col).setText(val)
-        
-        self.resizeColumnsToContents()
     
     def add_row(self):
         self.setFocus()
@@ -1164,6 +1174,9 @@ class OperationListTableWidget(QTableWidget):
             self.select_and_scroll_to_row(first_sel_row)
         elif self.rowCount() > 0:
             self.select_and_scroll_to_row(first_sel_row - 1)
+        
+        if self.rowCount():
+            self.update_row(0)
     
     def move_rows_up(self):
         self.setFocus()
@@ -1254,12 +1267,11 @@ class OperationListTableWidget(QTableWidget):
         self.setFocus()
         row = self.currentRow()
         
-        src_operation = self.item(row, 0).getOperation()
+        src_operation = self.convert_row_to_operation(row)
         d = SearchReplaceDialog(self, self.plugin_action, src_operation)
         if d.exec_() == d.Accepted:
             d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
-            self.item(row, 0).setOperation(d.operation)
-            self.update_row(row)
+            self.populate_table_row(row, d.operation)
 
 
 class ErrorStrategyDialog(Dialog):

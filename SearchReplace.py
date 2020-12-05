@@ -24,11 +24,12 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog
 
 from calibre_plugins.mass_search_replace.common_utils import debug_print, get_icon
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_OPERATION as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD
+from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY_OPERATION as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD as TEMPLATE
 from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
 from calibre_plugins.mass_search_replace.TestField import get_possible_fields, get_possible_idents
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
 
+TEMPLATE_FIELD = TEMPLATE
 
 class KEY_OPERATION:
     locals().update(vars(KEY_QUERY))
@@ -148,10 +149,21 @@ def operation_para_list(operation):
     if (field and field != column):
         column += ' => '+ field
     
-    return [ column, operation.get(KEY_OPERATION.SEARCH_MODE, ''), operation.get(KEY_OPERATION.SEARCH_FOR, ''), operation.get(KEY_OPERATION.REPLACE_WITH, '') ]
+    search_mode = operation.get(KEY_OPERATION.SEARCH_MODE, '')
+    template = operation.get(KEY_OPERATION.S_R_TEMPLATE, '')
+    search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
+    replace_with = operation.get(KEY_OPERATION.REPLACE_WITH, '')
+    
+    return [ column, template, search_mode, search_for, replace_with ]
 
 def operation_string(operation):
-    return '"'+ '" | "'.join(operation_para_list(operation))+'"'
+    val = [operation_para_list(operation)[0]]
+    temp = operation_para_list(operation)[1]
+    if temp:
+        val.append(temp)
+    val = val + operation_para_list(operation)[2:]
+    
+    return '"'+ '" | "'.join(val)+'"'
 
 
 

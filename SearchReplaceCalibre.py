@@ -600,7 +600,19 @@ class MetadataBulkWidget(QWidget):
     
     def s_r_template_changed(self, *args):
         #self.s_r_search_field_changed(self.search_field.currentIndex())
-        self.s_r_paint_results(None) #un_pogaz template_button
+        
+        #un_pogaz
+        for i in range(0, self.s_r_number_of_books):
+            w = getattr(self, 'book_%d_text'%(i+1))
+            mi = self.db.get_metadata(self.ids[i], index_is_id=True)
+            src = self.s_r_sf_itemdata(None)
+            t = self.s_r_get_field(mi, src)
+            if len(t) > 1:
+                t = t[self.starting_from.value()-1:
+                      self.starting_from.value()-1 + self.results_count.value()]
+            w.setText(unicode_type(self.multiple_separator.text()).join(t))
+        
+        self.s_r_paint_results(None)
     
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
