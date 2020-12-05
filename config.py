@@ -44,7 +44,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, clean_empty_operation
+from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, clean_empty_operation
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
                                                               get_icon, debug_print)
 
@@ -256,6 +256,7 @@ class ConfigWidget(QWidget):
         if d.exec_() == d.Accepted:
             PREFS[KEY.ERROR_UPDATE] = d.error_update
             PREFS[KEY.ERROR_OPERATION] = d.error_operation
+            debug_print('Error Strategy settings:\nUpdate > {:s}\nOperation > {:s}\n'.format(PREFS[KEY.ERROR_UPDATE], PREFS[KEY.ERROR_OPERATION]))
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -679,12 +680,10 @@ class SettingsButton(QToolButton):
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        self.setToolTip(_('Change operation list'))
         self.clicked.connect(self._clicked)
         
         self._query = query
         self._initial_query = copy.deepcopy(query)
-        self._hasError = False
         self.setQuery(query)
     
     
@@ -722,8 +721,10 @@ class SettingsButton(QToolButton):
         
         if hasError:
             self.setIcon(get_icon(ICON.WARNING))
+            self.setToolTip(_('This operations list contain a error'))
         else:
             self.setIcon(get_icon('gear.png'))
+            self.setToolTip(_('Edit the operations list'))
         
         return hasError
     
@@ -881,11 +882,16 @@ class OperationWidgetItem(QTableWidgetItem):
         return copy.copy(self._operation)
     
     def hasError(self):
-        self._hasError = not operation_isFullValid(self._operation, self.plugin_action)
-        if self._hasError:
+        err = operation_testFullError(self._operation, self.plugin_action)
+        
+        if err:
             self.setIcon(get_icon(ICON.WARNING))
+            self.setToolTip(str(err))
+            return True
         else:
             self.setIcon(get_icon())
+            self.setToolTip('')
+            return False
 
 COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 
