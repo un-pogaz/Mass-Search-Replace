@@ -42,7 +42,7 @@ class MassSearchReplaceAction(InterfaceAction):
     
     name = 'Mass Search/Replace'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = ('Mass Search/Replace', None, _('Applie a list of multiple saved Search/Replace operations'), None)
+    action_spec = ('Mass Search/Replace', None, _('Applie a list of multiple saved Search and Replace operations'), None)
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])
@@ -220,13 +220,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.quickSearchReplace = query[KEY.MENU_TEXT] == None
         
         
-        # operation list of search/replace
+        # operation list of Search/Replace
         self.operation_list = operation_list_active(query[KEY.MENU_SEARCH_REPLACES])
         
-        # Count of search/replace
+        # Count of Search/Replace
         self.operation_count = len(self.operation_list)
         
-        # Count of search/replace
+        # Count of Search/Replace
         self.total_operation_count = self.book_count*self.operation_count
         
         # Search/Replace Widget

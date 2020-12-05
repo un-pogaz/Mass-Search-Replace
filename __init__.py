@@ -28,7 +28,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
     calibre utilities to run without needing to load the GUI libraries.
     '''
     name                    = 'Mass Search-Replace'
-    description             = _('Applie a list of multiple saved Search/Replace operations')
+    description             = _('Applie a list of multiple saved Search and Replace operations')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
     version                 = (0, 9, 0)
