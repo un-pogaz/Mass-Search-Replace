@@ -940,7 +940,7 @@ class MetadataBulkWidget(QWidget):
             sftxt = unicode_type(self.search_field.currentText())
             if not sftxt:
                 raise Exception(CalibreText.SEARCH_FIELD)
-                
+            
             smtxt = unicode_type(self.search_mode.currentText())
             if not smtxt:
                 raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.SEARCH_MODE))
