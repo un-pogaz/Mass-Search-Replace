@@ -64,26 +64,28 @@ class ICON:
         WARNING,
     ]
 
-class KEY:
+class KEY_MENU:
     MENU = 'Menu'
-    MENU_ACTIVE = 'Active'
-    MENU_IMAGE = 'Image'
-    MENU_TEXT = 'Text'
-    MENU_SUBMENU = 'SubMenu'
-    MENU_SEARCH_REPLACES = 'Search-Replaces'
+    ACTIVE = 'Active'
+    IMAGE = 'Image'
+    TEXT = 'Text'
+    SUBMENU = 'SubMenu'
+    OPERATIONS = 'Operations'
     
-    ALL_MENU = [
-        MENU_ACTIVE,
-        MENU_TEXT,
-        MENU_SUBMENU,
-        MENU_IMAGE,
-        MENU_SEARCH_REPLACES,
+    ALL = [
+        ACTIVE,
+        TEXT,
+        SUBMENU,
+        IMAGE,
+        OPERATIONS,
     ]
     
     QUICK = 'Quick'
-    
-    ERROR_UPDATE = 'ErrorStrategyUpdate'
-    ERROR_OPERATION = 'ErrorStrategyOperation'
+
+class KEY_ERROR:
+    ERROR = 'ErrorStrategy'
+    UPDATE = 'Update'
+    OPERATION = 'Operation'
 
 class ERROR_UPDATE:
     
@@ -112,6 +114,8 @@ class ERROR_UPDATE:
             SAFELY: [SAFELY_NAME, SAFELY_DESC],
             DONT_STOP: [DONT_STOP_NAME, DONT_STOP_DESC],
     }
+    
+    DEFAULT = INTERRUPT
 
 class ERROR_OPERATION:
     
@@ -132,26 +136,31 @@ class ERROR_OPERATION:
             ASK: [ASK_NAME, ASK_DESC],
             HIDE: [HIDE_NAME, HIDE_DESC],
     }
+    
+    DEFAULT = ASK
 
 # This is where all preferences for this plugin are stored
 PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
-PREFS.defaults[KEY.MENU] = []
-PREFS.defaults[KEY.QUICK] = []
-PREFS.defaults[KEY.ERROR_UPDATE] = ERROR_UPDATE.INTERRUPT
-PREFS.defaults[KEY.ERROR_OPERATION] = ERROR_OPERATION.ASK
+PREFS.defaults[KEY_MENU.MENU] = []
+PREFS.defaults[KEY_MENU.QUICK] = []
+
+PREFS.defaults[KEY_ERROR.ERROR] = {
+    KEY_ERROR.OPERATION : ERROR_UPDATE.DEFAULT,
+    KEY_ERROR.UPDATE : ERROR_OPERATION.DEFAULT
+}
 
 OWIP = 'owip'
 
 
-def get_default_query():
-    query = {}
-    query[KEY.MENU_ACTIVE] = True
-    query[KEY.MENU_TEXT] = ''
-    query[KEY.MENU_SUBMENU] = ''
-    query[KEY.MENU_IMAGE] = ''
-    query[KEY.MENU_SEARCH_REPLACES] = []
-    return query
+def get_default_menu():
+    menu = {}
+    menu[KEY_MENU.ACTIVE] = True
+    menu[KEY_MENU.TEXT] = ''
+    menu[KEY_MENU.SUBMENU] = ''
+    menu[KEY_MENU.IMAGE] = ''
+    menu[KEY_MENU.OPERATIONS] = []
+    return menu
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -161,7 +170,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        query_list = PREFS[KEY.MENU]
+        menu_list = PREFS[KEY_MENU.MENU]
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
@@ -172,8 +181,8 @@ class ConfigWidget(QWidget):
         table_layout = QHBoxLayout()
         layout.addLayout(table_layout)
         
-        # Create a table the user can edit the query list
-        self._table = MenuQueryTableWidget(plugin_action, query_list, self)
+        # Create a table the user can edit the menu list
+        self._table = MenuTableWidget(plugin_action, menu_list, self)
         heading_label.setBuddy(self._table)
         table_layout.addWidget(self._table)
         
@@ -240,7 +249,7 @@ class ConfigWidget(QWidget):
     
     
     def save_settings(self):
-        PREFS[KEY.MENU] = self._table.get_query_list()
+        PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     
@@ -254,9 +263,12 @@ class ConfigWidget(QWidget):
     def edit_error_strategy(self):
         d = ErrorStrategyDialog(self.plugin_action.gui, self.plugin_action)
         if d.exec_() == d.Accepted:
-            PREFS[KEY.ERROR_UPDATE] = d.error_update
-            PREFS[KEY.ERROR_OPERATION] = d.error_operation
-            debug_print('Error Strategy settings:\nUpdate > {:s}\nOperation > {:s}\n'.format(PREFS[KEY.ERROR_UPDATE], PREFS[KEY.ERROR_OPERATION]))
+            PREFS[KEY_ERROR.ERROR] = {
+                KEY_ERROR.OPERATION : d.error_operation,
+                KEY_ERROR.UPDATE : d.error_update
+            }
+            
+            debug_print('Error Strategy settings: {0}\n'.format(PREFS[KEY_ERROR.ERROR]))
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -305,10 +317,10 @@ class ConfigWidget(QWidget):
         try:
             # Read the .JSON file to add to the menus then delete it.
             import_config = JSONConfig(json)
-            query_list = import_config[KEY.MENU]
+            menu_list = import_config[KEY_MENU.MENU]
             # Now insert the menus into the table
-            table.append_query_list(query_list)
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(query_list)),
+            table.append_menu_list(menu_list)
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(menu_list)),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Import failed'), e, show=True)
@@ -326,8 +338,8 @@ class ConfigWidget(QWidget):
     
     def export_menus(self):
         table = self._table
-        query_list = table.get_selected_query()
-        if len(query_list) == 0:
+        menu_list = table.get_selected_menu()
+        if len(menu_list) == 0:
             return error_dialog(self, _('Export failed'), _('No menu items selected to export'), show=True)
         archive_path = self.pick_archive_to_export()
         if not archive_path:
@@ -335,8 +347,8 @@ class ConfigWidget(QWidget):
         
         # Build our unique list of images that need to be exported
         image_names = {}
-        for query in query_list:
-            image_name = query[KEY.MENU_IMAGE]
+        for menu in menu_list:
+            image_name = menu[KEY_MENU.IMAGE]
             if image_name and image_name not in image_names:
                 image_path = os.path.join(table.resources_dir, image_name)
                 if os.path.exists(image_path):
@@ -348,7 +360,7 @@ class ConfigWidget(QWidget):
         
         json = os.path.join(table.resources_dir, OWIP)
         export_config = JSONConfig(json)
-        export_config[KEY.MENU] = query_list
+        export_config[KEY_MENU.MENU] = menu_list
         json_path = os.path.join(table.resources_dir, OWIP+'.json')
         
         try:
@@ -358,7 +370,7 @@ class ConfigWidget(QWidget):
                 # Add any images referred to in those menu items that are local resources
                 for image_name, image_path in list(image_names.items()):
                     archive_zip.write(image_path, os.path.basename(image_path))
-            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(query_list), archive_path),
+            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
@@ -388,8 +400,8 @@ def get_image_names(image_map):
 
 COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
 
-class MenuQueryTableWidget(QTableWidget):
-    def __init__(self, plugin_action, query_list=None, *args):
+class MenuTableWidget(QTableWidget):
+    def __init__(self, plugin_action, menu_list=None, *args):
         QTableWidget.__init__(self, *args)
         self.plugin_action = plugin_action
         self.gui = plugin_action.gui
@@ -404,33 +416,33 @@ class MenuQueryTableWidget(QTableWidget):
         self.setSortingEnabled(False)
         self.setMinimumSize(600, 0)
         
-        self.populate_table(query_list)
+        self.populate_table(menu_list)
         
         self.cellChanged.connect(self.cell_changed)
     
-    def populate_table(self, query_list=None):
+    def populate_table(self, menu_list=None):
         self.clear()
         self.setColumnCount(len(COL_NAMES))
         self.setHorizontalHeaderLabels(COL_NAMES)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        if query_list == None: query_list = []
-        self.setRowCount(len(query_list))
-        for row, query in enumerate(query_list, 0):
-            self.populate_table_row(row, query)
+        if menu_list == None: menu_list = []
+        self.setRowCount(len(menu_list))
+        for row, menu in enumerate(menu_list, 0):
+            self.populate_table_row(row, menu)
         
         self.selectRow(0)
     
-    def populate_table_row(self, row, query):
+    def populate_table_row(self, row, menu):
         self.blockSignals(True)
-        icon_name = query[KEY.MENU_IMAGE]
-        menu_text = query[KEY.MENU_TEXT]
+        icon_name = menu[KEY_MENU.IMAGE]
+        menu_text = menu[KEY_MENU.TEXT]
         
-        self.setItem(row, 0, CheckableTableWidgetItem(query[KEY.MENU_ACTIVE]))
+        self.setItem(row, 0, CheckableTableWidgetItem(menu[KEY_MENU.ACTIVE]))
         self.setItem(row, 1, TextIconWidgetItem(menu_text, get_icon(icon_name)))
-        self.setItem(row, 2, QTableWidgetItem(query[KEY.MENU_SUBMENU]))
+        self.setItem(row, 2, QTableWidgetItem(menu[KEY_MENU.SUBMENU]))
         if menu_text:
-            self.set_editable_cells_in_row(row, image=icon_name, query=query)
+            self.set_editable_cells_in_row(row, image=icon_name, menu=menu)
         else:
             # Make all the later column cells non-editable
             self.set_noneditable_cells_in_row(row)
@@ -450,7 +462,7 @@ class MenuQueryTableWidget(QTableWidget):
             # Make sure that the other columns in this row are enabled if not already.
             if not self.cellWidget(row, len(COL_NAMES)-1):
                 self.set_editable_cells_in_row(row)
-            self.cellWidget(row, 4).setQuery(self.convert_row_to_query(row))
+            self.cellWidget(row, 4).setMenu(self.convert_row_to_menu(row))
         else:
             # Blank menu text so treat it as a separator row
             self.set_noneditable_cells_in_row(row)
@@ -468,12 +480,12 @@ class MenuQueryTableWidget(QTableWidget):
         # Store the current index as item data in index 0 in case user cancels dialog in future
         combo.setItemData(0, combo.currentIndex())
     
-    def set_editable_cells_in_row(self, row, image='', query=None):
+    def set_editable_cells_in_row(self, row, image='', menu=None):
         image_combo = ImageComboBox(self, self.image_map, image)
         image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, row))
         self.setCellWidget(row, 3, image_combo)
-        if query==None: query = self.create_blank_row_query()
-        self.setCellWidget(row, 4, SettingsButton(self.plugin_action, query))
+        if menu==None: menu = self.create_blank_row_menu()
+        self.setCellWidget(row, 4, SettingsButton(self.plugin_action, menu))
     
     def set_noneditable_cells_in_row(self, row):
         for col in range(3, len(COL_NAMES)):
@@ -515,7 +527,7 @@ class MenuQueryTableWidget(QTableWidget):
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
-        self.populate_table_row(row, self.create_blank_row_query())
+        self.populate_table_row(row, self.create_blank_row_menu())
         self.select_and_scroll_to_row(row)
     
     def copy_row(self):
@@ -523,12 +535,12 @@ class MenuQueryTableWidget(QTableWidget):
         currentRow = self.currentRow()
         if currentRow < 0:
             return
-        query = self.convert_row_to_query(currentRow)
-        query[KEY.MENU_TEXT] += ' ' + _('(copy)')
+        menu = self.convert_row_to_menu(currentRow)
+        menu[KEY_MENU.TEXT] += ' ' + _('(copy)')
         # We will insert a blank row below the currently selected row
         row = self.currentRow() + 1
         self.insertRow(row)
-        self.populate_table_row(row, query)
+        self.populate_table_row(row, menu)
         self.select_and_scroll_to_row(row)
         self.resizeColumnsToContents()
     
@@ -622,42 +634,42 @@ class MenuQueryTableWidget(QTableWidget):
         return image_map
     
     
-    def create_blank_row_query(self):
-        return get_default_query()
+    def create_blank_row_menu(self):
+        return get_default_menu()
     
-    def get_query_list(self):
-        query_list = []
+    def get_menu_list(self):
+        menu_list = []
         for row in range(self.rowCount()):
-            query_list.append(self.convert_row_to_query(row))
+            menu_list.append(self.convert_row_to_menu(row))
         
         # Remove any blank separator row items from at the start and the end
-        while len(query_list) > 0 and not query_list[-1][KEY.MENU_TEXT]:
-            query_list.pop()
-        while len(query_list) > 0 and not query_list[0][KEY.MENU_TEXT]:
-            query_list.pop(0)
-        return query_list
+        while len(menu_list) > 0 and not menu_list[-1][KEY_MENU.TEXT]:
+            menu_list.pop()
+        while len(menu_list) > 0 and not menu_list[0][KEY_MENU.TEXT]:
+            menu_list.pop(0)
+        return menu_list
     
-    def convert_row_to_query(self, row):
-        query = self.create_blank_row_query()
-        query[KEY.MENU_ACTIVE] = self.item(row, 0).checkState() == Qt.Checked
-        query[KEY.MENU_TEXT] = unicode(self.item(row, 1).text()).strip()
-        query[KEY.MENU_SUBMENU] = unicode(self.item(row, 2).text()).strip()
-        if query[KEY.MENU_TEXT]:
-            query[KEY.MENU_IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
-            query[KEY.MENU_SEARCH_REPLACES] = self.cellWidget(row, 4).getOperationList()
-        return query
+    def convert_row_to_menu(self, row):
+        menu = self.create_blank_row_menu()
+        menu[KEY_MENU.ACTIVE] = self.item(row, 0).checkState() == Qt.Checked
+        menu[KEY_MENU.TEXT] = unicode(self.item(row, 1).text()).strip()
+        menu[KEY_MENU.SUBMENU] = unicode(self.item(row, 2).text()).strip()
+        if menu[KEY_MENU.TEXT]:
+            menu[KEY_MENU.IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
+            menu[KEY_MENU.OPERATIONS] = self.cellWidget(row, 4).getOperationList()
+        return menu
     
-    def get_selected_query(self):
-        query_list = []
+    def get_selected_menu(self):
+        menu_list = []
         for row in self.selectionModel().selectedRows():
-            query_list.append(self.convert_row_to_query(row.row()))
-        return query_list
+            menu_list.append(self.convert_row_to_menu(row.row()))
+        return menu_list
     
-    def append_query_list(self, query_list):
-        for query in reversed(query_list):
+    def append_menu_list(self, menu_list):
+        for menu in reversed(menu_list):
             row = self.currentRow() + 1
             self.insertRow(row)
-            self.populate_table_row(row, query)
+            self.populate_table_row(row, menu)
 
 class ImageComboBox(NoWheelComboBox):
     def __init__(self, parent, image_map, selected_text):
@@ -673,7 +685,7 @@ class ImageComboBox(NoWheelComboBox):
         self.setItemData(0, idx)
 
 class SettingsButton(QToolButton):
-    def __init__(self, plugin_action, query):
+    def __init__(self, plugin_action, menu):
         QToolButton.__init__(self)
         self.plugin_action = plugin_action
         
@@ -682,18 +694,18 @@ class SettingsButton(QToolButton):
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.clicked.connect(self._clicked)
         
-        self._query = query
-        self._initial_query = copy.deepcopy(query)
-        self.setQuery(query)
+        self._menu = menu
+        self._initial_menu = copy.deepcopy(menu)
+        self.setMenu(menu)
     
     
-    def setQuery(self, query):
-        self._query = query
+    def setMenu(self, menu):
+        self._menu = menu
         self.updateText()
         self.hasError()
     
-    def getQuery(self):
-        return copy.copy(self._query)
+    def getMenu(self):
+        return copy.copy(self._menu)
     
     def updateText(self):
         count = len(self.getOperationList())
@@ -730,7 +742,7 @@ class SettingsButton(QToolButton):
     
     def getHasChanged(self):
         op_lst = self.getOperationList()
-        initial_op_lst = self._initial_query[KEY.MENU_SEARCH_REPLACES]
+        initial_op_lst = self._initial_menu[KEY_MENU.OPERATIONS]
         if len(op_lst) != len(initial_op_lst):
             return True
         
@@ -745,14 +757,14 @@ class SettingsButton(QToolButton):
         return False
     
     def setOperationList(self, operation_list):
-        self._query[KEY.MENU_SEARCH_REPLACES] = operation_list
-        self.setQuery(self._query)
+        self._menu[KEY_MENU.OPERATIONS] = operation_list
+        self.setMenu(self._menu)
     
     def getOperationList(self):
-        return copy.copy(self._query[KEY.MENU_SEARCH_REPLACES])
+        return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
-        d = ConfigOperationListDialog(self, self.plugin_action, query=self.getQuery())
+        d = ConfigOperationListDialog(self, self.plugin_action, menu=self.getMenu())
         if d.exec_() == d.Accepted:
             self.setOperationList(d.operation_list)
 
@@ -893,15 +905,16 @@ class OperationWidgetItem(QTableWidgetItem):
             self.setToolTip('')
             return False
 
+
 COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 
 class ConfigOperationListDialog(Dialog):
-    def __init__(self, parent, plugin_action, query):
+    def __init__(self, parent, plugin_action, menu):
         self.plugin_action = plugin_action
-        if not query: query = get_default_query()
-        name = query[KEY.MENU_TEXT]
-        sub_menu = query[KEY.MENU_SUBMENU]
-        self.operation_list = query[KEY.MENU_SEARCH_REPLACES]
+        if not menu: menu = get_default_menu()
+        name = menu[KEY_MENU.TEXT]
+        sub_menu = menu[KEY_MENU.SUBMENU]
+        self.operation_list = menu[KEY_MENU.OPERATIONS]
         
         title = ''
         if not name:
@@ -1029,9 +1042,9 @@ class ConfigOperationListDialog(Dialog):
             shutil.copyfile(json_path, json_temp)
             import_config = JSONConfig(json_name)
             
-            if KEY.MENU_SEARCH_REPLACES not in import_config:
+            if KEY_MENU.OPERATIONS not in import_config:
                 return error_dialog(self, _('Import failed'), _('This is not a valid JSON file'), show=True)
-            operation_list = import_config[KEY.MENU_SEARCH_REPLACES]
+            operation_list = import_config[KEY_MENU.OPERATIONS]
             table.append_operation_list(operation_list)
             
             info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(operation_list), json_path),
@@ -1067,7 +1080,7 @@ class ConfigOperationListDialog(Dialog):
         try:
             
             export_config = JSONConfig(json_name)
-            export_config[KEY.MENU_SEARCH_REPLACES] = operation_list
+            export_config[KEY_MENU.OPERATIONS] = operation_list
             shutil.copyfile(json_temp, json_path)
             info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
                         show=True, show_copy_button=False)
@@ -1283,8 +1296,14 @@ class OperationListTableWidget(QTableWidget):
 class ErrorStrategyDialog(Dialog):
     def __init__(self, parent, plugin_action):
         self.plugin_action = plugin_action
-        self.error_update = PREFS[KEY.ERROR_UPDATE]
-        self.error_operation = PREFS[KEY.ERROR_OPERATION]
+        self.error_update = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
+        self.error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
+        
+        if self.error_operation not in ERROR_OPERATION.LIST.keys():
+            self.error_operation = ERROR_OPERATION.DEFAULT
+        
+        if self.error_update not in ERROR_UPDATE.LIST.keys():
+            self.error_update = ERROR_UPDATE.DEFAULT
         
         title = _('Error Strategy')
         Dialog.__init__(self, title, 'config_ErrorStrategy', parent)
@@ -1313,7 +1332,6 @@ class ErrorStrategyDialog(Dialog):
         
         update_label.setBuddy(self.updateStrategy)
         
-        
         self.desc = QTextEdit (' ', self)
         self.desc.setReadOnly(True)
         layout.addWidget(self.desc)
@@ -1326,18 +1344,19 @@ class ErrorStrategyDialog(Dialog):
     
     def operationStrategyIndexChanged(self, idx):
         error_operation = self.operationStrategy.selected_key()
-        if error_operation not in ERROR_OPERATION.LIST.keys():
-            error_operation = PREFS.defaults[KEY.ERROR_OPERATION]
-        
         self.desc.setText(ERROR_OPERATION.LIST[error_operation][1])
     
     def updateStrategyIndexChanged(self, idx):
         error_update = self.updateStrategy.selected_key()
-        if error_update not in ERROR_UPDATE.LIST.keys():
-            error_update = PREFS.defaults[KEY.ERROR_UPDATE]
         self.desc.setText(ERROR_UPDATE.LIST[error_update][1])
     
     def accept(self):
-        self.error_update = self.updateStrategy.selected_key()
         self.error_operation = self.operationStrategy.selected_key()
+        if self.error_operation not in ERROR_OPERATION.LIST.keys():
+            self.error_operation = ERROR_OPERATION.DEFAULT
+        
+        self.error_update = self.updateStrategy.selected_key()
+        if self.error_update not in ERROR_UPDATE.LIST.keys():
+            self.error_update = ERROR_UPDATE.DEFAULT
+        
         Dialog.accept(self)

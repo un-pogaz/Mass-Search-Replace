@@ -59,7 +59,7 @@ S_R_REPLACE_MODES = [
         _('Append to field'),
                     ]
 
-class KEY_OPERATION:
+class KEY:
     CASE_SENSITIVE      = 'case_sensitive'
     COMMA_SEPARATED     = 'comma_separated'
     DESTINATION_FIELD   = 'destination_field'
@@ -849,7 +849,7 @@ class MetadataBulkWidget(QWidget):
             new = False
         
         query = self.get_query()
-        query[KEY_OPERATION.NAME] = name
+        query[KEY.NAME] = name
         
         self.queries[name] = query
         self.queries.commit()
@@ -1068,34 +1068,34 @@ class MetadataBulkWidget(QWidget):
     
     def _get_query_without_error(self):
         query = {}
-        query[KEY_OPERATION.NAME] = unicode_type(self.query_field.currentText())
-        query[KEY_OPERATION.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
-        query[KEY_OPERATION.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
-        query[KEY_OPERATION.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
-        query[KEY_OPERATION.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
-        query[KEY_OPERATION.SEARCH_FOR] = unicode_type(self.search_for.text())
-        query[KEY_OPERATION.CASE_SENSITIVE] = self.case_sensitive.isChecked()
-        query[KEY_OPERATION.REPLACE_WITH] = unicode_type(self.replace_with.text())
-        query[KEY_OPERATION.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
-        query[KEY_OPERATION.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
-        query[KEY_OPERATION.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
-        query[KEY_OPERATION.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
-        query[KEY_OPERATION.COMMA_SEPARATED] = self.comma_separated.isChecked()
-        query[KEY_OPERATION.RESULTS_COUNT] = self.results_count.value()
-        query[KEY_OPERATION.STARTING_FROM] = self.starting_from.value()
-        query[KEY_OPERATION.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
+        query[KEY.NAME] = unicode_type(self.query_field.currentText())
+        query[KEY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
+        query[KEY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
+        query[KEY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
+        query[KEY.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
+        query[KEY.SEARCH_FOR] = unicode_type(self.search_for.text())
+        query[KEY.CASE_SENSITIVE] = self.case_sensitive.isChecked()
+        query[KEY.REPLACE_WITH] = unicode_type(self.replace_with.text())
+        query[KEY.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
+        query[KEY.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
+        query[KEY.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
+        query[KEY.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
+        query[KEY.COMMA_SEPARATED] = self.comma_separated.isChecked()
+        query[KEY.RESULTS_COUNT] = self.results_count.value()
+        query[KEY.STARTING_FROM] = self.starting_from.value()
+        query[KEY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
         
         return query
     
     def get_query(self):
         query = self._get_query_without_error()
         
-        if query[KEY_OPERATION.SEARCH_FIELD] != TEMPLATE_FIELD:
-            query[KEY_OPERATION.S_R_TEMPLATE] = ''
+        if query[KEY.SEARCH_FIELD] != TEMPLATE_FIELD:
+            query[KEY.S_R_TEMPLATE] = ''
         
         # to be used in validate method
         if self.s_r_error != None:
-            query[KEY_OPERATION.S_R_ERROR] = self.s_r_error
+            query[KEY.S_R_ERROR] = self.s_r_error
         
         return query
     
@@ -1125,24 +1125,24 @@ class MetadataBulkWidget(QWidget):
                 except:
                     attr.setCurrentIndex(0)
             
-            set_index(self.search_mode, KEY_OPERATION.SEARCH_MODE)
-            set_index(self.search_field, KEY_OPERATION.SEARCH_FIELD)
-            set_text(self.s_r_template, KEY_OPERATION.S_R_TEMPLATE)
+            set_index(self.search_mode, KEY.SEARCH_MODE)
+            set_index(self.search_field, KEY.SEARCH_FIELD)
+            set_text(self.s_r_template, KEY.S_R_TEMPLATE)
             
             self.s_r_template_changed()  # simulate gain/loss of focus
             
-            set_index(self.s_r_src_ident, KEY_OPERATION.S_R_SRC_IDENT)
-            set_text(self.s_r_dst_ident, KEY_OPERATION.S_R_DST_IDENT)
-            set_text(self.search_for, KEY_OPERATION.SEARCH_FOR)
-            set_checked(self.case_sensitive, KEY_OPERATION.CASE_SENSITIVE)
-            set_text(self.replace_with, KEY_OPERATION.REPLACE_WITH)
-            set_index(self.replace_func, KEY_OPERATION.REPLACE_FUNC)
-            set_index(self.destination_field, KEY_OPERATION.DESTINATION_FIELD)
-            set_index(self.replace_mode, KEY_OPERATION.REPLACE_MODE)
-            set_checked(self.comma_separated, KEY_OPERATION.COMMA_SEPARATED)
-            set_value(self.results_count, KEY_OPERATION.RESULTS_COUNT)
-            set_value(self.starting_from, KEY_OPERATION.STARTING_FROM)
-            set_text(self.multiple_separator, KEY_OPERATION.MULTIPLE_SEPARATOR)
+            set_index(self.s_r_src_ident, KEY.S_R_SRC_IDENT)
+            set_text(self.s_r_dst_ident, KEY.S_R_DST_IDENT)
+            set_text(self.search_for, KEY.SEARCH_FOR)
+            set_checked(self.case_sensitive, KEY.CASE_SENSITIVE)
+            set_text(self.replace_with, KEY.REPLACE_WITH)
+            set_index(self.replace_func, KEY.REPLACE_FUNC)
+            set_index(self.destination_field, KEY.DESTINATION_FIELD)
+            set_index(self.replace_mode, KEY.REPLACE_MODE)
+            set_checked(self.comma_separated, KEY.COMMA_SEPARATED)
+            set_value(self.results_count, KEY.RESULTS_COUNT)
+            set_value(self.starting_from, KEY.STARTING_FROM)
+            set_text(self.multiple_separator, KEY.MULTIPLE_SEPARATOR)
     
     
     def openTemplateBox(self):

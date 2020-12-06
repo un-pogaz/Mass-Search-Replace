@@ -11,6 +11,10 @@ import os, time
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
+try:
+    load_translations()
+except NameError:
+    pass # load_translations() added in calibre 1.9
 
 from calibre_plugins.mass_search_replace.SearchReplaceCalibre import TEMPLATE_FIELD
 

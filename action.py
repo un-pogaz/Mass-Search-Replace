@@ -32,10 +32,9 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 from polyglot.builtins import iteritems
 
-from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_query
+from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
-
 
 
 class MassSearchReplaceAction(InterfaceAction):
@@ -54,13 +53,14 @@ class MassSearchReplaceAction(InterfaceAction):
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
         
-        error_operation = PREFS[KEY.ERROR_OPERATION]
-        if error_operation not in ERROR_OPERATION.LIST.keys():
-            PREFS[KEY.ERROR_OPERATION] = PREFS.defaults[KEY.ERROR_OPERATION]
         
-        error_update = PREFS[KEY.ERROR_UPDATE]
+        error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
+        if error_operation not in ERROR_OPERATION.LIST.keys():
+            PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION] = ERROR_OPERATION.DEFAULT
+        
+        error_update = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
         if error_update not in ERROR_UPDATE.LIST.keys():
-            PREFS[KEY.ERROR_UPDATE] = PREFS.defaults[KEY.ERROR_UPDATE]
+            PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE] = ERROR_UPDATE.DEFAULT
         
         
         # Assign our menu to this action and an icon
@@ -75,9 +75,9 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
-        query_list = PREFS[KEY.MENU]
+        menu_list = PREFS[KEY_MENU.MENU]
         self.menu.clear()
-        self.query_menu = []
+        self.menu_list = []
         sub_menus = {}
         
         
@@ -91,9 +91,9 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions = []
         
         debug_print('Rebuilding menu')
-        for query in query_list:
-            if not query_testGetError(query) and query[KEY.MENU_ACTIVE]:
-                self.append_menu_item_ex(self.menu, sub_menus, query)
+        for menu in menu_list:
+            if not menu_testGetError(menu) and menu[KEY_MENU.ACTIVE]:
+                self.append_menu_item_ex(self.menu, sub_menus, menu)
         
         self.menu.addSeparator()
         
@@ -110,11 +110,11 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu_actions.append(ac)
         self.gui.keyboard.finalize()
     
-    def append_menu_item_ex(self, parent_menu, sub_menus, query):
+    def append_menu_item_ex(self, parent_menu, sub_menus, menu):
         
-        menu_text = query[KEY.MENU_TEXT]
-        sub_menu_text = query[KEY.MENU_SUBMENU]
-        image_name = query[KEY.MENU_IMAGE]
+        menu_text = menu[KEY_MENU.TEXT]
+        sub_menu_text = menu[KEY_MENU.SUBMENU]
+        image_name = menu[KEY_MENU.IMAGE]
         
         ac = None
         if sub_menu_text:
@@ -129,7 +129,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         if not menu_text:
             parent_menu.addSeparator()
-        elif len(query[KEY.MENU_SEARCH_REPLACES])>0:
+        elif len(menu[KEY_MENU.OPERATIONS])>0:
             if sub_menu_text:
                 name = '{:s} > {:s}'.format(sub_menu_text, menu_text)
             else:
@@ -139,21 +139,21 @@ class MassSearchReplaceAction(InterfaceAction):
             debug_print('Rebuilding menu for:', name)
             
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
-                           triggered=partial(self.run_SearchReplace, query),
+                           triggered=partial(self.run_SearchReplace, menu),
                            unique_name=name, shortcut_name=name)
         
         if ac:
             # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
             self.menu_actions.append(ac)
-            self.query_menu.append((query, ac))
+            self.menu_list.append((menu, ac))
     
     def quickSearchReplace(self, parameter_list):
         
-        query = get_default_query()
-        query[KEY.MENU_TEXT] = None
-        query[KEY.MENU_SEARCH_REPLACES] = PREFS[KEY.QUICK]
+        menu = get_default_menu()
+        menu[KEY_MENU.TEXT] = None
+        menu[KEY_MENU.OPERATIONS] = PREFS[KEY_MENU.QUICK]
         
-        d = ConfigOperationListDialog(self.menu, self, query=query)
+        d = ConfigOperationListDialog(self.menu, self, menu=menu)
         
         if len(d.operation_list)==0:
             d.add_empty_operation()
@@ -161,12 +161,12 @@ class MassSearchReplaceAction(InterfaceAction):
         if d.exec_() == d.Accepted:
             
             if len(d.operation_list)>0:
-                query[KEY.MENU_SEARCH_REPLACES] = d.operation_list
-                PREFS[KEY.QUICK] = d.operation_list
+                menu[KEY_MENU.OPERATIONS] = d.operation_list
+                PREFS[KEY_MENU.QUICK] = d.operation_list
                 
-                self.run_SearchReplace(query)
+                self.run_SearchReplace(menu)
     
-    def run_SearchReplace(self, query):
+    def run_SearchReplace(self, menu):
         
         if not self.is_library_selected:
             return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
@@ -178,7 +178,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         book_ids = self.gui.library_view.get_selected_ids()
         
-        srpg = SearchReplacesProgressDialog(self, book_ids, query)
+        srpg = SearchReplacesProgressDialog(self, book_ids, menu)
         srpg.close()
         del srpg
     
@@ -186,17 +186,17 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(self.gui)
 
 
-def query_testGetError(query):
+def menu_testGetError(menu):
     
-    difference = set(KEY.ALL_MENU).difference(query)
+    difference = set(KEY_MENU.ALL).difference(menu)
     for key in difference:
-        return Exception(_('Invalide configuration, the "{:s}" key is missing.').format(key))
+        return Exception(_('Invalide menu configuration, the "{:s}" key is missing.').format(key))
     
     return None
 
 
 class SearchReplacesProgressDialog(QProgressDialog):
-    def __init__(self, plugin_action, book_ids, query):
+    def __init__(self, plugin_action, book_ids, menu):
         
         # plugin_action
         self.plugin_action = plugin_action
@@ -217,11 +217,11 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.fields_update = 0
         
         # is a quick Search/Replace
-        self.quickSearchReplace = query[KEY.MENU_TEXT] == None
+        self.quickSearchReplace = menu[KEY_MENU.TEXT] == None
         
         
         # operation list of Search/Replace
-        self.operation_list = operation_list_active(query[KEY.MENU_SEARCH_REPLACES])
+        self.operation_list = operation_list_active(menu[KEY_MENU.OPERATIONS])
         
         # Count of Search/Replace
         self.operation_count = len(self.operation_list)
@@ -235,15 +235,17 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.time_execut = 0
         
         # operation error
-        self.operationStrategy = PREFS[KEY.ERROR_OPERATION]
+        self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         self.operationErrorList = []
         
+        
         # Exception
-        self.exceptionStrategy = PREFS[KEY.ERROR_UPDATE]
+        self.exceptionStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
         self.exception = None
         self.exception_list = False
         self.exception_update = False
         self.exception_safely = False
+        
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, self.gui)
         
