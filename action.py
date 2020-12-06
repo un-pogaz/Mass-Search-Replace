@@ -450,8 +450,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             
                             self.dbA.set_field(field, book_id_val_map)
                         
-                        print(self.s_r.updated_fields)
-                        
                     except Exception as e:
                         self.exception_update = True
                         self.exception = e
