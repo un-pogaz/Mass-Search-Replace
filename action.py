@@ -41,7 +41,7 @@ class MassSearchReplaceAction(InterfaceAction):
     
     name = 'Mass Search/Replace'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = ('Mass Search/Replace', None, _('Applie a list of multiple saved Search and Replace operations'), None)
+    action_spec = ('Mass Search/Replace', None, _('Apply a list of multiple saved Find and Replace operations'), None)
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])

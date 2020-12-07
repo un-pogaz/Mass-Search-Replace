@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-06 21:16+0100\n"
+"POT-Creation-Date: 2020-12-07 12:50+0100\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -88,8 +88,12 @@ msgstr ""
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr ""
 
-#: __init__.py:31 action.py:44
-msgid "Applie a list of multiple saved Search and Replace operations"
+#: __init__.py:31
+msgid "Easily apply a list of multiple saved Find and Replace operations to your books metadata"
+msgstr ""
+
+#: action.py:44
+msgid "Apply a list of multiple saved Find and Replace operations"
 msgstr ""
 
 #: action.py:100

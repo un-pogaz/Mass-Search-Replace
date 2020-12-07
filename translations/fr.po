@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-06 21:16+0100\n"
-"PO-Revision-Date: 2020-12-06 21:16+0100\n"
+"POT-Creation-Date: 2020-12-07 12:50+0100\n"
+"PO-Revision-Date: 2020-12-07 12:51+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -90,9 +90,13 @@ msgstr "Le champ de l'opération \"{:s}\" contient une valeur non valide ({:s}).
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr "La valeur de ce champ est localisée (traduite). Cela peut poser problème lors de l'utilisation de paramètres partagée sur internet ou d'un changement de la langue de l'interface utilisateur."
 
-#: __init__.py:31 action.py:44
-msgid "Applie a list of multiple saved Search and Replace operations"
-msgstr "Appliquer une liste de plusieurs Rechercher et Remplacer sauvegardées"
+#: __init__.py:31
+msgid "Easily apply a list of multiple saved Find and Replace operations to your books metadata"
+msgstr "Appliquer facilement une liste de plusieurs opérations de Rechercher et Remplacer sauvegardées aux métadonnées de vos livres"
+
+#: action.py:44
+msgid "Apply a list of multiple saved Find and Replace operations"
+msgstr "Appliquer une liste de plusieurs opérations de Rechercher et Remplacer"
 
 #: action.py:100
 msgid "&Quick Search/Replace..."
