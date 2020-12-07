@@ -27,7 +27,7 @@ except ImportError:
 from calibre import prints
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version
-from calibre.gui2 import error_dialog, warning_dialog, question_dialog
+from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.library import current_library_name
 from polyglot.builtins import iteritems
@@ -238,6 +238,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         self.operationErrorList = []
         
+        # show Update Report
+        self.showUpdateReport = PREFS[KEY_MENU.UPDATE_REPORT]
         
         # Exception
         self.exceptionStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
@@ -279,27 +281,36 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         _('A invalid operations has detected:\n{:s}\n\n'
                           'Mass Search/Replace was canceled.').format(str(self.operationErrorList[0])),
                           show=True, show_copy_button=False)
-            
-        elif self.exception_update:
-            debug_print('Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(self.exception))
-            
-            msg = _('Mass Search/Replace encountered an error during the library update.')
-            if self.exceptionStrategy == ERROR_UPDATE.RESTORE:
-                msg += '\n' + _('The library a was restored to its original state.')
-                debug_print('The library a was restored to its original state.')
-                
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
         
         else:
             
+            #info debug
             debug_print('Search/Replace launched for {:d} books with {:d} operation.'.format(self.book_count, self.operation_count))
-            debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
+            
             if self.operationErrorList:
-                debug_print('!! An invalid operation was detected.'.format(self.time_execut))
+                debug_print('!! {:d} invalid operation was detected.'.format(len(self.operationErrorList)))
+            
+            if self.exception_update:
+                debug_print('!! Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(self.exception))
+            elif self.exception_safely:
+                debug_print('!! {:d} exceptions have occurred during the library update.'.format(len(self.exception)))
+            
+            if self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE:
+                debug_print('The library a was restored to its original state.')
+            else:
+                debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
             debug_print('Search/Replace execute in {:0.3f} seconds.\n'.format(self.time_execut))
             
-            if self.exception_safely:
-                debug_print('!! {:d} exceptions have occurred.'.format(len(self.exception)))
+            #info dialog
+            if self.exception_update:
+                
+                msg = _('Mass Search/Replace encountered an error during the library update.')
+                if self.exceptionStrategy == ERROR_UPDATE.RESTORE:
+                    msg += '\n' + _('The library a was restored to its original state.')
+                    
+                CustomExceptionErrorDialog(self.gui ,self.exception, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
+            
+            elif self.exception_safely:
                 
                 det_msg= '\n'.join('Book {:s} | {:s} > {:}'.format(book_info, field, e) for id, book_info, field, e in self.exception )
                 
@@ -307,12 +318,17 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
                               det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
             
-            elif self.operationErrorList:
+            if self.operationErrorList:
                 det_msg= '\n'.join( 'Operation {:d}/{:d} > {:s}'.format(n, self.operation_count, err) for n, err in self.operationErrorList)
                 
                 warning_dialog(self.gui, _('Invalid operation'),
                             _('{:d} invalid operations has detected and have been ignored.').format(len(self.operationErrorList)),
                             det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
+            
+            if self.showUpdateReport and not (self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE):
+                info_dialog(self.gui, _('Update Report'), 
+                        _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(self.books_update, self.fields_update)
+                        , show=True, show_copy_button=False)
             
         
         self.close()
@@ -361,7 +377,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     if not rslt:
                         return
                 
-                
                 if not err:
                     for num, book_id in enumerate(self.book_ids, 1):
                         
@@ -402,13 +417,15 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 lst_id += book_id_val_map.keys()
             self.fields_update = len(lst_id)
             
-            lst_id = list(dict.fromkeys(lst_id));
+            lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
+            
+            book_id_update = defaultdict(dict)
             
             if self.books_update > 0:
                 
-                debug_print('Update the database for {:d} books...\n'.format(self.books_update))
-                self.setLabelText(_('Update the library for {:d} books...').format(self.books_update))
+                debug_print('Update the database for {:d} books with a total of {:d} fields...\n'.format(self.books_update, self.fields_update))
+                self.setLabelText(_('Update the library for {:d} books with a total of {:d} fields...').format(self.books_update, self.fields_update))
                 self.setValue(self.total_operation_count)
                 
                 if self.exceptionStrategy == ERROR_UPDATE.SAFELY or self.exceptionStrategy == ERROR_UPDATE.DONT_STOP:
@@ -426,6 +443,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                                 try:
                                     val = self.s_r.updated_fields[field][id]
                                     self.dbA.set_field(field, {id:val})
+                                    book_id_update[field][id] = ''
                                 except Exception as e:
                                     self.exception_safely = True
                                     
@@ -449,6 +467,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                                 backup_fields[field] = src_field
                             
                             self.dbA.set_field(field, book_id_val_map)
+                            book_id_update[field] = {id:'' for id in book_id_val_map.keys()}
                         
                     except Exception as e:
                         self.exception_update = True
@@ -463,5 +482,14 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
         
         finally:
+            
+            lst_id = []
+            for field, book_id_map in iteritems(book_id_update):
+                lst_id += book_id_map.keys()
+            self.fields_update = len(lst_id)
+            
+            lst_id = list(dict.fromkeys(lst_id))
+            self.books_update = len(lst_id)
+            
             self.time_execut = round(time.time() - start, 3)
             self.hide()

@@ -21,14 +21,14 @@ try:
     from PyQt5 import QtCore
     from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
                           QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                          QTableWidgetItem, QAbstractItemView, QComboBox,
+                          QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
 except:
     from PyQt4 import QtGui, QtCore
     from PyQt4.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
                           QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                          QTableWidgetItem, QAbstractItemView, QComboBox,
+                          QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
                           QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                           QPushButton, QSizePolicy)
 
@@ -81,6 +81,7 @@ class KEY_MENU:
     ]
     
     QUICK = 'Quick'
+    UPDATE_REPORT = 'UpdateReport'
 
 class KEY_ERROR:
     ERROR = 'ErrorStrategy'
@@ -144,6 +145,7 @@ PREFS = JSONConfig('plugins/Mass Search-Replace')
 # Set defaults
 PREFS.defaults[KEY_MENU.MENU] = []
 PREFS.defaults[KEY_MENU.QUICK] = []
+PREFS.defaults[KEY_MENU.UPDATE_REPORT] = False
 
 PREFS.defaults[KEY_ERROR.ERROR] = {
     KEY_ERROR.OPERATION : ERROR_UPDATE.DEFAULT,
@@ -241,6 +243,13 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(keyboard_shortcuts_button)
         keyboard_layout.insertStretch(-1)
         
+        self.updateReport = QCheckBox(_('Display a update report'), self)
+        if PREFS[KEY_MENU.UPDATE_REPORT]:
+            self.updateReport.setCheckState(Qt.Checked)
+        else:
+            self.updateReport.setCheckState(Qt.Unchecked)
+        
+        keyboard_layout.addWidget(self.updateReport)
         
         error_button = QPushButton(_('Error strategy...'), self)
         error_button.setToolTip(_('Define the strategy when a error occurs during the library update'))
@@ -250,6 +259,7 @@ class ConfigWidget(QWidget):
     
     def save_settings(self):
         PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
+        PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     
