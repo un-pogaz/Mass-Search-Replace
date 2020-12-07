@@ -31,7 +31,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
     description             = _('Easily apply a list of multiple saved Find and Replace operations to your books metadata')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 9, 0)
+    version                 = (0, 9, 1)
     minimum_calibre_version = (4, 0, 0)
 
     #: This field defines the GUI plugin class that contains all the code

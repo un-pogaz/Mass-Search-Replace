@@ -41,10 +41,9 @@ _s_r = None
 def get_default_operation(plugin_action):
         global _default_operation
         global _s_r
-        if not _s_r or not _default_operation:
+        if not _s_r or not _default_operation or _s_r.db != plugin_action.gui.current_db:
             _s_r = SearchReplaceWidget_NoWindows(plugin_action)
             _default_operation = _s_r.save_settings()
-            
             _default_operation[KEY_OPERATION.ACTIVE] = True
         
         return copy.copy(_default_operation)
@@ -164,7 +163,6 @@ def operation_string(operation):
     val = val + operation_para_list(operation)[2:]
     
     return '"'+ '" | "'.join(val)+'"'
-
 
 
 def SearchReplaceWidget_NoWindows(plugin_action):

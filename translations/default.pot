@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-07 14:12+0100\n"
+"POT-Creation-Date: 2020-12-07 14:59+0100\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -37,15 +37,15 @@ msgstr ""
 msgid "Identifier type \"{:s}\" is not available for this library"
 msgstr ""
 
-#: SearchReplace.py:212
+#: SearchReplace.py:211
 msgid "Configuration of a Search/Replace operation"
 msgstr ""
 
-#: SearchReplace.py:228 action.py:280 action.py:324 action.py:369
+#: SearchReplace.py:227 action.py:280 action.py:324 action.py:369
 msgid "Invalid operation"
 msgstr ""
 
-#: SearchReplace.py:229
+#: SearchReplace.py:228
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
