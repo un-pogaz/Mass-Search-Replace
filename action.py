@@ -242,7 +242,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # Exception
         self.exceptionStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
         self.exception = None
-        self.exception_list = False
+        self.exception_unhandled = False
         self.exception_update = False
         self.exception_safely = False
         
@@ -269,7 +269,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         if self.wasCanceled():
             debug_print('Mass Search/Replace was cancelled. No change.')
         
-        elif self.exception_list:
+        elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
             CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Unhandled exception')+'\n')
         
@@ -392,7 +392,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         self.s_r.search_replace(book_id)
         
         except Exception as e:
-            self.exception_list = True
+            self.exception_unhandled = True
             self.exception = e
         
         else:
