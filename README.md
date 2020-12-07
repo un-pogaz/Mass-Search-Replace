@@ -1,6 +1,6 @@
 # Mass Search/Replace
 
-Calibre plugin for easy mass application of several Search/Replace operations
+Calibre plugin for easily apply a list of multiple saved Find and Replace operations to your books metadata
 
 https://www.mobileread.com/forums/showthread.php?t=335417
 
