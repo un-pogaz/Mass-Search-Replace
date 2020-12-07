@@ -65,7 +65,7 @@ def check_template(template, plugin_action, show_error=False):
         mi = MetaInformation(_('Unknown'))
     ## add any extra fields by actions that define update_metadata
     #plugin_action.update_metadata(mi)
-    #
+    
     output = SafeFormat().safe_format(template, mi, TEMPLATE_ERROR, mi)
     for msg in error_msgs:
         if output.lower().find(msg.lower()) != -1:
@@ -97,7 +97,7 @@ class TemplateBox(TemplateDialog):
                 mi = MetaInformation(_('Unknown'))
         ## add any extra fields by actions that define update_metadata
         #plugin_action.update_metadata(mi)
-        #
+        
         if not template_text:
             text = _('Enter a template to test using data from the selected book')
             text_is_placeholder = True

@@ -728,7 +728,6 @@ class MetadataBulkWidget(QWidget):
         result = []
         rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
         for s in src:
-            #FIXME: THE PROBLEM IS HERE
             t = self.s_r_obj.sub(self.s_r_func, s)
             if self.search_mode.currentIndex() == 0:
                 t = rfunc(t)
@@ -801,6 +800,158 @@ class MetadataBulkWidget(QWidget):
         if self.comma_separated.isChecked():
             return ','
         return ''
+    
+    def s_r_paint_results(self, txt):
+        self.s_r_error = None
+        self.s_r_set_colors()
+        flags = regex.FULLCASE | regex.UNICODE
+        
+        if self.case_sensitive.isChecked():
+            flags |= regex.IGNORECASE
+        
+        
+        #extend try catch -by un_pogaz
+        try:
+            
+            sftxt = unicode_type(self.search_field.currentText())
+            if not sftxt:
+                raise Exception(CalibreText.SEARCH_FIELD)
+            
+            smtxt = unicode_type(self.search_mode.currentText())
+            if not smtxt:
+                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.SEARCH_MODE))
+            
+            rmtxt = unicode_type(self.replace_mode.currentText())
+            if not rmtxt:
+                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.REPLACE_MODE))
+            
+            if sftxt == 'identifiers':
+                if not unicode_type(self.s_r_src_ident.currentText()):
+                    raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
+            
+            if sftxt == TEMPLATE_FIELD:
+                error = check_template(self.s_r_template.text(), self.plugin_action)
+                if error is not True:
+                    raise Exception(_('S/R TEMPLATE ERROR')+': '+ str(error))
+            
+        except Exception as e:
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        
+        try:
+            
+            stext = unicode_type(self.search_for.text())
+            if not stext:
+                raise Exception(_('You must specify a search expression in the "Search for" field'))
+            if self.search_mode.currentIndex() == 0:
+                self.s_r_obj = regex.compile(regex.escape(stext), flags | regex.V1)
+            else:
+                try:
+                    self.s_r_obj = regex.compile(stext, flags | regex.V1)
+                except regex.error:
+                    self.s_r_obj = regex.compile(stext, flags)
+        except Exception as e:
+            self.s_r_obj = None
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        try:
+            #Fix casse test text
+            t = self.s_r_obj.sub(self.s_r_func, unicode_type(self.test_text.text()))
+            if self.search_mode.currentIndex() == 0:
+                rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
+                t = rfunc(t)
+            self.test_result.setText(t)
+        except Exception as e:
+            self.s_r_error = e
+            self.s_r_set_colors()
+            return
+        
+        
+        for i in range(0,self.s_r_number_of_books):
+            mi = self.db.get_metadata(self.ids[i], index_is_id=True)
+            wr = getattr(self, 'book_%d_result'%(i+1))
+            try:
+                result = self.s_r_do_regexp(mi)
+                t = self.s_r_do_destination(mi, result)
+                if len(t) > 1 and self.destination_field_fm['is_multiple']:
+                    t = t[self.starting_from.value()-1:
+                          self.starting_from.value()-1 + self.results_count.value()]
+                    t = unicode_type(self.multiple_separator.text()).join(t)
+                else:
+                    t = self.s_r_replace_mode_separator().join(t)
+                wr.setText(t)
+            except Exception as e:
+                self.s_r_error = e
+                self.s_r_set_colors()
+                break
+    
+    def do_search_replace(self, book_id):
+        source = self.s_r_sf_itemdata(None)
+        if not source or not self.s_r_obj:
+            return
+        dest = self.s_r_df_itemdata(None)
+        if not dest:
+            dest = source
+        
+        dfm = self.db.field_metadata[dest]
+        mi = self.db.new_api.get_proxy_metadata(book_id)
+        
+        #edit the metadata object with the stored edited field
+        if dest in self.set_field_calls:
+            if book_id in self.set_field_calls[dest]:
+                store = self.set_field_calls[dest][book_id]
+                mi.set(dest, store)
+        
+        original = mi.get(dest)
+        
+        val = self.s_r_do_regexp(mi)
+        val = self.s_r_do_destination(mi, val)
+        if dfm['is_multiple']:
+            if dfm['is_csp']:
+                # convert the colon-separated pair strings back into a dict,
+                # which is what set_identifiers wants
+                dst_id_type = unicode_type(self.s_r_dst_ident.text())
+                if dst_id_type and dst_id_type != '*':
+                    v = ''.join(val)
+                    ids = mi.get(dest)
+                    ids[dst_id_type] = v
+                    val = ids
+                else:
+                    try:
+                        val = dict([(t.split(':')) for t in val])
+                    except:
+                        raise Exception(_('Invalid identifier string. It must be a '
+                                          'comma-separated list of pairs of '
+                                          'strings separated by a colon'))
+        else:
+            val = self.s_r_replace_mode_separator().join(val)
+            if dest == 'title' and len(val) == 0:
+                val = _('Unknown')
+        
+        if not val and dfm['datatype'] == 'datetime':
+            val = None
+        if dfm['datatype'] == 'rating':
+            if (not val or int(val) == 0):
+                val = None
+            if dest == 'rating' and val:
+                val = (int(val) // 2) * 2
+        
+        def lenNone(v):
+            if v == None: return 0
+            else:
+                try: return len(v)
+                except: return 0
+        
+        #add the result value only if different of the original
+        # and if it is not a pair None/''
+        if original != val and not (lenNone(original) == 0 and lenNone(val) == 0):
+            
+            self.set_field_calls[dest][book_id] = val
+    # }}}
     
     def s_r_remove_query(self, *args):
         if self.query_field.currentIndex() == 0:
@@ -894,210 +1045,6 @@ class MetadataBulkWidget(QWidget):
         self.starting_from.setValue(1)
         self.multiple_separator.setText(" ::: ")
     
-    def do_it(self):
-        if len(self.ids) < 1:
-            return
-        try:
-            source = self.s_r_sf_itemdata(None)
-        except:
-            source = ''
-        do_sr = source and self.s_r_obj
-        
-        if self.s_r_error is not None and do_sr:
-            error_dialog(self, _('Search/replace invalid'),
-                    _('Search/replace is invalid: %s')%error_message(self.s_r_error),
-                    show=True)
-            return False
-        self.changed = bool(self.ids)
-                
-        self.set_field_calls = defaultdict(dict)
-        
-        if do_sr:
-            for book_id in self.ids:
-                self.do_search_replace(book_id)
-            if self.set_field_calls:
-                for field, book_id_val_map in iteritems(self.set_field_calls):
-                    self.refresh_books.update(self.db.new_api.set_field(field, book_id_val_map))
-        
-        self.db.clean()
-        return
-    
-    # }}}
-    
-    
-    def s_r_paint_results(self, txt):
-        self.s_r_error = None
-        self.s_r_set_colors()
-        flags = regex.FULLCASE | regex.UNICODE
-        
-        if self.case_sensitive.isChecked():
-            flags |= regex.IGNORECASE
-        
-        
-        #extend try catch -by un_pogaz
-        try:
-            
-            sftxt = unicode_type(self.search_field.currentText())
-            if not sftxt:
-                raise Exception(CalibreText.SEARCH_FIELD)
-            
-            smtxt = unicode_type(self.search_mode.currentText())
-            if not smtxt:
-                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.SEARCH_MODE))
-            
-            rmtxt = unicode_type(self.replace_mode.currentText())
-            if not rmtxt:
-                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.REPLACE_MODE))
-            
-            if sftxt == 'identifiers':
-                if not unicode_type(self.s_r_src_ident.currentText()):
-                    raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
-            
-            if sftxt == TEMPLATE_FIELD:
-                error = check_template(self.s_r_template.text(), self.plugin_action)
-                if error is not True:
-                    raise Exception(_('S/R TEMPLATE ERROR')+': '+ str(error))
-            
-        except Exception as e:
-            self.s_r_error = e
-            self.s_r_set_colors()
-            return
-        
-        
-        try:
-            
-            stext = unicode_type(self.search_for.text())
-            if not stext:
-                raise Exception(_('You must specify a search expression in the "Search for" field'))
-            if self.search_mode.currentIndex() == 0:
-                self.s_r_obj = regex.compile(regex.escape(stext), flags | regex.V1)
-            else:
-                try:
-                    self.s_r_obj = regex.compile(stext, flags | regex.V1)
-                except regex.error:
-                    self.s_r_obj = regex.compile(stext, flags)
-        except Exception as e:
-            self.s_r_obj = None
-            self.s_r_error = e
-            self.s_r_set_colors()
-            return
-        
-        try:
-            self.test_result.setText(self.s_r_obj.sub(self.s_r_func,
-                                     unicode_type(self.test_text.text())))
-        except Exception as e:
-            self.s_r_error = e
-            self.s_r_set_colors()
-            return
-        
-        
-        for i in range(0,self.s_r_number_of_books):
-            mi = self.db.get_metadata(self.ids[i], index_is_id=True)
-            wr = getattr(self, 'book_%d_result'%(i+1))
-            try:
-                result = self.s_r_do_regexp(mi)
-                t = self.s_r_do_destination(mi, result)
-                if len(t) > 1 and self.destination_field_fm['is_multiple']:
-                    t = t[self.starting_from.value()-1:
-                          self.starting_from.value()-1 + self.results_count.value()]
-                    t = unicode_type(self.multiple_separator.text()).join(t)
-                else:
-                    t = self.s_r_replace_mode_separator().join(t)
-                wr.setText(t)
-            except Exception as e:
-                self.s_r_error = e
-                self.s_r_set_colors()
-                break
-    
-    
-    def do_search_replace(self, book_id):
-        source = self.s_r_sf_itemdata(None)
-        if not source or not self.s_r_obj:
-            return
-        dest = self.s_r_df_itemdata(None)
-        if not dest:
-            dest = source
-        
-        dfm = self.db.field_metadata[dest]
-        mi = self.db.new_api.get_proxy_metadata(book_id)
-        
-        #edit the metadata object with the stored edited field
-        if dest in self.set_field_calls:
-            if book_id in self.set_field_calls[dest]:
-                store = self.set_field_calls[dest][book_id]
-                mi.set(dest, store)
-        
-        original = mi.get(dest)
-        
-        val = self.s_r_do_regexp(mi)
-        val = self.s_r_do_destination(mi, val)
-        if dfm['is_multiple']:
-            if dfm['is_csp']:
-                # convert the colon-separated pair strings back into a dict,
-                # which is what set_identifiers wants
-                dst_id_type = unicode_type(self.s_r_dst_ident.text())
-                if dst_id_type and dst_id_type != '*':
-                    v = ''.join(val)
-                    ids = mi.get(dest)
-                    ids[dst_id_type] = v
-                    val = ids
-                else:
-                    try:
-                        val = dict([(t.split(':')) for t in val])
-                    except:
-                        raise Exception(_('Invalid identifier string. It must be a '
-                                          'comma-separated list of pairs of '
-                                          'strings separated by a colon'))
-        else:
-            val = self.s_r_replace_mode_separator().join(val)
-            if dest == 'title' and len(val) == 0:
-                val = _('Unknown')
-        
-        if not val and dfm['datatype'] == 'datetime':
-            val = None
-        if dfm['datatype'] == 'rating':
-            if (not val or int(val) == 0):
-                val = None
-            if dest == 'rating' and val:
-                val = (int(val) // 2) * 2
-        
-        #add the result value only if different of the original
-        # and if it is not a pair None/''
-        if original != val and not (original == None and val == '' or original == '' and val == None):
-            self.set_field_calls[dest][book_id] = val
-    
-    def _get_query_without_error(self):
-        query = {}
-        query[KEY.NAME] = unicode_type(self.query_field.currentText())
-        query[KEY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
-        query[KEY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
-        query[KEY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
-        query[KEY.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
-        query[KEY.SEARCH_FOR] = unicode_type(self.search_for.text())
-        query[KEY.CASE_SENSITIVE] = self.case_sensitive.isChecked()
-        query[KEY.REPLACE_WITH] = unicode_type(self.replace_with.text())
-        query[KEY.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
-        query[KEY.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
-        query[KEY.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
-        query[KEY.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
-        query[KEY.COMMA_SEPARATED] = self.comma_separated.isChecked()
-        query[KEY.RESULTS_COUNT] = self.results_count.value()
-        query[KEY.STARTING_FROM] = self.starting_from.value()
-        query[KEY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
-        
-        return query
-    
-    def get_query(self):
-        query = self._get_query_without_error()
-        
-        if query[KEY.SEARCH_FIELD] != TEMPLATE_FIELD:
-            query[KEY.S_R_TEMPLATE] = ''
-        
-        # to be used in validate method
-        if self.s_r_error != None:
-            query[KEY.S_R_ERROR] = self.s_r_error
-        
-        return query
     
     def load_query(self, query):
         if query:
@@ -1143,6 +1090,67 @@ class MetadataBulkWidget(QWidget):
             set_value(self.results_count, KEY.RESULTS_COUNT)
             set_value(self.starting_from, KEY.STARTING_FROM)
             set_text(self.multiple_separator, KEY.MULTIPLE_SEPARATOR)
+    
+    def _get_query_without_error(self):
+        query = {}
+        query[KEY.NAME] = unicode_type(self.query_field.currentText())
+        query[KEY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
+        query[KEY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
+        query[KEY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
+        query[KEY.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
+        query[KEY.SEARCH_FOR] = unicode_type(self.search_for.text())
+        query[KEY.CASE_SENSITIVE] = self.case_sensitive.isChecked()
+        query[KEY.REPLACE_WITH] = unicode_type(self.replace_with.text())
+        query[KEY.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
+        query[KEY.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
+        query[KEY.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
+        query[KEY.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
+        query[KEY.COMMA_SEPARATED] = self.comma_separated.isChecked()
+        query[KEY.RESULTS_COUNT] = self.results_count.value()
+        query[KEY.STARTING_FROM] = self.starting_from.value()
+        query[KEY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
+        
+        return query
+    
+    def get_query(self):
+        query = self._get_query_without_error()
+        
+        if query[KEY.SEARCH_FIELD] != TEMPLATE_FIELD:
+            query[KEY.S_R_TEMPLATE] = ''
+        
+        # to be used in validate method
+        if self.s_r_error != None:
+            query[KEY.S_R_ERROR] = self.s_r_error
+        
+        return query
+    
+    def do_it(self):
+        if len(self.ids) < 1:
+            return
+        try:
+            source = self.s_r_sf_itemdata(None)
+        except:
+            source = ''
+        do_sr = source and self.s_r_obj
+        
+        if self.s_r_error is not None and do_sr:
+            error_dialog(self, _('Search/replace invalid'),
+                    _('Search/replace is invalid: %s')%error_message(self.s_r_error),
+                    show=True)
+            return False
+        self.changed = bool(self.ids)
+                
+        self.set_field_calls = defaultdict(dict)
+        
+        if do_sr:
+            for book_id in self.ids:
+                self.do_search_replace(book_id)
+            if self.set_field_calls:
+                for field, book_id_val_map in iteritems(self.set_field_calls):
+                    self.refresh_books.update(self.db.new_api.set_field(field, book_id_val_map))
+        
+        self.db.clean()
+        return
     
     
     def openTemplateBox(self):
