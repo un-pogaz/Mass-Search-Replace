@@ -1,4 +1,8 @@
 ### version 0.9.2
+Add Spanish translation
+Thank *dunhill*
+
+### version 0.9.2
 FIX case for the test result field
 FIX detection of None and inchanged value
 
