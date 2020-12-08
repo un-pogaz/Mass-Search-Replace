@@ -859,12 +859,11 @@ class MetadataBulkWidget(QWidget):
             return
         
         try:
-            #Fix casse test text
-            t = self.s_r_obj.sub(self.s_r_func, unicode_type(self.test_text.text()))
+            test_result = self.s_r_obj.sub(self.s_r_func, self.test_text.text())
             if self.search_mode.currentIndex() == 0:
-                rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
-                t = rfunc(t)
-            self.test_result.setText(t)
+                rfunc = self.s_r_functions[self.replace_func.currentText()]
+                test_result = rfunc(test_result)
+            self.test_result.setText(test_result)
         except Exception as e:
             self.s_r_error = e
             self.s_r_set_colors()
