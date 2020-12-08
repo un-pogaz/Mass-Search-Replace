@@ -940,18 +940,19 @@ class MetadataBulkWidget(QWidget):
             if dest == 'rating' and val:
                 val = (int(val) // 2) * 2
         
-        def lenNone(v):
-            if v == None: return 0
-            else:
-                try: return len(v)
-                except: return 0
-        
         #add the result value only if different of the original
         # and if it is not a pair None/''
-        if original != val and not (lenNone(original) == 0 and lenNone(val) == 0):
-            
+        if original != val and (self.hasValue(original) or self.hasValue(val)):
             self.set_field_calls[dest][book_id] = val
     # }}}
+    
+    def hasValue(self, v):
+        if v == None: return False
+        elif v is True or v is False: return True
+        elif v is int() or v is float(): return True
+        else:
+            try: return len(v) > 0
+            except: return True
     
     def s_r_remove_query(self, *args):
         if self.query_field.currentIndex() == 0:

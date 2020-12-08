@@ -53,7 +53,6 @@ class MassSearchReplaceAction(InterfaceAction):
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
         
-        
         error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         if error_operation not in ERROR_OPERATION.LIST.keys():
             PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION] = ERROR_OPERATION.DEFAULT
@@ -341,6 +340,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
     
     def _run_search_replaces(self):
         lst_id = []
+        book_id_update = defaultdict(dict)
         start = time.time()
         alradyOperationError = False
         try:
