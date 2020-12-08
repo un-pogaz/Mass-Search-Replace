@@ -1,6 +1,6 @@
 ### version 0.9.2
 Add Spanish translation
-Thank *dunhill*
+Thanks *dunhill*
 
 ### version 0.9.2
 FIX case for the test result field
