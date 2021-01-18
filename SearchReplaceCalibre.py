@@ -806,7 +806,7 @@ class MetadataBulkWidget(QWidget):
         self.s_r_set_colors()
         flags = regex.FULLCASE | regex.UNICODE
         
-        if self.case_sensitive.isChecked():
+        if not self.case_sensitive.isChecked():
             flags |= regex.IGNORECASE
         
         
