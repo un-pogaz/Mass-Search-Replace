@@ -1,4 +1,5 @@
-### version 0.9.4
+### version 1.0.0
+Full release
 Fix regression with case sensitivity
 
 ### version 0.9.3
