@@ -1,4 +1,7 @@
-### version 0.9.2
+### version 0.9.4
+Fix regression case sensitivity
+
+### version 0.9.3
 Add Spanish translation
 Thanks *dunhill*
 
