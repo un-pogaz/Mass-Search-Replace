@@ -1,5 +1,5 @@
 ### version 0.9.4
-Fix regression case sensitivity
+Fix regression with case sensitivity
 
 ### version 0.9.3
 Add Spanish translation
