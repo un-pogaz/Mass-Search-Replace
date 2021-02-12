@@ -1,3 +1,6 @@
+### version 1.0.1
+Fix error in search mode "Character match"
+
 ### version 1.0.0
 Full release
 Fix regression with case sensitivity

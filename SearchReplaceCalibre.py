@@ -861,7 +861,7 @@ class MetadataBulkWidget(QWidget):
         try:
             test_result = self.s_r_obj.sub(self.s_r_func, self.test_text.text())
             if self.search_mode.currentIndex() == 0:
-                rfunc = self.s_r_functions[self.replace_func.currentText()]
+                rfunc = S_R_FUNCTIONS[self.replace_func.currentText()]
                 test_result = rfunc(test_result)
             self.test_result.setText(test_result)
         except Exception as e:
