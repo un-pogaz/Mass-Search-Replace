@@ -1,3 +1,6 @@
+### version 1.0.2
+[Follow Calibre] Fix invalide identifier with colon
+
 ### version 1.0.1
 Fix error in search mode "Character match"
 
