@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-12-07 14:59+0100\n"
-"PO-Revision-Date: 2020-12-07 14:59+0100\n"
+"POT-Creation-Date: 2021-05-19 14:55+0200\n"
+"PO-Revision-Date: 2021-05-19 14:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-Basepath: ..\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: action.py\n"
@@ -20,31 +20,31 @@ msgstr ""
 "X-Poedit-SearchPath-5: templates.py\n"
 "X-Poedit-SearchPath-6: SearchReplaceCalibreText.py\n"
 
-#: SearchReplace.py:102
+#: SearchReplace.py:103
 msgid "Invalid operation, the \"{:s}\" key is missing."
 msgstr "Opération non valide, la clé \"{:s}\" est manquante."
 
-#: SearchReplace.py:121
+#: SearchReplace.py:122
 msgid "Search field \"{:s}\" is not available for this library"
 msgstr "Le champ de recherche \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:124
+#: SearchReplace.py:125
 msgid "Destination field \"{:s}\" is not available for this library"
 msgstr "Le champ de destination \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:129
+#: SearchReplace.py:130
 msgid "Identifier type \"{:s}\" is not available for this library"
 msgstr "Le type d'identifiant \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:211
+#: SearchReplace.py:212
 msgid "Configuration of a Search/Replace operation"
 msgstr "Configuration d'une opération de Rechercher/Remplacer"
 
-#: SearchReplace.py:227 action.py:280 action.py:324 action.py:369
+#: SearchReplace.py:228 action.py:279 action.py:325 action.py:371
 msgid "Invalid operation"
 msgstr "Opération non valide"
 
-#: SearchReplace.py:228
+#: SearchReplace.py:229
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
@@ -78,15 +78,19 @@ msgstr "Type d'identifiant"
 msgid "Open the template editor"
 msgstr "Ouvrir l'éditeur de modèles"
 
-#: SearchReplaceCalibreText.py:31
+#: SearchReplaceCalibreText.py:30
+msgid "Invalid identifier string. It must be a comma-separated list of pairs of strings separated by a colon."
+msgstr "Chaîne d'identifiant invalide. Ce doit être une liste séparée par des virgules contenant des paires de chaînes séparées par un deux point (:)."
+
+#: SearchReplaceCalibreText.py:33
 msgid "The field \"{:s}\" is not defined"
 msgstr "Le champ \"{:s}\" n'est pas définie"
 
-#: SearchReplaceCalibreText.py:34
+#: SearchReplaceCalibreText.py:36
 msgid "The operation field \"{:s}\" contains a invalid value ({:s})."
 msgstr "Le champ de l'opération \"{:s}\" contient une valeur non valide ({:s})."
 
-#: SearchReplaceCalibreText.py:37
+#: SearchReplaceCalibreText.py:39
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr "La valeur de ce champ est localisée (traduite). Cela peut poser problème lors de l'utilisation de paramètres partagée sur internet ou d'un changement de la langue de l'interface utilisateur."
 
@@ -98,39 +102,39 @@ msgstr "Appliquer facilement une liste de plusieurs opérations de Rechercher et
 msgid "Apply a list of multiple saved Find and Replace operations"
 msgstr "Appliquer une liste de plusieurs opérations de Rechercher et Remplacer"
 
-#: action.py:100
+#: action.py:99
 msgid "&Quick Search/Replace..."
 msgstr "&Rechercher/Remplacer rapide..."
 
-#: action.py:107
+#: action.py:106
 msgid "&Customize plugin..."
 msgstr "&Personnaliser l'extension..."
 
-#: action.py:172 action.py:176
+#: action.py:171 action.py:175
 msgid "Could not to launch Mass Search/Replace"
 msgstr "Impossible de lancé Mass Search/Replace"
 
-#: action.py:172 action.py:176
+#: action.py:171 action.py:175
 msgid "No book selected"
 msgstr "Aucun livre sélectionné"
 
-#: action.py:193
+#: action.py:192
 msgid "Invalide menu configuration, the \"{:s}\" key is missing."
 msgstr "Configuration de menu non valide, la clé \"{:s}\" est manquante."
 
-#: action.py:252
+#: action.py:251
 msgid "Cancel"
 msgstr "Annuler"
 
-#: action.py:254
+#: action.py:253
 msgid "Mass Search/Replace Progress"
 msgstr "Progression de Mass Search/Replace"
 
-#: action.py:276 common_utils.py:685
-msgid "Unhandled exception"
-msgstr "Exception non gérée"
+#: action.py:275
+msgid "Mass Search/Replace encountered an unhandled exception."
+msgstr "Mass Search/Replace a rencontré une exception non gérée."
 
-#: action.py:281
+#: action.py:280
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -148,17 +152,17 @@ msgstr "Mass Search/Replace a rencontré une erreur lors de la mise à jour de l
 
 #: action.py:309
 msgid "The library a was restored to its original state."
-msgstr "La bibliothèque a été restaurée dans son état d'origine."
+msgstr "La bibliothèque a été restaurée a son état d'origine."
 
-#: action.py:311
+#: action.py:312
 msgid "Cannot update the library"
 msgstr "Impossible de mettre à jour la bibliothèque"
 
-#: action.py:317
+#: action.py:318
 msgid "Exceptions during the library update"
 msgstr "Exceptions lors de la mise à jour de la bibliothèque"
 
-#: action.py:318
+#: action.py:319
 msgid ""
 "{:d} exceptions have occurred during the library update.\n"
 "Some fields may not have been updated."
@@ -166,19 +170,19 @@ msgstr ""
 "{:d} exceptions sont survenue lors de la mise à jour de la bibliothèque.\n"
 "Certains champs peuvent ne pas avoir était mis à jour."
 
-#: action.py:325
+#: action.py:326
 msgid "{:d} invalid operations has detected and have been ignored."
 msgstr "{:d} opérations non valides ont été détectées et ont été ignorées."
 
-#: action.py:329
+#: action.py:330
 msgid "Update Report"
 msgstr "Rapport de mise à jour"
 
-#: action.py:330
+#: action.py:331
 msgid "Mass Search/Replace performed for {:d} books with a total of {:d} fields modify."
 msgstr "Mass Search/Replace effectué pour {:d} livres avec un total de {:d} champs modifier."
 
-#: action.py:370
+#: action.py:372
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -192,11 +196,11 @@ msgstr ""
 "Poursuivre l'exécution de Mass Search/Replace ?\n"
 "D'autres erreurs peuvent exister et seront ignorées."
 
-#: action.py:385
+#: action.py:387
 msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
 msgstr "Rechercher/Remplacer {:d} sur {:d}. Livre {:d} sur {:d}."
 
-#: action.py:428
+#: action.py:440
 msgid "Update the library for {:d} books with a total of {:d} fields..."
 msgstr "Mise a jour de la bibliothèque pour {:d} livres avec un total de {:d} champs..."
 
@@ -215,6 +219,10 @@ msgstr "Raccourcis clavier"
 #: common_utils.py:576
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
+
+#: common_utils.py:685
+msgid "Unhandled exception"
+msgstr "Exception non gérée"
 
 #: config.py:94
 msgid "Interrupt execution"

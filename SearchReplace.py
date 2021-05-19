@@ -197,7 +197,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
         
         err = self.testGetError()
         if not err:
-            self.do_search_replace(book_id)
+           err = self.do_search_replace(book_id)
         return err
 
 
@@ -227,7 +227,7 @@ class SearchReplaceDialog(Dialog):
         if err:
             if question_dialog(self, _('Invalid operation'),
                              _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
-                             default_yes=True, show_copy_button=True, override_icon=get_icon('dialog_warning.png')):
+                             default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
                 
                 Dialog.reject(self)
                 return

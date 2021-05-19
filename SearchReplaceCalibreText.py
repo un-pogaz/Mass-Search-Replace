@@ -27,6 +27,8 @@ class FIELD_NAME:
 
 TEMPLATE_BUTTON_ToolTip = _('Open the template editor')
 
+EXCEPTION_Invalid_identifier = _('Invalid identifier string. It must be a comma-separated list of pairs of strings separated by a colon.')
+
 def getEmptyField(field):
     return _('The field "{:s}" is not defined').format(field)
 

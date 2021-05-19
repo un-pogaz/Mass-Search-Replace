@@ -921,11 +921,20 @@ class MetadataBulkWidget(QWidget):
                     val = ids
                 else:
                     try:
-                        val = dict([(t.split(':', 1)) for t in val])
+                        val = dict([(t.split(':', maxsplit=1)) for t in val])
                     except:
-                        raise Exception(_('Invalid identifier string. It must be a '
-                                          'comma-separated list of pairs of '
-                                          'strings separated by a colon'))
+                        #import traceback
+                        #ans = question_dialog(self, _('Invalid identifier string'),
+                        #       _('The identifier string for book "{0}" (id {1}) is '
+                        #         'invalid. It must be a comma-separated list of '
+                        #         'pairs of strings separated by a colon.\n\n'
+                        #         'Do you want to continue processing books?').format(mi.title, mi.id),
+                        #       det_msg='\n'.join([_('Result identifier string: '),
+                        #                         ', '.join(val), '-----', traceback.format_exc()]),
+                        #       show_copy_button=True)
+                        #return ans
+                        ## Use cusotm error handling
+                        return Exception(CalibreText.EXCEPTION_Invalid_identifier)
         else:
             val = self.s_r_replace_mode_separator().join(val)
             if dest == 'title' and len(val) == 0:

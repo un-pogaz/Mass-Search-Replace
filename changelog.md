@@ -1,3 +1,6 @@
+### version 1.1.0
+Improved handling of errors with invalid identifiers
+
 ### version 1.0.2
 [Follow Calibre] Fix invalide identifier with colon
 

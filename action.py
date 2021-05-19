@@ -35,7 +35,7 @@ from polyglot.builtins import iteritems
 from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
-
+import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
 
 class MassSearchReplaceAction(InterfaceAction):
     
@@ -242,7 +242,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         # Exception
         self.exceptionStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
-        self.exception = None
+        self.exception = []
         self.exception_unhandled = False
         self.exception_update = False
         self.exception_safely = False
@@ -272,7 +272,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Unhandled exception')+'\n')
+            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0]))
@@ -290,7 +290,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 debug_print('!! {:d} invalid operation was detected.'.format(len(self.operationErrorList)))
             
             if self.exception_update:
-                debug_print('!! Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(self.exception))
+                id, book_info, field, e = self.exception[0]
+                debug_print('!! Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(e))
             elif self.exception_safely:
                 debug_print('!! {:d} exceptions have occurred during the library update.'.format(len(self.exception)))
             
@@ -306,12 +307,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 msg = _('Mass Search/Replace encountered an error during the library update.')
                 if self.exceptionStrategy == ERROR_UPDATE.RESTORE:
                     msg += '\n' + _('The library a was restored to its original state.')
-                    
-                CustomExceptionErrorDialog(self.gui ,self.exception, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
+                
+                id, book_info, field, e = self.exception[0]
+                CustomExceptionErrorDialog(self.gui, e, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
             
             elif self.exception_safely:
                 
-                det_msg= '\n'.join('Book {:s} | {:s} > {:}'.format(book_info, field, e) for id, book_info, field, e in self.exception )
+                det_msg= '\n'.join('Book {:s} | {:s} > {:}'.format(book_info, field, e.__class__.__name__ +': '+ str(e)) for id, book_info, field, e in self.exception)
                 
                 warning_dialog(self.gui, _('Exceptions during the library update'),
                             _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
@@ -325,7 +327,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
             
             if self.showUpdateReport and not (self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE):
-                info_dialog(self.gui, _('Update Report'), 
+                info_dialog(self.gui, _('Update Report'),
                         _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(self.books_update, self.fields_update)
                         , show=True, show_copy_button=False)
             
@@ -342,7 +344,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         lst_id = []
         book_id_update = defaultdict(dict)
         start = time.time()
-        alradyOperationError = False
+        alreadyOperationError = False
         try:
             self.setValue(0)
             self.show()
@@ -363,8 +365,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 if len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ABORT:
                     return
-                elif not alradyOperationError and len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ASK:
-                    alradyOperationError = True
+                elif not alreadyOperationError and len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ASK:
+                    alreadyOperationError = True
                     start_dialog =  time.time()
                     rslt = question_dialog(self.gui, _('Invalid operation'),
                             _('A invalid operations has detected:\n{:s}\n\n'
@@ -399,12 +401,21 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         debug_print(book_info+nl)
                         
-                        
                         if self.wasCanceled():
                             self.close()
                             return
                         
-                        self.s_r.search_replace(book_id)
+                        err = self.s_r.search_replace(book_id)
+                        if err:
+                            if type(err) is Exception:
+                                if str(err) == CalibreText.EXCEPTION_Invalid_identifier:
+                                    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                                    self.exception.append( (book_id, book_info, 'identifier', err) )
+                                else:
+                                    raise err
+                            else:
+                                raise Exception(err)
+                        
         
         except Exception as e:
             self.exception_unhandled = True
@@ -430,8 +441,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 if self.exceptionStrategy == ERROR_UPDATE.SAFELY or self.exceptionStrategy == ERROR_UPDATE.DONT_STOP:
                     
-                    self.exception = []
                     dont_stop = self.exceptionStrategy == ERROR_UPDATE.DONT_STOP
+                    
+                    if self.exception:
+                        self.exception_safely = True
                     
                     for id in iter(lst_id):
                         if self.exception and not dont_stop:
@@ -450,8 +463,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                                     miA = self.dbA.get_proxy_metadata(id)
                                     #title (author & author)
                                     book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
-                                    
-                                    self.exception.append( (id, book_info, field, e.__class__.__name__ +': '+ str(e)) )
+                                    self.exception.append( (id, book_info, field, e) )
                     
                 else:
                     try:
@@ -460,6 +472,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         is_restore = self.exceptionStrategy == ERROR_UPDATE.RESTORE
                         if is_restore:
                             backup_fields = defaultdict(dict)
+                        
+                        if self.exception:
+                            raise Exception('raise')
                         
                         for field, book_id_val_map in iteritems(self.s_r.updated_fields):
                             if is_restore:
@@ -471,8 +486,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                     except Exception as e:
                         self.exception_update = True
-                        self.exception = e
-                        
                         if is_restore:
                             for field, book_id_val_map in iteritems(backup_fields):
                                self.dbA.set_field(field, book_id_val_map)
