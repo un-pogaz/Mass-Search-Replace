@@ -51,6 +51,7 @@ S_R_FUNCTIONS = {
 S_R_MATCH_MODES = [
         _('Character match'),
         _('Regular expression'),
+        CalibreText.S_R_REPLACE, ##un_pogaz Replace Field
                   ]
 
 S_R_REPLACE_MODES = [
@@ -166,9 +167,9 @@ class MetadataBulkWidget(QWidget):
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem5)
         self.vargrid.addLayout(self.horizontalLayout_6, 3, 2, 1, 1)
-        self.xlabel_21 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_21.setObjectName("xlabel_21")
-        self.vargrid.addWidget(self.xlabel_21, 4, 0, 1, 1)
+        self.source_field_label = QtWidgets.QLabel(self.tabWidgetPage3)
+        self.source_field_label.setObjectName("source_field_label")
+        self.vargrid.addWidget(self.source_field_label, 4, 0, 1, 1)
         self.search_field = QtWidgets.QComboBox(self.tabWidgetPage3)
         self.search_field.setObjectName("search_field")
         self.vargrid.addWidget(self.search_field, 4, 1, 1, 1)
@@ -205,9 +206,9 @@ class MetadataBulkWidget(QWidget):
         self.s_r_template.setSizePolicy(sizePolicy)
         self.s_r_template.setObjectName("s_r_template")
         self.vargrid.addWidget(self.s_r_template, 5, 1, 1, 1)
-        self.xlabel_2 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_2.setObjectName("xlabel_2")
-        self.vargrid.addWidget(self.xlabel_2, 6, 0, 1, 1)
+        self.search_for_label = QtWidgets.QLabel(self.tabWidgetPage3)
+        self.search_for_label.setObjectName("search_for_label")
+        self.vargrid.addWidget(self.search_for_label, 6, 0, 1, 1)
         self.search_for = HistoryLineEdit(self.tabWidgetPage3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
@@ -224,6 +225,13 @@ class MetadataBulkWidget(QWidget):
         self.xlabel_4.setObjectName("xlabel_4")
         self.vargrid.addWidget(self.xlabel_4, 7, 0, 1, 1)
         self.replace_with = HistoryLineEdit(self.tabWidgetPage3)
+        ##un_pogaz sizePolicy for replace_with
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(100)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.replace_with.sizePolicy().hasHeightForWidth())
+        self.replace_with.setSizePolicy(sizePolicy)
+        ##
         self.replace_with.setObjectName("replace_with")
         self.vargrid.addWidget(self.replace_with, 7, 1, 1, 1)
         self.verticalLayout = QtWidgets.QHBoxLayout()
@@ -333,11 +341,11 @@ class MetadataBulkWidget(QWidget):
         l.addWidget(self.scrollArea3)
         
         self.xlabel_22.setBuddy(self.query_field)
-        self.xlabel_21.setBuddy(self.search_field)
+        self.source_field_label.setBuddy(self.search_field)
         self.xlabel_24.setBuddy(self.search_mode)
         self.s_r_src_ident_label.setBuddy(self.s_r_src_ident)
         self.template_label.setBuddy(self.s_r_template)
-        self.xlabel_2.setBuddy(self.search_for)
+        self.search_for_label.setBuddy(self.search_for)
         self.xlabel_4.setBuddy(self.replace_with)
         self.label_41.setBuddy(self.replace_func)
         self.destination_field_label.setBuddy(self.destination_field)
@@ -348,7 +356,7 @@ class MetadataBulkWidget(QWidget):
         self.xlabel_41.setBuddy(self.multiple_separator)
         self.label_31.setBuddy(self.test_text)
         
-        # un_pogaz template_button
+        ##un_pogaz template_button
         self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
         self.template_button.setIcon(QIcon(I('template_funcs.png')))
@@ -356,7 +364,7 @@ class MetadataBulkWidget(QWidget):
         self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
         self.template_button.clicked.connect(self.openTemplateBox)
         self.vargrid.addWidget(self.template_button, 5, 2, 1, 1)
-        ###
+        ##
         
         self.retranslateUi()
     
@@ -367,7 +375,7 @@ class MetadataBulkWidget(QWidget):
         self.save_button.setText(_("Sa&ve"))
         self.remove_button.setToolTip(_("Delete saved search/replace"))
         self.remove_button.setText(_("Delete"))
-        self.xlabel_21.setText(_("Search &field:"))
+        self.source_field_label.setText(_("Search &field:"))
         self.search_field.setToolTip(_("The name of the field that you want to search"))
         self.xlabel_24.setText(_("Search &mode:"))
         self.search_mode.setToolTip(_("Choose whether to use basic text matching or advanced regular expression matching"))
@@ -375,7 +383,7 @@ class MetadataBulkWidget(QWidget):
         self.s_r_src_ident.setToolTip(_("Choose which identifier type to operate upon"))
         self.template_label.setText(_("&Template:"))
         self.s_r_template.setToolTip(_("Enter a template to be used as the source for the search/replace"))
-        self.xlabel_2.setText(_("&Search for:"))
+        self.search_for_label.setText(_("&Search for:"))
         self.search_for.setToolTip(_("Enter what you are looking for, either plain text or a regular expression, depending on the mode"))
         self.case_sensitive.setToolTip(_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored"))
         self.case_sensitive.setText(_("Cas&e sensitive"))
@@ -406,6 +414,10 @@ class MetadataBulkWidget(QWidget):
         self.xlabel_5.setText(_("Test result"))
         self.label_31.setText(_("Your &test:"))
         #self.central_widget.setTabText(self.central_widget.indexOf(self.scrollArea3), _("&Search and replace"))
+        
+        ##un_pogaz Search and destination field label swap
+        self.source_field_label_text = self.source_field_label.text()
+        self.destination_field_label_text = self.destination_field_label.text()
     
     # S&R {{{
     def prepare_search_and_replace(self):
@@ -428,6 +440,11 @@ class MetadataBulkWidget(QWidget):
                 self.writable_fields.append(f)
             if fm[f]['datatype'] == 'composite':
                 self.all_fields.append(f)
+        
+        ##un_pogaz exclude unsupported cover
+        self.all_fields.remove('cover')
+        self.writable_fields.remove('cover')
+        
         self.all_fields.sort()
         self.all_fields.insert(1, TEMPLATE_FIELD)
         self.writable_fields.sort()
@@ -469,6 +486,9 @@ class MetadataBulkWidget(QWidget):
                  'before proceeding.<p>'
                  'Search and replace in text fields using character matching '
                  'or regular expressions. ')
+        
+        ##un_pogaz main_heading_short
+        self.main_heading_short = self.main_heading[:self.main_heading.find('<p>')] + '<p>'
         
         self.character_heading = _(
                  'In character mode, the field is searched for the entered '
@@ -521,7 +541,7 @@ class MetadataBulkWidget(QWidget):
         self.s_r_src_ident.currentIndexChanged[int].connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) #un_pogaz template_button
+        self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) ##un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
@@ -601,7 +621,7 @@ class MetadataBulkWidget(QWidget):
     def s_r_template_changed(self, *args):
         #self.s_r_search_field_changed(self.search_field.currentIndex())
         
-        #un_pogaz
+        ##un_pogaz
         for i in range(0, self.s_r_number_of_books):
             w = getattr(self, 'book_%d_text'%(i+1))
             mi = self.db.get_metadata(self.ids[i], index_is_id=True)
@@ -616,18 +636,22 @@ class MetadataBulkWidget(QWidget):
     
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
+        
+        if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
+            self.s_r_dst_ident.setText(self.s_r_src_ident.currentText())
+        
         self.s_r_paint_results(idx)
     
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
         self.template_label.setVisible(False)
-        self.template_button.setVisible(False) #un_pogaz template_button
+        self.template_button.setVisible(False) ##un_pogaz template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
         if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD: ## idx == 1 # Template 
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
-            self.template_button.setVisible(True) #un_pogaz template_button
+            self.template_button.setVisible(True) ##un_pogaz template_button
         elif self.s_r_sf_itemdata(idx) == 'identifiers':
             self.s_r_src_ident_label.setVisible(True)
             self.s_r_src_ident.setVisible(True)
@@ -655,9 +679,10 @@ class MetadataBulkWidget(QWidget):
         if not txt:
             txt = self.s_r_sf_itemdata(None)
         if txt and txt in self.writable_fields:
-            if txt == 'identifiers':
+            if txt == 'identifiers' and self.search_mode.currentIndex() != 2: ##un_pogaz Replace Field
                 self.s_r_dst_ident_label.setVisible(True)
                 self.s_r_dst_ident.setVisible(True)
+            
             self.destination_field_fm = self.db.metadata_for_field(txt)
         self.s_r_paint_results(None)
     
@@ -665,6 +690,13 @@ class MetadataBulkWidget(QWidget):
         search = self.search_field.currentText()
         self.search_field.clear()
         self.destination_field.clear()
+        
+        if val != 2: ##un_pogaz Replace Field
+            self.search_for_label.setVisible(True)
+            self.search_for.setVisible(True)
+            self.case_sensitive.setVisible(True)
+            self.source_field_label.setText(self.source_field_label_text)
+            self.destination_field_label.setText(self.destination_field_label_text)
         
         if val == 0:
             for f in self.writable_fields:
@@ -678,6 +710,31 @@ class MetadataBulkWidget(QWidget):
             self.replace_mode_label.setVisible(False)
             self.comma_separated.setVisible(False)
             self.s_r_heading.setText('<p>'+self.main_heading + self.character_heading)
+            
+        elif val == 2: ##un_pogaz Replace Field
+            self.search_field.blockSignals(True)
+            self.destination_field.blockSignals(True)
+            for f in self.writable_fields:
+                self.search_field.addItem(f if f != 'sort' else 'title_sort', f)
+                self.destination_field.addItem(f if f != 'sort' else 'title_sort', f)
+            self.destination_field.setCurrentIndex(0)
+            self.search_field.blockSignals(False)
+            self.destination_field.blockSignals(False)
+            self.destination_field.setVisible(False)
+            self.destination_field_label.setVisible(False)
+            self.replace_mode.setCurrentIndex(0)
+            self.replace_mode.setVisible(False)
+            self.replace_mode_label.setVisible(False)
+            self.comma_separated.setVisible(False)
+            self.s_r_heading.setText('<p>'+ self.main_heading_short + CalibreText.REPLACE_HEADING)
+            
+            self.search_for_label.setVisible(False)
+            self.search_for.setVisible(False)
+            self.search_for.setText(CalibreText.REPLACE_REGEX)
+            self.case_sensitive.setVisible(False)
+            self.source_field_label.setText(self.destination_field_label_text)
+            self.destination_field_label.setText(self.source_field_label_text)
+            
         else:
             self.search_field.blockSignals(True)
             self.destination_field.blockSignals(True)
@@ -809,8 +866,11 @@ class MetadataBulkWidget(QWidget):
         if not self.case_sensitive.isChecked():
             flags |= regex.IGNORECASE
         
+        if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
+            flags |= regex.DOTALL
         
-        #extend try catch -by un_pogaz
+        
+        ##un_pogaz extend try catch
         try:
             
             sftxt = unicode_type(self.search_field.currentText())
@@ -933,7 +993,7 @@ class MetadataBulkWidget(QWidget):
                         #                         ', '.join(val), '-----', traceback.format_exc()]),
                         #       show_copy_button=True)
                         #return ans
-                        ## Use cusotm error handling
+                        ##un_pogaz use custom error handling
                         return Exception(CalibreText.EXCEPTION_Invalid_identifier)
         else:
             val = self.s_r_replace_mode_separator().join(val)

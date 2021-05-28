@@ -43,7 +43,7 @@ def get_default_operation(plugin_action):
         global _s_r
         
         if not _s_r or _s_r.db != plugin_action.gui.current_db:
-            _s_r = SearchReplaceWidget_NoWindows(plugin_action)
+            _s_r = SearchReplaceWidget_NoWindows(plugin_action, [0])
         if not _default_operation:
             _default_operation = _s_r.save_settings()
             _default_operation[KEY_OPERATION.ACTIVE] = True
@@ -152,7 +152,11 @@ def operation_para_list(operation):
     
     search_mode = operation.get(KEY_OPERATION.SEARCH_MODE, '')
     template = operation.get(KEY_OPERATION.S_R_TEMPLATE, '')
-    search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
+    search_for = ''
+    if search_mode == CalibreText.S_R_REPLACE:
+        search_for = '*'
+    else:
+        search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
     replace_with = operation.get(KEY_OPERATION.REPLACE_WITH, '')
     
     return [ column, template, search_mode, search_for, replace_with ]
@@ -167,15 +171,15 @@ def operation_string(operation):
     return '"'+ '" | "'.join(val)+'"'
 
 
-def SearchReplaceWidget_NoWindows(plugin_action):
-    rslt = SearchReplaceWidget(plugin_action)
+def SearchReplaceWidget_NoWindows(plugin_action, book_ids=[]):
+    rslt = SearchReplaceWidget(plugin_action, book_ids)
     rslt.resize(QSize(0, 0))
     return rslt;
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
         
-        if not book_ids or len(book_ids)==0:
+        if not book_ids or len(book_ids) == 0:
             book_ids = plugin_action.gui.library_view.get_selected_ids();
         
         MetadataBulkWidget.__init__(self, plugin_action, book_ids, refresh_books)
@@ -208,7 +212,7 @@ class SearchReplaceDialog(Dialog):
         if not operation:
             operation = get_default_operation(plugin_action)
         self.operation = operation
-        self.widget = SearchReplaceWidget(self.plugin_action, book_ids)
+        self.widget = SearchReplaceWidget(self.plugin_action, book_ids[:10])
         Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace', parent)
     
     def setup_ui(self):

@@ -1,3 +1,8 @@
+### version 1.2.0
+Add a 'Replace Field' mode that replace any values with the specified string
+FIX Freeze when your config the settings of operations when many books are selected
+FIX the displaying of a error in dialog
+
 ### version 1.1.0
 Improved handling of errors with invalid identifiers
 

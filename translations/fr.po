@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2021-05-19 14:55+0200\n"
-"PO-Revision-Date: 2021-05-19 14:55+0200\n"
+"POT-Creation-Date: 2021-05-28 14:35+0200\n"
+"PO-Revision-Date: 2021-05-28 14:35+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -36,21 +36,21 @@ msgstr "Le champ de destination \"{:s}\" n'est pas disponible pour cette bibliot
 msgid "Identifier type \"{:s}\" is not available for this library"
 msgstr "Le type d'identifiant \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:212
+#: SearchReplace.py:216
 msgid "Configuration of a Search/Replace operation"
 msgstr "Configuration d'une opération de Rechercher/Remplacer"
 
-#: SearchReplace.py:228 action.py:279 action.py:325 action.py:371
+#: SearchReplace.py:232 action.py:278 action.py:324 action.py:370
 msgid "Invalid operation"
 msgstr "Opération non valide"
 
-#: SearchReplace.py:229
+#: SearchReplace.py:233
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
 "Do you want discard the changes?"
 msgstr ""
-"L'enregistrement de l'opération \"Rechercher/Remplacer\" a échoué.\n"
+"L'enregistrement de l'opération \\\"Rechercher/Remplacer\\\" a échoué.\n"
 "{:s}\n"
 "Voulez-vous abandonner les modifications ?"
 
@@ -75,22 +75,30 @@ msgid "Identifier type"
 msgstr "Type d'identifiant"
 
 #: SearchReplaceCalibreText.py:28
+msgid "Replace field"
+msgstr "Remplacer le champ"
+
+#: SearchReplaceCalibreText.py:31
+msgid "In field replacement mode, the specified field is set to the text and all previous values are erased. After replacement is finished, the text can be changed to upper-case, lower-case, or title-case."
+msgstr "En mode de remplacement de champ, le 'Champ de destination' est défini au texte spécifier et toutes les valeurs précédentes sont effacées. Une fois le remplacement effectué, la casse peut être modifiée avec l'option 'Casse à appliquer sur le remplacement'."
+
+#: SearchReplaceCalibreText.py:36
 msgid "Open the template editor"
 msgstr "Ouvrir l'éditeur de modèles"
 
-#: SearchReplaceCalibreText.py:30
+#: SearchReplaceCalibreText.py:38
 msgid "Invalid identifier string. It must be a comma-separated list of pairs of strings separated by a colon."
 msgstr "Chaîne d'identifiant invalide. Ce doit être une liste séparée par des virgules contenant des paires de chaînes séparées par un deux point (:)."
 
-#: SearchReplaceCalibreText.py:33
+#: SearchReplaceCalibreText.py:41
 msgid "The field \"{:s}\" is not defined"
 msgstr "Le champ \"{:s}\" n'est pas définie"
 
-#: SearchReplaceCalibreText.py:36
+#: SearchReplaceCalibreText.py:44
 msgid "The operation field \"{:s}\" contains a invalid value ({:s})."
 msgstr "Le champ de l'opération \"{:s}\" contient une valeur non valide ({:s})."
 
-#: SearchReplaceCalibreText.py:39
+#: SearchReplaceCalibreText.py:47
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr "La valeur de ce champ est localisée (traduite). Cela peut poser problème lors de l'utilisation de paramètres partagée sur internet ou d'un changement de la langue de l'interface utilisateur."
 
@@ -118,23 +126,23 @@ msgstr "Impossible de lancé Mass Search/Replace"
 msgid "No book selected"
 msgstr "Aucun livre sélectionné"
 
-#: action.py:192
+#: action.py:191
 msgid "Invalide menu configuration, the \"{:s}\" key is missing."
 msgstr "Configuration de menu non valide, la clé \"{:s}\" est manquante."
 
-#: action.py:251
+#: action.py:250
 msgid "Cancel"
 msgstr "Annuler"
 
-#: action.py:253
+#: action.py:252
 msgid "Mass Search/Replace Progress"
 msgstr "Progression de Mass Search/Replace"
 
-#: action.py:275
+#: action.py:274
 msgid "Mass Search/Replace encountered an unhandled exception."
 msgstr "Mass Search/Replace a rencontré une exception non gérée."
 
-#: action.py:280
+#: action.py:279
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -146,23 +154,23 @@ msgstr ""
 "\n"
 "Mass Search/Replace a été annulée."
 
-#: action.py:307
+#: action.py:306
 msgid "Mass Search/Replace encountered an error during the library update."
 msgstr "Mass Search/Replace a rencontré une erreur lors de la mise à jour de la bibliothèque."
 
-#: action.py:309
+#: action.py:308
 msgid "The library a was restored to its original state."
 msgstr "La bibliothèque a été restaurée a son état d'origine."
 
-#: action.py:312
+#: action.py:311
 msgid "Cannot update the library"
 msgstr "Impossible de mettre à jour la bibliothèque"
 
-#: action.py:318
+#: action.py:317
 msgid "Exceptions during the library update"
 msgstr "Exceptions lors de la mise à jour de la bibliothèque"
 
-#: action.py:319
+#: action.py:318
 msgid ""
 "{:d} exceptions have occurred during the library update.\n"
 "Some fields may not have been updated."
@@ -170,19 +178,19 @@ msgstr ""
 "{:d} exceptions sont survenue lors de la mise à jour de la bibliothèque.\n"
 "Certains champs peuvent ne pas avoir était mis à jour."
 
-#: action.py:326
+#: action.py:325
 msgid "{:d} invalid operations has detected and have been ignored."
 msgstr "{:d} opérations non valides ont été détectées et ont été ignorées."
 
-#: action.py:330
+#: action.py:329
 msgid "Update Report"
 msgstr "Rapport de mise à jour"
 
-#: action.py:331
+#: action.py:330
 msgid "Mass Search/Replace performed for {:d} books with a total of {:d} fields modify."
 msgstr "Mass Search/Replace effectué pour {:d} livres avec un total de {:d} champs modifier."
 
-#: action.py:372
+#: action.py:371
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -196,11 +204,11 @@ msgstr ""
 "Poursuivre l'exécution de Mass Search/Replace ?\n"
 "D'autres erreurs peuvent exister et seront ignorées."
 
-#: action.py:387
+#: action.py:386
 msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
 msgstr "Rechercher/Remplacer {:d} sur {:d}. Livre {:d} sur {:d}."
 
-#: action.py:440
+#: action.py:438
 msgid "Update the library for {:d} books with a total of {:d} fields..."
 msgstr "Mise a jour de la bibliothèque pour {:d} livres avec un total de {:d} champs..."
 
@@ -381,7 +389,7 @@ msgid ""
 "{:d} menu items exported to\n"
 "{:s}"
 msgstr ""
-"{:d} éléments de menu exportés vers\n"
+"{:d} éléments de menu importés\n"
 "{:s}"
 
 #: config.py:392
@@ -420,7 +428,7 @@ msgstr "Êtes-vous sûr de vouloir supprimer cette ligne du menu ?"
 msgid "Are you sure you want to delete the selected {:d} menu items?"
 msgstr "Êtes-vous sûr de vouloir supprimer les {:d} lignes de menu sélectionnés ?"
 
-#: config.py:565 config.py:858 config.py:1197
+#: config.py:565 config.py:858 config.py:1199
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
@@ -566,30 +574,30 @@ msgid ""
 "{:d} operations exported to\n"
 "{:s}"
 msgstr ""
-"{:d} opérations exportés vers\n"
+"{:d} opérations\n"
 "{:s}"
 
 #: config.py:1104
 msgid "Save the operations as..."
 msgstr "Enregistrer les opérations sous..."
 
-#: config.py:1194
+#: config.py:1196
 msgid "Are you sure you want to delete this operation?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette opération ?"
 
-#: config.py:1196
+#: config.py:1198
 msgid "Are you sure you want to delete the selected {:d} operations?"
 msgstr "Êtes-vous sûr de vouloir supprimer les {:d} opérations ?"
 
-#: config.py:1318
+#: config.py:1320
 msgid "Error Strategy"
 msgstr "Stratégie d'erreur"
 
-#: config.py:1325
+#: config.py:1327
 msgid "Set the strategy when an invalid operation has detected:"
 msgstr "Définir la stratégie lorsqu'une opération non valide est détectée :"
 
-#: config.py:1336
+#: config.py:1338
 msgid "Define the strategy when a error occurs during the library update:"
 msgstr "Définir la stratégie lorsqu'une erreur se produit lors de la mise à jour de la bibliothèque :"
 
@@ -612,3 +620,6 @@ msgstr "Saisissez un modèle à tester en utilisant les données du livre sélec
 #: templates.py:109
 msgid "Template editor"
 msgstr "Éditeur de modèles"
+
+#~ msgid "A invalid operations has detected"
+#~ msgstr "Une opération non valide a été détectée"

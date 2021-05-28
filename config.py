@@ -1114,6 +1114,8 @@ class OperationListTableWidget(QTableWidget):
         QTableWidget.__init__(self, *args)
         self.plugin_action = plugin_action
         
+        self.book_ids = self.plugin_action.gui.library_view.get_selected_ids()[:10]
+        
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSortingEnabled(False)
@@ -1297,7 +1299,7 @@ class OperationListTableWidget(QTableWidget):
         row = self.currentRow()
         
         src_operation = self.convert_row_to_operation(row)
-        d = SearchReplaceDialog(self, self.plugin_action, src_operation)
+        d = SearchReplaceDialog(self, self.plugin_action, src_operation, self.book_ids)
         if d.exec_() == d.Accepted:
             d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
             self.populate_table_row(row, d.operation)

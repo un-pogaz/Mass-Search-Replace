@@ -25,6 +25,14 @@ class FIELD_NAME:
     SEARCH_MODE = _('Search mode')
     IDENTIFIER_TYPE = _('Identifier type')
 
+S_R_REPLACE = _('Replace field')
+REPLACE_REGEX = '(?s)^.*$'
+REPLACE_HEADING = _(
+                 'In field replacement mode, the specified field is set '
+                 'to the text and all previous values are erased. After '
+                 'replacement is finished, the text can be changed to '
+                 'upper-case, lower-case, or title-case.')
+
 TEMPLATE_BUTTON_ToolTip = _('Open the template editor')
 
 EXCEPTION_Invalid_identifier = _('Invalid identifier string. It must be a comma-separated list of pairs of strings separated by a colon.')

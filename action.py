@@ -173,7 +173,6 @@ class MassSearchReplaceAction(InterfaceAction):
         rows = self.gui.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
             return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
-        book_ids = self.gui.library_view.get_selected_ids()
         
         book_ids = self.gui.library_view.get_selected_ids()
         
@@ -229,7 +228,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.total_operation_count = self.book_count*self.operation_count
         
         # Search/Replace Widget
-        self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action)
+        self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action, self.book_ids)
         
         self.time_execut = 0
         
@@ -275,10 +274,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
             CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
-            debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0]))
+            debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))
             warning_dialog(self.gui, _('Invalid operation'),
                         _('A invalid operations has detected:\n{:s}\n\n'
-                          'Mass Search/Replace was canceled.').format(str(self.operationErrorList[0])),
+                          'Mass Search/Replace was canceled.').format(str(self.operationErrorList[0][1])),
                           show=True, show_copy_button=False)
         
         else:
@@ -360,7 +359,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 if err:
                     debug_print('!! Invalide operation: {0}\n'.format(err))
-                    self.operationErrorList.append((op, str(err)))
+                    self.operationErrorList.append([op, str(err)])
                 
                 
                 if len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ABORT:
@@ -371,7 +370,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     rslt = question_dialog(self.gui, _('Invalid operation'),
                             _('A invalid operations has detected:\n{:s}\n\n'
                               'Continue the execution of Mass Search/Replace?\n'
-                              'Other errors may exist and will be ignored.').format(str(self.operationErrorList[0])),
+                              'Other errors may exist and will be ignored.').format(str(self.operationErrorList[0][1])),
                               default_yes=True, override_icon=get_icon('dialog_warning.png'))
                     
                     start = start + (time.time() - start_dialog)
