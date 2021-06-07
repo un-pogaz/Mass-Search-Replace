@@ -1,3 +1,6 @@
+### version 1.2.1
+Fix ghost identifier with empty value
+
 ### version 1.2.0
 Add a 'Replace Field' mode that replace any values with the specified string
 FIX Freeze when your config the settings of operations when many books are selected

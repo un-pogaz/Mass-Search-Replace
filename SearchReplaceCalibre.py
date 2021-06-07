@@ -976,7 +976,7 @@ class MetadataBulkWidget(QWidget):
                 dst_id_type = unicode_type(self.s_r_dst_ident.text())
                 if dst_id_type and dst_id_type != '*':
                     v = ''.join(val)
-                    ids = mi.get(dest)
+                    ids = mi.get(dest).copy() ##un_pogaz fix ghost identifier with empty value
                     ids[dst_id_type] = v
                     val = ids
                 else:
@@ -1008,8 +1008,8 @@ class MetadataBulkWidget(QWidget):
             if dest == 'rating' and val:
                 val = (int(val) // 2) * 2
         
-        #add the result value only if different of the original
-        # and if it is not a pair None/''
+        ## add the result value only if different of the original
+        ## and if it is not a pair None/''
         if original != val and (self.hasValue(original) or self.hasValue(val)):
             self.set_field_calls[dest][book_id] = val
     # }}}
