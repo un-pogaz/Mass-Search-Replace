@@ -485,6 +485,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                     except Exception as e:
                         self.exception_update = True
+                        self.exception.append( (None, None, None, e) )
+                        
                         if is_restore:
                             for field, book_id_val_map in iteritems(backup_fields):
                                self.dbA.set_field(field, book_id_val_map)
