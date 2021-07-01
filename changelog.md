@@ -1,5 +1,8 @@
+### version 1.2.2
+FIX wrong error message when an error occurs during the update of the library
+
 ### version 1.2.1
-Fix ghost identifier with empty value
+FIX ghost identifier with empty value
 
 ### version 1.2.0
 Add a 'Replace Field' mode that replace any values with the specified string
