@@ -17,20 +17,25 @@ except NameError:
     pass # load_translations() added in calibre 1.9
 
 try:
-    from PyQt5 import Qt as QtGui
-    from PyQt5 import QtCore
+    from qt.core import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
+                            QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
+                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
+                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
+                            QPushButton, QSpacerItem, QSizePolicy)
+except ImportError:
     from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                          QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                          QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                          QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                          QPushButton, QSizePolicy)
+                            QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
+                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
+                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
+                            QPushButton, QSpacerItem, QSizePolicy)
+
+
+try:
+    QtItemFlags = Qt.ItemFlag
+    QPolicy = QSizePolicy.Policy
 except:
-    from PyQt4 import QtGui, QtCore
-    from PyQt4.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                          QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                          QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                          QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                          QPushButton, QSizePolicy)
+    QtItemFlags = Qt.ItemFlags
+    QPolicy = QSizePolicy
 
 try:
     from urllib.request import urlretrieve
@@ -189,37 +194,37 @@ class ConfigWidget(QWidget):
         table_layout.addWidget(self._table)
         
         # Add a vertical layout containing the the buttons to move up/down etc.
-        button_layout = QtGui.QVBoxLayout()
+        button_layout = QVBoxLayout()
         table_layout.addLayout(button_layout)
-        move_up_button = QtGui.QToolButton(self)
+        move_up_button = QToolButton(self)
         move_up_button.setToolTip(_('Move menu item up'))
         move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem)
         
-        add_button = QtGui.QToolButton(self)
+        add_button = QToolButton(self)
         add_button.setToolTip(_('Add menu item'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
-        copy_button = QtGui.QToolButton(self)
+        copy_button = QToolButton(self)
         copy_button.setToolTip(_('Copy menu item'))
         copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem2 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
-        delete_button = QtGui.QToolButton(self)
+        delete_button = QToolButton(self)
         delete_button.setToolTip(_('Delete menu item'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem3 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
-        move_down_button = QtGui.QToolButton(self)
+        move_down_button = QToolButton(self)
         move_down_button.setToolTip(_('Move menu item down'))
         move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)
@@ -699,7 +704,7 @@ class SettingsButton(QToolButton):
         QToolButton.__init__(self)
         self.plugin_action = plugin_action
         
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setSizePolicy(QPolicy.Maximum, QPolicy.Maximum)
         
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.clicked.connect(self._clicked)
@@ -880,7 +885,7 @@ class ImageDialog(QDialog):
 class OperationWidgetItem(QTableWidgetItem):
     def __init__(self, plugin_action, operation):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(Qt.ItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        self.setFlags(QtItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
         self.plugin_action = plugin_action
         self._operation = operation
         self._hasError = False
@@ -963,37 +968,37 @@ class ConfigOperationListDialog(Dialog):
         table_layout.addWidget(self._table)
         
         # Add a vertical layout containing the the buttons to move up/down etc.
-        button_layout = QtGui.QVBoxLayout()
+        button_layout = QVBoxLayout()
         table_layout.addLayout(button_layout)
-        move_up_button = QtGui.QToolButton(self)
+        move_up_button = QToolButton(self)
         move_up_button.setToolTip(_('Move operation up'))
         move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem)
         
-        add_button = QtGui.QToolButton(self)
+        add_button = QToolButton(self)
         add_button.setToolTip(_('Add operation'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
-        copy_button = QtGui.QToolButton(self)
+        copy_button = QToolButton(self)
         copy_button.setToolTip(_('Copy operation'))
         copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem2 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
-        delete_button = QtGui.QToolButton(self)
+        delete_button = QToolButton(self)
         delete_button.setToolTip(_('Delete operation'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem3 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
-        move_down_button = QtGui.QToolButton(self)
+        move_down_button = QToolButton(self)
         move_down_button.setToolTip(_('Move operation down'))
         move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)

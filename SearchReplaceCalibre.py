@@ -14,13 +14,24 @@ from collections import defaultdict
 from six import text_type as unicode
 from six.moves import range
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import (QApplication, Qt, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout,
-                      QLabel, QGroupBox, QToolButton, QPushButton, QComboBox,
-                      QRadioButton, QDialog, QDialogButtonBox, QMenu, QPainter, QPoint, QPixmap,
-                      QCheckBox, QSizePolicy, QLineEdit, QCompleter, QSize, QInputDialog,
-                      QIcon, QTreeWidgetItem, QTreeWidget, QAbstractItemView, QModelIndex)
-                      
+try:
+    from qt.core import QApplication, Qt, QIcon
+except ImportError:
+    from PyQt5.Qt import QApplication, Qt, QIcon
+
+try:
+    from PyQt6 import QtCore, QtWidgets
+    QShape = QtWidgets.QFrame.Shape
+    QShadow = QtWidgets.QFrame.Shadow
+    QSizeConstraint = QtWidgets.QLayout.SizeConstraint
+    QPolicy = QtWidgets.QSizePolicy.Policy
+except:
+    from PyQt5 import QtCore, QtWidgets
+    QShape = QtWidgets.QFrame
+    QShadow = QtWidgets.QFrame
+    QSizeConstraint = QtWidgets.QLayout
+    QPolicy = QtWidgets.QSizePolicy
+
 from calibre import prints
 from calibre.constants import iswindows, isosx, numeric_version as calibre_version
 from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
@@ -108,9 +119,9 @@ class KEY:
 
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
-class MetadataBulkWidget(QWidget):
+class MetadataBulkWidget(QtWidgets.QWidget):
     def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
-        QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.plugin_action = plugin_action
         self.gui = plugin_action.gui
         self.db = self.gui.current_db
@@ -122,17 +133,17 @@ class MetadataBulkWidget(QWidget):
         self.prepare_search_and_replace()
     
     def _init_controls(self):
-        l = QVBoxLayout()
+        l = QtWidgets.QVBoxLayout()
         self.setLayout(l)
         self.scrollArea3 = QtWidgets.QScrollArea()
-        self.scrollArea3.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.scrollArea3.setFrameShape(QShape.NoFrame)
         self.scrollArea3.setWidgetResizable(True)
         self.scrollArea3.setObjectName("scrollArea3")
         self.tabWidgetPage3 = QtWidgets.QWidget()
         self.tabWidgetPage3.setGeometry(QtCore.QRect(0, 0, 804, 388))
         self.tabWidgetPage3.setObjectName("tabWidgetPage3")
         self.vargrid = QtWidgets.QGridLayout(self.tabWidgetPage3)
-        self.vargrid.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.vargrid.setSizeConstraint(QSizeConstraint.SetMinimumSize)
         self.vargrid.setObjectName("vargrid")
         self.s_r_heading = QtWidgets.QLabel(self.tabWidgetPage3)
         self.s_r_heading.setWordWrap(True)
@@ -144,8 +155,8 @@ class MetadataBulkWidget(QWidget):
         self.filler.setObjectName("filler")
         self.vargrid.addWidget(self.filler, 1, 0, 1, 1)
         self.line = QtWidgets.QFrame(self.tabWidgetPage3)
-        self.line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setFrameShape(QShape.HLine)
+        self.line.setFrameShadow(QShadow.Sunken)
         self.line.setObjectName("line")
         self.vargrid.addWidget(self.line, 2, 0, 1, 3)
         self.xlabel_22 = QtWidgets.QLabel(self.tabWidgetPage3)
@@ -156,7 +167,7 @@ class MetadataBulkWidget(QWidget):
         self.vargrid.addWidget(self.query_field, 3, 1, 1, 1)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        spacerItem4 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem4 = QtWidgets.QSpacerItem(20, 20, QPolicy.Fixed, QPolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem4)
         self.save_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.save_button.setObjectName("save_button")
@@ -164,7 +175,7 @@ class MetadataBulkWidget(QWidget):
         self.remove_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.remove_button.setObjectName("remove_button")
         self.horizontalLayout_6.addWidget(self.remove_button)
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QPolicy.Expanding, QPolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem5)
         self.vargrid.addLayout(self.horizontalLayout_6, 3, 2, 1, 1)
         self.source_field_label = QtWidgets.QLabel(self.tabWidgetPage3)
@@ -181,14 +192,14 @@ class MetadataBulkWidget(QWidget):
         self.search_mode = QtWidgets.QComboBox(self.tabWidgetPage3)
         self.search_mode.setObjectName("search_mode")
         self.HLayout_4.addWidget(self.search_mode)
-        spacerItem6 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem6 = QtWidgets.QSpacerItem(20, 10, QPolicy.Expanding, QPolicy.Minimum)
         self.HLayout_4.addItem(spacerItem6)
         self.vargrid.addLayout(self.HLayout_4, 4, 2, 1, 1)
         self.s_r_src_ident_label = QtWidgets.QLabel(self.tabWidgetPage3)
         self.s_r_src_ident_label.setObjectName("s_r_src_ident_label")
         self.vargrid.addWidget(self.s_r_src_ident_label, 5, 0, 1, 1)
         self.s_r_src_ident = QtWidgets.QComboBox(self.tabWidgetPage3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QPolicy.Expanding, QPolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_src_ident.sizePolicy().hasHeightForWidth())
@@ -199,7 +210,7 @@ class MetadataBulkWidget(QWidget):
         self.template_label.setObjectName("template_label")
         self.vargrid.addWidget(self.template_label, 5, 0, 1, 1)
         self.s_r_template = HistoryLineEdit(self.tabWidgetPage3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QPolicy.Expanding, QPolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_template.sizePolicy().hasHeightForWidth())
@@ -210,7 +221,7 @@ class MetadataBulkWidget(QWidget):
         self.search_for_label.setObjectName("search_for_label")
         self.vargrid.addWidget(self.search_for_label, 6, 0, 1, 1)
         self.search_for = HistoryLineEdit(self.tabWidgetPage3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QPolicy.Expanding, QPolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.search_for.sizePolicy().hasHeightForWidth())
@@ -226,7 +237,7 @@ class MetadataBulkWidget(QWidget):
         self.vargrid.addWidget(self.xlabel_4, 7, 0, 1, 1)
         self.replace_with = HistoryLineEdit(self.tabWidgetPage3)
         ##un_pogaz sizePolicy for replace_with
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QPolicy.Expanding, QPolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.replace_with.sizePolicy().hasHeightForWidth())
@@ -242,7 +253,7 @@ class MetadataBulkWidget(QWidget):
         self.replace_func = QtWidgets.QComboBox(self.tabWidgetPage3)
         self.replace_func.setObjectName("replace_func")
         self.verticalLayout.addWidget(self.replace_func)
-        spacerItem7 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem7 = QtWidgets.QSpacerItem(20, 10, QPolicy.Expanding, QPolicy.Minimum)
         self.verticalLayout.addItem(spacerItem7)
         self.vargrid.addLayout(self.verticalLayout, 7, 2, 1, 1)
         self.destination_field_label = QtWidgets.QLabel(self.tabWidgetPage3)
@@ -263,14 +274,14 @@ class MetadataBulkWidget(QWidget):
         self.comma_separated.setChecked(True)
         self.comma_separated.setObjectName("comma_separated")
         self.verticalLayout_2.addWidget(self.comma_separated)
-        spacerItem8 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem8 = QtWidgets.QSpacerItem(20, 10, QPolicy.Expanding, QPolicy.Minimum)
         self.verticalLayout_2.addItem(spacerItem8)
         self.vargrid.addLayout(self.verticalLayout_2, 8, 2, 1, 1)
         self.s_r_dst_ident_label = QtWidgets.QLabel(self.tabWidgetPage3)
         self.s_r_dst_ident_label.setObjectName("s_r_dst_ident_label")
         self.vargrid.addWidget(self.s_r_dst_ident_label, 9, 0, 1, 1)
         self.s_r_dst_ident = QtWidgets.QLineEdit(self.tabWidgetPage3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QPolicy.Expanding, QPolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_dst_ident.sizePolicy().hasHeightForWidth())
@@ -279,7 +290,7 @@ class MetadataBulkWidget(QWidget):
         self.vargrid.addWidget(self.s_r_dst_ident, 9, 1, 1, 1)
         self.horizontalLayout_21 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_21.setObjectName("horizontalLayout_21")
-        spacerItem9 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem9 = QtWidgets.QSpacerItem(20, 0, QPolicy.Expanding, QPolicy.Minimum)
         self.horizontalLayout_21.addItem(spacerItem9)
         self.xlabel_412 = QtWidgets.QLabel(self.tabWidgetPage3)
         self.xlabel_412.setObjectName("xlabel_412")
@@ -309,7 +320,7 @@ class MetadataBulkWidget(QWidget):
         self.horizontalLayout_21.addWidget(self.multiple_separator)
         self.vargrid.addLayout(self.horizontalLayout_21, 10, 1, 1, 2)
         self.scrollArea11 = QtWidgets.QScrollArea(self.tabWidgetPage3)
-        self.scrollArea11.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.scrollArea11.setFrameShape(QShape.NoFrame)
         self.scrollArea11.setWidgetResizable(True)
         self.scrollArea11.setObjectName("scrollArea11")
         self.gridLayoutWidget_2 = QtWidgets.QWidget()
@@ -332,7 +343,7 @@ class MetadataBulkWidget(QWidget):
         self.test_result = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
         self.test_result.setObjectName("test_result")
         self.testgrid.addWidget(self.test_result, 8, 2, 1, 1)
-        spacerItem10 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem10 = QtWidgets.QSpacerItem(20, 5, QPolicy.Minimum, QPolicy.Expanding)
         self.testgrid.addItem(spacerItem10, 25, 0, 1, 2)
         self.scrollArea11.setWidget(self.gridLayoutWidget_2)
         self.vargrid.addWidget(self.scrollArea11, 11, 0, 1, 4)
@@ -360,7 +371,7 @@ class MetadataBulkWidget(QWidget):
         self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
         self.template_button.setIcon(QIcon(I('template_funcs.png')))
-        self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.template_button.setSizePolicy(QPolicy.Maximum, QPolicy.Maximum)
         self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
         self.template_button.clicked.connect(self.openTemplateBox)
         self.vargrid.addWidget(self.template_button, 5, 2, 1, 1)
@@ -455,16 +466,16 @@ class MetadataBulkWidget(QWidget):
         offset = 10
         self.s_r_number_of_books = min(10, len(self.ids))
         for i in range(1,self.s_r_number_of_books+1):
-            w = QLabel(self.tabWidgetPage3)
+            w = QtWidgets.QLabel(self.tabWidgetPage3)
             w.setText(_('Book %d:')%i)
             self.testgrid.addWidget(w, i+offset, 0, 1, 1)
-            w = QLineEdit(self.tabWidgetPage3)
+            w = QtWidgets.QLineEdit(self.tabWidgetPage3)
             w.setReadOnly(True)
             name = 'book_%d_text'%i
             setattr(self, name, w)
             self.book_1_text.setObjectName(name)
             self.testgrid.addWidget(w, i+offset, 1, 1, 1)
-            w = QLineEdit(self.tabWidgetPage3)
+            w = QtWidgets.QLineEdit(self.tabWidgetPage3)
             w.setReadOnly(True)
             name = 'book_%d_result'%i
             setattr(self, name, w)
@@ -472,7 +483,7 @@ class MetadataBulkWidget(QWidget):
             self.testgrid.addWidget(w, i+offset, 2, 1, 1)
         
         ident_types = sorted(self.db.get_all_identifier_types(), key=sort_key)
-        self.s_r_dst_ident.setCompleter(QCompleter(ident_types))
+        self.s_r_dst_ident.setCompleter(QtWidgets.QCompleter(ident_types))
         try:
             self.s_r_dst_ident.setPlaceholderText(_('Enter an identifier type'))
         except:
@@ -527,18 +538,18 @@ class MetadataBulkWidget(QWidget):
         self.s_r_obj = None
         
         self.replace_func.addItems(sorted(S_R_FUNCTIONS.keys()))
-        self.search_mode.currentIndexChanged[int].connect(self.s_r_search_mode_changed)
-        self.search_field.currentIndexChanged[int].connect(self.s_r_search_field_changed)
-        self.destination_field.currentIndexChanged[int].connect(self.s_r_destination_field_changed)
+        self.search_mode.currentIndexChanged.connect(self.s_r_search_mode_changed)
+        self.search_field.currentIndexChanged.connect(self.s_r_search_field_changed)
+        self.destination_field.currentIndexChanged.connect(self.s_r_destination_field_changed)
         
-        self.replace_mode.currentIndexChanged[int].connect(self.s_r_paint_results)
-        self.replace_func.currentIndexChanged[native_string_type].connect(self.s_r_paint_results)
+        self.replace_mode.currentIndexChanged.connect(self.s_r_paint_results)
+        self.replace_func.currentIndexChanged.connect(self.s_r_paint_results)
         self.search_for.editTextChanged[native_string_type].connect(self.s_r_paint_results)
         self.replace_with.editTextChanged[native_string_type].connect(self.s_r_paint_results)
         self.test_text.editTextChanged[native_string_type].connect(self.s_r_paint_results)
         self.comma_separated.stateChanged.connect(self.s_r_paint_results)
         self.case_sensitive.stateChanged.connect(self.s_r_paint_results)
-        self.s_r_src_ident.currentIndexChanged[int].connect(self.s_r_identifier_type_changed)
+        self.s_r_src_ident.currentIndexChanged.connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
         self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) ##un_pogaz template_button
@@ -564,7 +575,7 @@ class MetadataBulkWidget(QWidget):
         self.query_field.addItem("")
         self.query_field_values = sorted(self.queries, key=sort_key)
         self.query_field.addItems(self.query_field_values)
-        self.query_field.currentIndexChanged[native_string_type].connect(self.s_r_query_change)
+        self.query_field.currentIndexChanged.connect(self.s_r_query_change)
         self.query_field.setCurrentIndex(0)
         self.search_field.setCurrentIndex(0)
         self.s_r_search_field_changed(0)
@@ -1052,7 +1063,7 @@ class MetadataBulkWidget(QWidget):
             dex = 0
         name = ''
         while not name:
-            name, ok =  QInputDialog.getItem(self, _('Save search/replace'),
+            name, ok =  QtWidgets.QInputDialog.getItem(self, _('Save search/replace'),
                     _('Search/replace name:'), names, dex, True)
             if not ok:
                 return

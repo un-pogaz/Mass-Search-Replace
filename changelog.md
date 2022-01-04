@@ -1,3 +1,6 @@
+### version 1.3
+Compatible Calibre6/Qt6
+
 ### version 1.2.2
 FIX wrong error message when an error occurs during the update of the library
 

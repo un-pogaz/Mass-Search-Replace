@@ -19,10 +19,11 @@ except NameError:
 from functools import partial
 from datetime import datetime
 from collections import defaultdict
+
 try:
-    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from qt.core import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 except ImportError:
-    from PyQt4.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
 from calibre import prints
 from calibre.ebooks.metadata.book.base import Metadata

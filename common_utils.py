@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
@@ -17,19 +17,24 @@ except NameError:
     pass # load_translations() added in calibre 1.9
 
 try:
-    from PyQt5 import QtWidgets as QtGui
-    from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
-                          QTableWidgetItem, QFont, QLineEdit, QComboBox,
-                          QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                          QRegExpValidator, QRegExp, QTextEdit,
-                          QListWidget, QAbstractItemView)
+    from qt.core import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
+                            QTableWidgetItem, QFont, QLineEdit, QComboBox,
+                            QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
+                            QTextEdit, QListWidget, QAbstractItemView)
 except ImportError:
-    from PyQt4 import QtGui
-    from PyQt4.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
-                          QTableWidgetItem, QFont, QLineEdit, QComboBox,
-                          QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                          QRegExpValidator, QRegExp, QTextEdit,
-                          QListWidget, QAbstractItemView)
+    from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
+                            QTableWidgetItem, QFont, QLineEdit, QComboBox,
+                            QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
+                            QTextEdit, QListWidget, QAbstractItemView)
+
+try:
+    QtItemFlags = Qt.ItemFlag
+    #QTableWidgetType = QTableWidgetItem.ItemType.UserType
+except:
+    QtItemFlags = Qt.ItemFlags
+    #QTableWidgetType = QTableWidgetItem.UserType
+
+QTableWidgetType = 1000
 
 from calibre.constants import iswindows, DEBUG
 from calibre.gui2 import gprefs, error_dialog, UNDEFINED_QDATETIME, info_dialog
@@ -297,12 +302,12 @@ class ReadOnlyTableWidgetItem(QTableWidgetItem):
     def __init__(self, text):
         if text is None:
             text = ''
-        QTableWidgetItem.__init__(self, text, QtGui.QTableWidgetItem.UserType)
+        QTableWidgetItem.__init__(self, text, QTableWidgetType)
         self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class RatingTableWidgetItem(QTableWidgetItem):
     def __init__(self, rating, is_read_only=False):
-        QTableWidgetItem.__init__(self, '', QtGui.QTableWidgetItem.UserType)
+        QTableWidgetItem.__init__(self, '', QTableWidgetType)
         self.setData(Qt.DisplayRole, rating)
         if is_read_only:
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
@@ -312,10 +317,10 @@ class DateTableWidgetItem(QTableWidgetItem):
         if (date_read == UNDEFINED_DATE) and default_to_today:
             date_read = now()
         if is_read_only:
-            QTableWidgetItem.__init__(self, format_date(date_read, fmt), QtGui.QTableWidgetItem.UserType)
+            QTableWidgetItem.__init__(self, format_date(date_read, fmt), QTableWidgetType)
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
         else:
-            QTableWidgetItem.__init__(self, '', QtGui.QTableWidgetItem.UserType)
+            QTableWidgetItem.__init__(self, '', QTableWidgetType)
             dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
             self.setData(Qt.DisplayRole, dt)
 
@@ -328,7 +333,7 @@ class NoWheelComboBox(QComboBox):
 class CheckableTableWidgetItem(QTableWidgetItem):
     def __init__(self, checked=False, is_tristate=False):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(Qt.ItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        self.setFlags(QtItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
         if is_tristate:
             self.setFlags(self.flags() | Qt.ItemIsTristate)
         if checked:
@@ -371,14 +376,6 @@ class ReadOnlyLineEdit(QLineEdit):
             text = ''
         QLineEdit.__init__(self, text, parent)
         self.setEnabled(False)
-
-class NumericLineEdit(QLineEdit):
-    '''
-    Allows a numeric value up to two decimal places, or an integer
-    '''
-    def __init__(self, *args):
-        QLineEdit.__init__(self, *args)
-        self.setValidator(QRegExpValidator(QRegExp(r'(^\d*\.[\d]{1,2}$)|(^[1-9]\d*[\.]$)'), self))
 
 class ListComboBox(QComboBox):
     def __init__(self, parent, values, selected_value=None):

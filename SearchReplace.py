@@ -16,9 +16,11 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import Qt, QIcon, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSize
-                      
+try:
+    from qt.core import Qt, QIcon, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSize
+except ImportError:
+    from PyQt5.Qt import Qt, QIcon, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSize
+
 from calibre import prints
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog

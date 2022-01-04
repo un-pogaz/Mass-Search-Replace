@@ -19,14 +19,11 @@ from six.moves import range
 from six import text_type as unicode, string_types as basestring
 
 try:
-    from PyQt5 import QtWidgets as QtGui
-    from PyQt5.Qt import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
-                          QDialog, QSizePolicy, QSize)
-
+    from qt.core import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
+                      QDialog, QSizePolicy, QSize)
 except ImportError:
-    from PyQt4 import QtGui
-    from PyQt4.Qt import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
-                          QDialog, QSizePolicy, QSize)
+    from PyQt5.Qt import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
+                      QDialog, QSizePolicy, QSize)
 
 from calibre import prints
 from calibre.constants import DEBUG
