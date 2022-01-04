@@ -1,4 +1,4 @@
-### version 1.3
+### version 1.3.0
 Compatible Calibre6/Qt6
 
 ### version 1.2.2
