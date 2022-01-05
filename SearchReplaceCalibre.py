@@ -15,18 +15,16 @@ from six import text_type as unicode
 from six.moves import range
 
 try:
-    from qt.core import QApplication, Qt, QIcon
-except ImportError:
-    from PyQt5.Qt import QApplication, Qt, QIcon
+    from qt.core import QtCore, QtGui, QtWidgets
+except:
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
-    from PyQt6 import QtCore, QtWidgets
     QShape = QtWidgets.QFrame.Shape
     QShadow = QtWidgets.QFrame.Shadow
     QSizeConstraint = QtWidgets.QLayout.SizeConstraint
     QPolicy = QtWidgets.QSizePolicy.Policy
 except:
-    from PyQt5 import QtCore, QtWidgets
     QShape = QtWidgets.QFrame
     QShadow = QtWidgets.QFrame
     QSizeConstraint = QtWidgets.QLayout
@@ -47,7 +45,6 @@ from polyglot.builtins import error_message, iteritems, itervalues, native_strin
 
 from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
-
 
 TEMPLATE_FIELD = '{template}'
 
@@ -370,7 +367,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         ##un_pogaz template_button
         self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
-        self.template_button.setIcon(QIcon(I('template_funcs.png')))
+        self.template_button.setIcon(QtGui.QIcon(I('template_funcs.png')))
         self.template_button.setSizePolicy(QPolicy.Maximum, QPolicy.Maximum)
         self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
         self.template_button.clicked.connect(self.openTemplateBox)
@@ -556,9 +553,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
-        self.search_for.completer().setCaseSensitivity(Qt.CaseSensitive)
-        self.replace_with.completer().setCaseSensitivity(Qt.CaseSensitive)
-        self.s_r_template.completer().setCaseSensitivity(Qt.CaseSensitive)
+        self.search_for.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        self.replace_with.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        self.s_r_template.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
         
         self.s_r_search_mode_changed(self.search_mode.currentIndex())
         self.multiple_separator.setFixedWidth(30)
@@ -777,7 +774,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             col = 'rgba(0, 255, 0, 20%)'
             
         if calibre_version >= (5,0,0):
-            self.test_result.setStyleSheet(QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
+            self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
         else:
             self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
         

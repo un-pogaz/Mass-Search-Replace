@@ -18,13 +18,6 @@ import json
 from six.moves import range
 from six import text_type as unicode, string_types as basestring
 
-try:
-    from qt.core import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
-                      QDialog, QSizePolicy, QSize)
-except ImportError:
-    from PyQt5.Qt import (Qt, QGridLayout, QHBoxLayout, QVBoxLayout, QToolButton,
-                      QDialog, QSizePolicy, QSize)
-
 from calibre import prints
 from calibre.constants import DEBUG
 from calibre.ebooks.metadata import MetaInformation
@@ -112,5 +105,5 @@ class TemplateBox(TemplateDialog):
     
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()
-        QDialog.accept(self)
+        TemplateDialog.accept(self)
 
