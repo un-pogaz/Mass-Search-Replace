@@ -29,12 +29,9 @@ except ImportError:
                             QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
                             QPushButton, QSpacerItem, QSizePolicy)
 
-
 try:
-    QtItemFlags = Qt.ItemFlag
     QPolicy = QSizePolicy.Policy
 except:
-    QtItemFlags = Qt.ItemFlags
     QPolicy = QSizePolicy
 
 try:
@@ -52,7 +49,6 @@ from calibre.utils.zipfile import ZipFile
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, clean_empty_operation
 from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
                                                               get_icon, debug_print)
-
 
 class ICON:
     PLUGIN    = 'images/plugin.png'
@@ -885,7 +881,7 @@ class ImageDialog(QDialog):
 class OperationWidgetItem(QTableWidgetItem):
     def __init__(self, plugin_action, operation):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(QtItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
         self.plugin_action = plugin_action
         self._operation = operation
         self._hasError = False
