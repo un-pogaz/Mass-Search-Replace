@@ -200,12 +200,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # plugin_action
         self.plugin_action = plugin_action
         # gui
-        self.gui = plugin_action.gui
+        self.gui = self.plugin_action.gui
         
         # DB
-        self.db = plugin_action.gui.current_db
+        self.db = self.gui.current_db
         # DB API
-        self.dbA = plugin_action.gui.current_db.new_api
+        self.dbAPI = self.db.new_api
+        
         # liste of book id
         self.book_ids = book_ids
         # Count book
@@ -231,8 +232,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
         # Search/Replace Widget
         self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action, self.book_ids)
         
-        self.time_execut = 0
-        
         # operation error
         self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         self.operationErrorList = []
@@ -246,6 +245,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.exception_unhandled = False
         self.exception_update = False
         self.exception_safely = False
+        
+        self.time_execut = 0
         
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, self.gui)
@@ -335,7 +336,6 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.close()
     
     def close(self):
-        self.db.clean()
         self.s_r.close()
         QProgressDialog.close(self)
     
@@ -391,7 +391,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         else:
                             self.show()
                         
-                        miA = self.dbA.get_proxy_metadata(book_id)
+                        miA = self.dbAPI.get_proxy_metadata(book_id)
                         
                         #Book num/book_count > "title" (author & author) {id: book_id}
                         book_info = 'Book '+str(num)+'/'+str(self.book_count)+ ' > "'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') {id: '+str(book_id)+'}'
@@ -455,12 +455,12 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             if id in book_id_val_map:
                                 try:
                                     val = self.s_r.updated_fields[field][id]
-                                    self.dbA.set_field(field, {id:val})
+                                    self.dbAPI.set_field(field, {id:val})
                                     book_id_update[field][id] = ''
                                 except Exception as e:
                                     self.exception_safely = True
                                     
-                                    miA = self.dbA.get_proxy_metadata(id)
+                                    miA = self.dbAPI.get_proxy_metadata(id)
                                     #title (author & author)
                                     book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
                                     self.exception.append( (id, book_info, field, e) )
@@ -478,10 +478,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         for field, book_id_val_map in iteritems(self.s_r.updated_fields):
                             if is_restore:
-                                src_field = self.dbA.all_field_for(field, book_id_val_map.keys())
+                                src_field = self.dbAPI.all_field_for(field, book_id_val_map.keys())
                                 backup_fields[field] = src_field
                             
-                            self.dbA.set_field(field, book_id_val_map)
+                            self.dbAPI.set_field(field, book_id_val_map)
                             book_id_update[field] = {id:'' for id in book_id_val_map.keys()}
                         
                     except Exception as e:
@@ -490,7 +490,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         
                         if is_restore:
                             for field, book_id_val_map in iteritems(backup_fields):
-                               self.dbA.set_field(field, book_id_val_map)
+                               self.dbAPI.set_field(field, book_id_val_map)
                 
                 self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
                 
@@ -507,4 +507,5 @@ class SearchReplacesProgressDialog(QProgressDialog):
             self.books_update = len(lst_id)
             
             self.time_execut = round(time.time() - start, 3)
+            self.db.clean()
             self.hide()
