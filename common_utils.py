@@ -21,18 +21,13 @@ try:
                             QTableWidgetItem, QFont, QLineEdit, QComboBox,
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
                             QTextEdit, QListWidget, QAbstractItemView)
+    
 except ImportError:
     from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
                             QTableWidgetItem, QFont, QLineEdit, QComboBox,
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
                             QTextEdit, QListWidget, QAbstractItemView)
 
-try:
-    QtItemFlags = Qt.ItemFlag
-    QTableWidgetUserType = QTableWidgetItem.ItemType.UserType.value
-except:
-    QtItemFlags = Qt.ItemFlags
-    QTableWidgetUserType = QTableWidgetItem.UserType
 
 from calibre.constants import iswindows, DEBUG
 from calibre.gui2 import gprefs, error_dialog, UNDEFINED_QDATETIME, info_dialog
@@ -283,12 +278,12 @@ class ReadOnlyTableWidgetItem(QTableWidgetItem):
     def __init__(self, text):
         if text is None:
             text = ''
-        QTableWidgetItem.__init__(self, text, QTableWidgetUserType)
+        QTableWidgetItem.__init__(self, text)
         self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class RatingTableWidgetItem(QTableWidgetItem):
     def __init__(self, rating, is_read_only=False):
-        QTableWidgetItem.__init__(self, '', QTableWidgetUserType)
+        QTableWidgetItem.__init__(self, '')
         self.setData(Qt.DisplayRole, rating)
         if is_read_only:
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
@@ -298,10 +293,10 @@ class DateTableWidgetItem(QTableWidgetItem):
         if (date_read == UNDEFINED_DATE) and default_to_today:
             date_read = now()
         if is_read_only:
-            QTableWidgetItem.__init__(self, format_date(date_read, fmt), QTableWidgetUserType)
+            QTableWidgetItem.__init__(self, format_date(date_read, fmt))
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
         else:
-            QTableWidgetItem.__init__(self, '', QTableWidgetUserType)
+            QTableWidgetItem.__init__(self, '')
             dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
             self.setData(Qt.DisplayRole, dt)
 
@@ -314,7 +309,7 @@ class NoWheelComboBox(QComboBox):
 class CheckableTableWidgetItem(QTableWidgetItem):
     def __init__(self, checked=False, is_tristate=False):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(QtItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
         if is_tristate:
             self.setFlags(self.flags() | Qt.ItemIsTristate)
         if checked:
