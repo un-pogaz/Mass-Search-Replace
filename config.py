@@ -30,11 +30,6 @@ except ImportError:
                             QPushButton, QSpacerItem, QSizePolicy)
 
 try:
-    QPolicy = QSizePolicy.Policy
-except:
-    QPolicy = QSizePolicy
-
-try:
     from urllib.request import urlretrieve
 except ImportError:
     from urllib import urlretrieve
@@ -196,28 +191,28 @@ class ConfigWidget(QWidget):
         move_up_button.setToolTip(_('Move menu item up'))
         move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
-        spacerItem = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QToolButton(self)
         add_button.setToolTip(_('Add menu item'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
-        spacerItem1 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QToolButton(self)
         copy_button.setToolTip(_('Copy menu item'))
         copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
-        spacerItem2 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QToolButton(self)
         delete_button.setToolTip(_('Delete menu item'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        spacerItem3 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QToolButton(self)
@@ -700,7 +695,7 @@ class SettingsButton(QToolButton):
         QToolButton.__init__(self)
         self.plugin_action = plugin_action
         
-        self.setSizePolicy(QPolicy.Maximum, QPolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.clicked.connect(self._clicked)
@@ -970,28 +965,28 @@ class ConfigOperationListDialog(Dialog):
         move_up_button.setToolTip(_('Move operation up'))
         move_up_button.setIcon(get_icon('arrow-up.png'))
         button_layout.addWidget(move_up_button)
-        spacerItem = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem)
         
         add_button = QToolButton(self)
         add_button.setToolTip(_('Add operation'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
-        spacerItem1 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem1)
         
         copy_button = QToolButton(self)
         copy_button.setToolTip(_('Copy operation'))
         copy_button.setIcon(get_icon('edit-copy.png'))
         button_layout.addWidget(copy_button)
-        spacerItem2 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem2)
         
         delete_button = QToolButton(self)
         delete_button.setToolTip(_('Delete operation'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        spacerItem3 = QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding)
+        spacerItem3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addItem(spacerItem3)
         
         move_down_button = QToolButton(self)
