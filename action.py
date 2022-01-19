@@ -273,7 +273,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
+            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))

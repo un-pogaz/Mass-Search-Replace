@@ -17,6 +17,8 @@ except NameError:
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import InterfaceActionBase
 
+DEBUG_PRE = 'MassSearch/Replace'
+
 class ActionMassSearchReplace(InterfaceActionBase):
     '''
     This class is a simple wrapper that provides information about the actual
