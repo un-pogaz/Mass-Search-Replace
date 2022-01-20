@@ -39,12 +39,15 @@ from calibre.utils.config import JSONConfig, dynamic, prefs, tweaks
 from calibre.utils.date import now
 from calibre.utils.icu import capitalize, sort_key
 from calibre.utils.titlecase import titlecase
+from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
 from calibre.gui2.widgets2 import Dialog
 from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
 
 from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+
+GUI = get_gui()
 
 TEMPLATE_FIELD = '{template}'
 
@@ -117,11 +120,9 @@ class KEY:
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QtWidgets.QWidget):
-    def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
+    def __init__(self, book_ids=[], refresh_books=set([])):
         QtWidgets.QWidget.__init__(self)
-        self.plugin_action = plugin_action
-        self.gui = plugin_action.gui
-        self.db = self.gui.current_db
+        self.db = GUI.current_db
         self.ids = book_ids
         self.refresh_books = refresh_books
         self.set_field_calls = defaultdict(dict)
@@ -898,7 +899,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                     raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
             
             if sftxt == TEMPLATE_FIELD:
-                error = check_template(self.s_r_template.text(), self.plugin_action)
+                error = check_template(self.s_r_template.text())
                 if error is not True:
                     raise Exception(_('S/R TEMPLATE ERROR')+': '+ str(error))
             
@@ -1232,7 +1233,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def openTemplateBox(self):
         
-        temp = TemplateBox(self, self.plugin_action, template_text=unicode_type(self.s_r_template.text()))
+        temp = TemplateBox(self, template_text=unicode_type(self.s_r_template.text()))
         temp.exec_()
         if temp.template:
             self.s_r_template.setText(temp.template)

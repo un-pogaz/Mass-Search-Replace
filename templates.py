@@ -24,8 +24,11 @@ from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
+from calibre.gui2.ui import get_gui
 
 from calibre_plugins.mass_search_replace.common_utils import get_icon
+
+GUI = get_gui()
 
 TEMPLATE_PREFIX = 'TEMPLATE: '
 TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
@@ -35,9 +38,8 @@ try:
 except NameError:
     pass
 
-def check_template(template, plugin_action, show_error=False):
-    gui = plugin_action.gui
-    db = plugin_action.gui.current_db
+def check_template(template, show_error=False):
+    db = GUI.current_db
     error_msgs = [
         TEMPLATE_ERROR,
         'unknown function',
@@ -53,15 +55,13 @@ def check_template(template, plugin_action, show_error=False):
         mi = db.get_metadata(book_id, index_is_id=True, get_user_categories=True)
     except:
         mi = MetaInformation(_('Unknown'))
-    ## add any extra fields by actions that define update_metadata
-    #plugin_action.update_metadata(mi)
     
     output = SafeFormat().safe_format(template, mi, TEMPLATE_ERROR, mi)
     for msg in error_msgs:
         if output.lower().find(msg.lower()) != -1:
             error = output.lstrip(TEMPLATE_ERROR)
             if show_error:
-                error_dialog(gui, _('Template Error'),
+                error_dialog(GUI, _('Template Error'),
                         _('Running the template returned an error:') +'\n'+ str(error),
                         show=True)
             return error
@@ -69,13 +69,12 @@ def check_template(template, plugin_action, show_error=False):
 
 
 class TemplateBox(TemplateDialog):
-    def __init__(self, parent, plugin_action, template_text=''):
-        self.plugin_action = plugin_action
-        self.gui = plugin_action.gui
-        self.db = self.gui.current_db
+    def __init__(self, parent=None, template_text=''):
+        self.db = GUI.current_db
         self.template = template_text
+        if not parent: parent = GUI
         
-        rows = self.gui.current_view().selectionModel().selectedRows()
+        rows = GUI.current_view().selectionModel().selectedRows()
         if rows:
             index = rows[0]
             mi = self.db.get_metadata(index.row(), index_is_id=False, get_cover=False)
@@ -86,7 +85,6 @@ class TemplateBox(TemplateDialog):
             except:
                 mi = MetaInformation(_('Unknown'))
         ## add any extra fields by actions that define update_metadata
-        #plugin_action.update_metadata(mi)
         
         if not template_text:
             text = _('Enter a template to test using data from the selected book')
@@ -101,7 +99,7 @@ class TemplateBox(TemplateDialog):
             self.textbox.insertPlainText(template_text)
     
     def template_is_valide(self):
-        return check_template(self.template, self.plugin_action) is True
+        return check_template(self.template) is True
     
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()

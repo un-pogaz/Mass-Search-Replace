@@ -30,6 +30,7 @@ from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
+from calibre.gui2.ui import get_gui
 from calibre.library import current_library_name
 from polyglot.builtins import iteritems
 
@@ -37,6 +38,8 @@ from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY_MENU, KE
 from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
 from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+
+GUI = get_gui()
 
 class MassSearchReplaceAction(InterfaceAction):
     
@@ -49,7 +52,7 @@ class MassSearchReplaceAction(InterfaceAction):
     
     def genesis(self):
         self.is_library_selected = True
-        self.menu = QMenu(self.gui)
+        self.menu = QMenu(GUI)
         
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
@@ -83,10 +86,10 @@ class MassSearchReplaceAction(InterfaceAction):
         
         for i, action in enumerate(self.menu_actions, 0):
             if hasattr(action, 'calibre_shortcut_unique_name'):
-                self.gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
+                GUI.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
             # starting in calibre 2.10.0, actions are registers at the top gui level for OSX' benefit.
             if calibre_version >= (2,10,0) :
-                self.gui.removeAction(action)
+                GUI.removeAction(action)
         
         self.menu_actions = []
         
@@ -108,7 +111,7 @@ class MassSearchReplaceAction(InterfaceAction):
                                              triggered=self.show_configuration,
                                              unique_name='&Customize plugin')
         self.menu_actions.append(ac)
-        self.gui.keyboard.finalize()
+        GUI.keyboard.finalize()
     
     def append_menu_item_ex(self, parent_menu, sub_menus, menu):
         
@@ -147,13 +150,13 @@ class MassSearchReplaceAction(InterfaceAction):
             self.menu_actions.append(ac)
             self.menu_list.append((menu, ac))
     
-    def quickSearchReplace(self, parameter_list):
+    def quickSearchReplace(self):
         
         menu = get_default_menu()
         menu[KEY_MENU.TEXT] = None
         menu[KEY_MENU.OPERATIONS] = PREFS[KEY_MENU.QUICK]
         
-        d = ConfigOperationListDialog(self.menu, self, menu=menu)
+        d = ConfigOperationListDialog(self, menu=menu)
         
         if len(d.operation_list)==0:
             d.add_empty_operation()
@@ -169,20 +172,20 @@ class MassSearchReplaceAction(InterfaceAction):
     def run_SearchReplace(self, menu):
         
         if not self.is_library_selected:
-            return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
+            return error_dialog(GUI, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
         
-        rows = self.gui.library_view.selectionModel().selectedRows()
+        rows = GUI.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            return error_dialog(self.gui, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
+            return error_dialog(GUI, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
         
-        book_ids = self.gui.library_view.get_selected_ids()
+        book_ids = GUI.library_view.get_selected_ids()
         
-        srpg = SearchReplacesProgressDialog(self, book_ids, menu)
+        srpg = SearchReplacesProgressDialog(book_ids, menu)
         srpg.close()
         del srpg
     
     def show_configuration(self):
-        self.interface_action_base_plugin.do_user_config(self.gui)
+        self.interface_action_base_plugin.do_user_config(GUI)
 
 
 def menu_testGetError(menu):
@@ -195,15 +198,10 @@ def menu_testGetError(menu):
 
 
 class SearchReplacesProgressDialog(QProgressDialog):
-    def __init__(self, plugin_action, book_ids, menu):
-        
-        # plugin_action
-        self.plugin_action = plugin_action
-        # gui
-        self.gui = self.plugin_action.gui
+    def __init__(self, book_ids, menu):
         
         # DB
-        self.db = self.gui.current_db
+        self.db = GUI.current_db
         # DB API
         self.dbAPI = self.db.new_api
         
@@ -230,7 +228,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.total_operation_count = self.book_count*self.operation_count
         
         # Search/Replace Widget
-        self.s_r = SearchReplaceWidget_NoWindows(self.plugin_action, self.book_ids)
+        self.s_r = SearchReplaceWidget_NoWindows(self.book_ids)
         
         # operation error
         self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
@@ -249,7 +247,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.time_execut = 0
         
         
-        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, self.gui)
+        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, GUI)
         
         self.setWindowTitle(_('Mass Search/Replace Progress'))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
@@ -273,11 +271,11 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
+            CustomExceptionErrorDialog(GUI, self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))
-            warning_dialog(self.gui, _('Invalid operation'),
+            warning_dialog(GUI, _('Invalid operation'),
                         _('A invalid operations has detected:\n{:s}\n\n'
                           'Mass Search/Replace was canceled.').format(str(self.operationErrorList[0][1])),
                           show=True, show_copy_button=False)
@@ -310,25 +308,25 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     msg += '\n' + _('The library a was restored to its original state.')
                 
                 id, book_info, field, e = self.exception[0]
-                CustomExceptionErrorDialog(self.gui, e, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
+                CustomExceptionErrorDialog(GUI, e, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
             
             elif self.exception_safely:
                 
                 det_msg= '\n'.join('Book {:s} | {:s} > {:}'.format(book_info, field, e.__class__.__name__ +': '+ str(e)) for id, book_info, field, e in self.exception)
                 
-                warning_dialog(self.gui, _('Exceptions during the library update'),
+                warning_dialog(GUI, _('Exceptions during the library update'),
                             _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
                               det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
             
             if self.operationErrorList:
                 det_msg= '\n'.join( 'Operation {:d}/{:d} > {:s}'.format(n, self.operation_count, err) for n, err in self.operationErrorList)
                 
-                warning_dialog(self.gui, _('Invalid operation'),
+                warning_dialog(GUI, _('Invalid operation'),
                             _('{:d} invalid operations has detected and have been ignored.').format(len(self.operationErrorList)),
                             det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
             
             if self.showUpdateReport and not (self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE):
-                info_dialog(self.gui, _('Update Report'),
+                info_dialog(GUI, _('Update Report'),
                         _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(self.books_update, self.fields_update)
                         , show=True, show_copy_button=False)
             
@@ -353,7 +351,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 
                 debug_print('Operation {:d}/{:d} > {:s}'.format(op, self.operation_count, operation_string(operation)))
                 
-                err = operation_testGetError(operation, self.plugin_action)
+                err = operation_testGetError(operation)
                 if not err:
                     self.s_r.load_settings(operation)
                     err = self.s_r.testGetError()
@@ -368,7 +366,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                 elif not alreadyOperationError and len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ASK:
                     alreadyOperationError = True
                     start_dialog =  time.time()
-                    rslt = question_dialog(self.gui, _('Invalid operation'),
+                    rslt = question_dialog(GUI, _('Invalid operation'),
                             _('A invalid operations has detected:\n{:s}\n\n'
                               'Continue the execution of Mass Search/Replace?\n'
                               'Other errors may exist and will be ignored.').format(str(self.operationErrorList[0][1])),
@@ -492,7 +490,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                             for field, book_id_val_map in iteritems(backup_fields):
                                self.dbAPI.set_field(field, book_id_val_map)
                 
-                self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
+                GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
                 
             
         

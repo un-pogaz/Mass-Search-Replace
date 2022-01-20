@@ -23,6 +23,7 @@ except ImportError:
 
 from calibre import prints
 from calibre.gui2 import error_dialog, question_dialog
+from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 
 from calibre_plugins.mass_search_replace.common_utils import debug_print, get_icon
@@ -30,6 +31,8 @@ from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBul
 from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
 from calibre_plugins.mass_search_replace.TestField import get_possible_fields, get_possible_idents
 import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+
+GUI = get_gui()
 
 TEMPLATE_FIELD = TEMPLATE
 
@@ -40,12 +43,12 @@ class KEY_OPERATION:
 _default_operation = None
 _s_r = None
 
-def get_default_operation(plugin_action):
+def get_default_operation():
         global _default_operation
         global _s_r
         
-        if not _s_r or _s_r.db != plugin_action.gui.current_db:
-            _s_r = SearchReplaceWidget_NoWindows(plugin_action, [0])
+        if not _s_r or _s_r.db != GUI.current_db:
+            _s_r = SearchReplaceWidget_NoWindows([0])
         if not _default_operation:
             _default_operation = _s_r.save_settings()
             _default_operation[KEY_OPERATION.ACTIVE] = True
@@ -64,9 +67,9 @@ def operation_list_ConvertError(operation_list):
         rlst.append(operation_ConvertError(operation))
     return rlst
 
-def clean_empty_operation(operation_list, plugin_action):
+def clean_empty_operation(operation_list):
     if not operation_list: operation_list = []
-    default = get_default_operation(plugin_action)
+    default = get_default_operation()
     operation_list = operation_list_ConvertError(operation_list)
     rlst = []
     for operation in operation_list:
@@ -89,9 +92,9 @@ def operation_list_active(operation_list):
     return rlst
 
 
-def operation_testGetError(operation, plugin_action):
+def operation_testGetError(operation):
     
-    db = plugin_action.gui.current_db
+    db = GUI.current_db
     
     if not operation:
         return TypeError
@@ -133,17 +136,17 @@ def operation_testGetError(operation, plugin_action):
     
     return None
 
-def operation_testFullError(operation, plugin_action):
-    err = operation_testGetError(operation, plugin_action)
+def operation_testFullError(operation):
+    err = operation_testGetError(operation)
     if err:
         return err
-    get_default_operation(plugin_action)
+    get_default_operation()
     global _s_r
     _s_r.load_settings(operation)
     return _s_r.testGetError()
 
-def operation_isFullValid(operation, plugin_action):
-    return operation_testFullError(operation, plugin_action) == None
+def operation_isFullValid(operation):
+    return operation_testFullError(operation) == None
 
 
 def operation_para_list(operation):
@@ -173,20 +176,19 @@ def operation_string(operation):
     return '"'+ '" | "'.join(val)+'"'
 
 
-def SearchReplaceWidget_NoWindows(plugin_action, book_ids=[]):
-    rslt = SearchReplaceWidget(plugin_action, book_ids)
+def SearchReplaceWidget_NoWindows(book_ids=[]):
+    rslt = SearchReplaceWidget(book_ids)
     rslt.resize(QSize(0, 0))
     return rslt;
 
 class SearchReplaceWidget(MetadataBulkWidget):
-    def __init__(self, plugin_action, book_ids=[], refresh_books=set([])):
+    def __init__(self, book_ids=[], refresh_books=set([])):
         
         if not book_ids or len(book_ids) == 0:
-            book_ids = plugin_action.gui.library_view.get_selected_ids();
+            book_ids = GUI.library_view.get_selected_ids();
         
-        MetadataBulkWidget.__init__(self, plugin_action, book_ids, refresh_books)
+        MetadataBulkWidget.__init__(self, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
-        self.plugin_action = plugin_action
     
     def load_settings(self, operation):
         self.load_query(operation)
@@ -195,7 +197,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
         return self.get_query()
     
     def testGetError(self):
-        return operation_testGetError(self.get_query(), self.plugin_action)
+        return operation_testGetError(self.get_query())
     
     def search_replace(self, book_id, operation=None):
         if operation:
@@ -208,14 +210,12 @@ class SearchReplaceWidget(MetadataBulkWidget):
 
 
 class SearchReplaceDialog(Dialog):
-    def __init__(self, parent, plugin_action, operation=None, book_ids=[]):
-        self.plugin_action = plugin_action
-        self.parent = parent
+    def __init__(self, operation=None, book_ids=[]):
         if not operation:
-            operation = get_default_operation(plugin_action)
+            operation = get_default_operation()
         self.operation = operation
-        self.widget = SearchReplaceWidget(self.plugin_action, book_ids[:10])
-        Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace', parent)
+        self.widget = SearchReplaceWidget(book_ids[:10])
+        Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace')
     
     def setup_ui(self):
         l = QVBoxLayout()
