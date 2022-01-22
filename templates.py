@@ -26,7 +26,7 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
 from calibre.gui2.ui import get_gui
 
-from calibre_plugins.mass_search_replace.common_utils import get_icon
+from .common_utils import get_icon
 
 GUI = get_gui()
 

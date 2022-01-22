@@ -34,10 +34,10 @@ from calibre.gui2.ui import get_gui
 from calibre.library import current_library_name
 from polyglot.builtins import iteritems
 
-from calibre_plugins.mass_search_replace.config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from calibre_plugins.mass_search_replace.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
-import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
+from .common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
+from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
+from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
 

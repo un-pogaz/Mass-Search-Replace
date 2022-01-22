@@ -44,8 +44,8 @@ from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
 from calibre.gui2.widgets2 import Dialog
 from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
 
-from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
-import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+from .templates import TemplateBox, check_template
+from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
 

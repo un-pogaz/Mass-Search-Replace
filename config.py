@@ -42,8 +42,8 @@ from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from calibre_plugins.mass_search_replace.SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, clean_empty_operation
-from calibre_plugins.mass_search_replace.common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
+from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, clean_empty_operation
+from .common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
                                                               get_icon, debug_print)
 
 GUI = get_gui()

@@ -16,7 +16,7 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import TEMPLATE_FIELD
+from .SearchReplaceCalibre import TEMPLATE_FIELD
 
 def get_possible_fields(db):
     all_fields = []

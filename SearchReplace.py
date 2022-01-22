@@ -26,11 +26,11 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 
-from calibre_plugins.mass_search_replace.common_utils import debug_print, get_icon
-from calibre_plugins.mass_search_replace.SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD as TEMPLATE
-from calibre_plugins.mass_search_replace.templates import TemplateBox, check_template
-from calibre_plugins.mass_search_replace.TestField import get_possible_fields, get_possible_idents
-import calibre_plugins.mass_search_replace.SearchReplaceCalibreText as CalibreText
+from .common_utils import debug_print, get_icon
+from .SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD as TEMPLATE
+from .templates import TemplateBox, check_template
+from .TestField import get_possible_fields, get_possible_idents
+from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
 
