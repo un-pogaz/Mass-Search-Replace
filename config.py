@@ -243,10 +243,7 @@ class ConfigWidget(QWidget):
         keyboard_layout.insertStretch(-1)
         
         self.updateReport = QCheckBox(_('Display a update report'), self)
-        if PREFS[KEY_MENU.UPDATE_REPORT]:
-            self.updateReport.setCheckState(Qt.Checked)
-        else:
-            self.updateReport.setCheckState(Qt.Unchecked)
+        self.updateReport.setChecked(PREFS[KEY_MENU.UPDATE_REPORT])
         
         keyboard_layout.addWidget(self.updateReport)
         
