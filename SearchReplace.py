@@ -68,7 +68,7 @@ def operation_list_ConvertError(operation_list):
     return rlst
 
 def clean_empty_operation(operation_list):
-    if not operation_list: operation_list = []
+    operation_list = operation_list or []
     default = get_default_operation()
     operation_list = operation_list_ConvertError(operation_list)
     rlst = []

@@ -427,7 +427,7 @@ class MenuTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(COL_NAMES)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        if menu_list == None: menu_list = []
+        menu_list = menu_list or []
         self.setRowCount(len(menu_list))
         for row, menu in enumerate(menu_list, 0):
             self.populate_table_row(row, menu)
@@ -485,7 +485,7 @@ class MenuTableWidget(QTableWidget):
         image_combo = ImageComboBox(self, self.image_map, image)
         image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, row))
         self.setCellWidget(row, 3, image_combo)
-        if menu==None: menu = self.create_blank_row_menu()
+        menu = menu or self.create_blank_row_menu()
         self.setCellWidget(row, 4, SettingsButton(menu))
     
     def set_noneditable_cells_in_row(self, row):
@@ -876,7 +876,7 @@ class OperationWidgetItem(QTableWidgetItem):
         self.setOperation(operation)
     
     def setOperation(self, operation):
-        if not operation: operation = get_default_operation()
+        operation = operation or get_default_operation()
         self._operation = operation
         
         checked = operation_is_active(self._operation)
@@ -909,7 +909,7 @@ COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _(
 
 class ConfigOperationListDialog(Dialog):
     def __init__(self, parent, menu):
-        if not menu: menu = get_default_menu()
+        menu = menu or get_default_menu()
         name = menu[KEY_MENU.TEXT]
         sub_menu = menu[KEY_MENU.SUBMENU]
         self.operation_list = menu[KEY_MENU.OPERATIONS]

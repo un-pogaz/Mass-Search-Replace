@@ -72,7 +72,7 @@ class TemplateBox(TemplateDialog):
     def __init__(self, parent=None, template_text=''):
         self.db = GUI.current_db
         self.template = template_text
-        if not parent: parent = GUI
+        parent = parent or GUI
         
         rows = GUI.current_view().selectionModel().selectedRows()
         if rows:
