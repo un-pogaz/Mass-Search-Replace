@@ -7,8 +7,9 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time
-# calibre Python 3 compatibility.
+import copy, time
+# python3 compatibility
+from six.moves import range
 from six import text_type as unicode
 
 try:
@@ -16,9 +17,10 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from functools import partial
 from datetime import datetime
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+from functools import partial
+from polyglot.builtins import iteritems, itervalues
 
 try:
     from qt.core import QToolButton, QMenu, QProgressDialog, QTimer, QSize
@@ -32,10 +34,10 @@ from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dia
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from calibre.library import current_library_name
-from polyglot.builtins import iteritems
 
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
+from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_selected_BookIds, load_plugin_resources,
+                            create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 from . import SearchReplaceCalibreText as CalibreText
 
@@ -44,8 +46,9 @@ GUI = get_gui()
 class MassSearchReplaceAction(InterfaceAction):
     
     name = 'Mass Search/Replace'
+    
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = ('Mass Search/Replace', None, _('Apply a list of multiple saved Find and Replace operations'), None)
+    action_spec = (name, None, _('Apply a list of multiple saved Find and Replace operations'), None)
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])
@@ -54,8 +57,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.is_library_selected = True
         self.menu = QMenu(GUI)
         
-        icon_resources = self.load_resources(ICON.ALL)
-        set_plugin_icon_resources(self.name, icon_resources)
+        load_plugin_resources(self.plugin_path, ICON.ALL)
         
         error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         if error_operation not in ERROR_OPERATION.LIST.keys():
@@ -78,6 +80,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
+        debug_print('rebuild_menus')
         menu_list = PREFS[KEY_MENU.MENU]
         self.menu.clear()
         self.menu_list = []
@@ -170,15 +173,7 @@ class MassSearchReplaceAction(InterfaceAction):
                 self.run_SearchReplace(menu)
     
     def run_SearchReplace(self, menu):
-        
-        if not self.is_library_selected:
-            return error_dialog(GUI, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
-        
-        rows = GUI.library_view.selectionModel().selectedRows()
-        if not rows or len(rows) == 0:
-            return error_dialog(GUI, _('Could not to launch Mass Search/Replace'), _('No book selected'), show=True, show_copy_button=False)
-        
-        book_ids = GUI.library_view.get_selected_ids()
+        book_ids = get_selected_BookIds()
         
         srpg = SearchReplacesProgressDialog(book_ids, menu)
         srpg.close()
@@ -201,7 +196,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
     def __init__(self, book_ids, menu):
         
         # DB
-        self.db = GUI.current_db
+        self.db = current_db()
         # DB API
         self.dbAPI = self.db.new_api
         
@@ -271,7 +266,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(GUI, self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
+            CustomExceptionErrorDialog(self.exception)
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))
@@ -308,7 +303,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                     msg += '\n' + _('The library a was restored to its original state.')
                 
                 id, book_info, field, e = self.exception[0]
-                CustomExceptionErrorDialog(GUI, e, custome_title=_('Cannot update the library'), custome_msg=msg+'\n')
+                CustomExceptionErrorDialog(e, custome_msg=msg, custome_title=_('Cannot update the library'))
             
             elif self.exception_safely:
                 

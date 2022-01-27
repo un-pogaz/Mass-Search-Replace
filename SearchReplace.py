@@ -7,14 +7,20 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, copy
-# calibre Python 3 compatibility.
+import copy
+# python3 compatibility
+from six.moves import range
 from six import text_type as unicode
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
+
+from datetime import datetime
+from collections import defaultdict, OrderedDict
+from functools import partial
+from polyglot.builtins import iteritems, itervalues
 
 try:
     from qt.core import QGridLayout, QHBoxLayout, QVBoxLayout, QSize
@@ -26,10 +32,10 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 
-from .common_utils import debug_print, get_icon
+from .common_utils import debug_print, get_icon, current_db
 from .SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES, TEMPLATE_FIELD as TEMPLATE
 from .templates import TemplateBox, check_template
-from .TestField import get_possible_fields, get_possible_idents
+from .columns_metadata import get_possible_idents, get_possible_fields
 from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
@@ -47,7 +53,7 @@ def get_default_operation():
         global _default_operation
         global _s_r
         
-        if not _s_r or _s_r.db != GUI.current_db:
+        if not _s_r or _s_r.db != current_db():
             _s_r = SearchReplaceWidget_NoWindows([0])
         if not _default_operation:
             _default_operation = _s_r.save_settings()
@@ -91,53 +97,55 @@ def operation_list_active(operation_list):
     
     return rlst
 
+class OperationError(ValueError):
+    pass
 
-def operation_testGetError(operation):
-    
-    db = GUI.current_db
+def operation_testGetError(operation, all_fields=None, writable_fields=None, possible_idents=None):
     
     if not operation:
         return TypeError
     
     if KEY_OPERATION.S_R_ERROR in operation:
-        return Exception(str(operation[KEY_OPERATION.S_R_ERROR]))
+        return OperationError(str(operation[KEY_OPERATION.S_R_ERROR]))
             
     
     difference = set(KEY_OPERATION.ALL).difference(operation.keys())
     for key in difference:
-        return Exception(_('Invalid operation, the "{:s}" key is missing.').format(key))
+        return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
     
     if operation[KEY_OPERATION.REPLACE_FUNC] not in S_R_FUNCTIONS:
-        return Exception(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, operation[KEY_OPERATION.REPLACE_FUNC]))
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, operation[KEY_OPERATION.REPLACE_FUNC]))
         
     if operation[KEY_OPERATION.REPLACE_MODE] not in S_R_REPLACE_MODES:
-        return Exception(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, operation[KEY_OPERATION.REPLACE_MODE]))
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, operation[KEY_OPERATION.REPLACE_MODE]))
         
     if operation[KEY_OPERATION.SEARCH_MODE] not in S_R_MATCH_MODES:
-        return Exception(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_OPERATION.SEARCH_MODE]))
-    
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_OPERATION.SEARCH_MODE]))
     
     #Field test
-    all_fields, writable_fields = get_possible_fields(db)
+    if not all_fields or not writable_fields:
+        all_fields, writable_fields = get_possible_fields()
     
     search_field = operation[KEY_OPERATION.SEARCH_FIELD]
     dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
     
     if search_field not in all_fields:
-        return Exception(_('Search field "{:s}" is not available for this library').format(search_field))
+        return OperationError(_('Search field "{:s}" is not available for this library').format(search_field))
         
     if dest_field and (dest_field not in writable_fields):
-        return Exception(_('Destination field "{:s}" is not available for this library').format(dest_field))
+        return OperationError(_('Destination field "{:s}" is not available for this library').format(dest_field))
+    
+    possible_idents = possible_idents or get_possible_idents()
     
     if search_field == 'identifiers':
         src_ident = operation[KEY_OPERATION.S_R_SRC_IDENT]
-        if src_ident not in get_possible_idents(db):
-            return Exception(_('Identifier type "{:s}" is not available for this library').format(src_ident))
+        if src_ident not in possible_idents:
+            return OperationError(_('Identifier type "{:s}" is not available for this library').format(src_ident))
     
     return None
 
-def operation_testFullError(operation):
-    err = operation_testGetError(operation)
+def operation_testFullError(operation, all_fields=None, writable_fields=None, possible_idents=None):
+    err = operation_testGetError(operation, all_fields, writable_fields, possible_idents)
     if err:
         return err
     get_default_operation()
@@ -145,8 +153,8 @@ def operation_testFullError(operation):
     _s_r.load_settings(operation)
     return _s_r.testGetError()
 
-def operation_isFullValid(operation):
-    return operation_testFullError(operation) == None
+def operation_isFullValid(operation, all_fields=None, writable_fields=None, possible_idents=None):
+    return operation_testFullError(operation, all_fields, writable_fields, possible_idents) == None
 
 
 def operation_para_list(operation):

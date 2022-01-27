@@ -3,20 +3,19 @@
 from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
 
-__license__ = 'GPL v3'
+__license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-from functools import partial
-from collections import OrderedDict, defaultdict
-import re
-import traceback
 import copy
-import json
-
 # python3 compatibility
 from six.moves import range
-from six import text_type as unicode, string_types as basestring
+from six import text_type as unicode
+
+from datetime import datetime
+from collections import defaultdict, OrderedDict
+from functools import partial
+from polyglot.builtins import iteritems, itervalues
 
 from calibre import prints
 from calibre.constants import DEBUG
@@ -26,7 +25,7 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
 from calibre.gui2.ui import get_gui
 
-from .common_utils import get_icon
+from .common_utils import get_icon, current_db
 
 GUI = get_gui()
 
@@ -39,7 +38,7 @@ except NameError:
     pass
 
 def check_template(template, show_error=False):
-    db = GUI.current_db
+    db = current_db()
     error_msgs = [
         TEMPLATE_ERROR,
         'unknown function',
@@ -70,7 +69,7 @@ def check_template(template, show_error=False):
 
 class TemplateBox(TemplateDialog):
     def __init__(self, parent=None, template_text=''):
-        self.db = GUI.current_db
+        self.db = current_db()
         self.template = template_text
         parent = parent or GUI
         

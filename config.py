@@ -7,14 +7,20 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time, shutil, copy
-# calibre Python 3 compatibility.
+import copy, time, os, shutil
+# python3 compatibility
+from six.moves import range
 from six import text_type as unicode
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
+
+from datetime import datetime
+from collections import defaultdict, OrderedDict
+from functools import partial
+from polyglot.builtins import iteritems, itervalues
 
 try:
     from qt.core import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
@@ -34,7 +40,7 @@ try:
 except ImportError:
     from urllib import urlretrieve
 
-from functools import partial
+from calibre import prints
 from calibre.constants import iswindows
 from calibre.utils.config import config_dir, JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
@@ -42,9 +48,9 @@ from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 
-from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, clean_empty_operation
-from .common_utils import (NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, KeyboardConfigDialog, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox,
-                                                              get_icon, debug_print)
+from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
+from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, get_selected_BookIds,
+                            NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox)
 
 GUI = get_gui()
 
@@ -140,7 +146,7 @@ class ERROR_OPERATION:
     DEFAULT = ASK
 
 # This is where all preferences for this plugin are stored
-PREFS = JSONConfig('plugins/Mass Search-Replace')
+PREFS = PREFS_json()
 # Set defaults
 PREFS.defaults[KEY_MENU.MENU] = []
 PREFS.defaults[KEY_MENU.QUICK] = []
@@ -253,10 +259,7 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(error_button)
     
     def edit_shortcuts(self):
-        self.plugin_action.rebuild_menus()
-        d = KeyboardConfigDialog(self.plugin_action.action_spec[0])
-        if d.exec_() == d.Accepted:
-            GUI.keyboard.finalize()
+        KeyboardConfigDialog.edit_shortcuts(self.plugin_action)
     
     def save_settings(self):
         PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
@@ -371,7 +374,7 @@ class ConfigWidget(QWidget):
             with ZipFile(archive_path, 'w') as archive_zip:
                 archive_zip.write(json_path, os.path.basename(json_path))
                 # Add any images referred to in those menu items that are local resources
-                for image_name, image_path in list(image_names.items()):
+                for image_name, image_path in iteritems(image_names):
                     archive_zip.write(image_path, os.path.basename(image_path))
             info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
                         show=True, show_copy_button=False)
@@ -390,22 +393,16 @@ class ConfigWidget(QWidget):
         return fd.get_files()[0]
 
 
-COMBO_IMAGE_ADD = _('Add New Image...')
-
-def get_image_names(image_map):
-    image_names = sorted(image_map.keys())
-    # Add a blank item at the beginning of the list, and a blank then special 'Add" item at end
-    image_names.insert(0, '')
-    image_names.append('')
-    image_names.append(COMBO_IMAGE_ADD)
-    return image_names
 
 
 COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
-
 class MenuTableWidget(QTableWidget):
     def __init__(self, menu_list=None, *args):
         QTableWidget.__init__(self, *args)
+        
+        from .columns_metadata import get_possible_idents, get_possible_fields
+        self.possible_idents = get_possible_idents()
+        self.all_fields, self.writable_fields = get_possible_fields()
         
         self.resources_dir = os.path.join(config_dir, 'resources/images')
         if iswindows:
@@ -486,7 +483,7 @@ class MenuTableWidget(QTableWidget):
         image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, row))
         self.setCellWidget(row, 3, image_combo)
         menu = menu or self.create_blank_row_menu()
-        self.setCellWidget(row, 4, SettingsButton(menu))
+        self.setCellWidget(row, 4, SettingsButton(self, menu))
     
     def set_noneditable_cells_in_row(self, row):
         for col in range(3, len(COL_NAMES)):
@@ -672,21 +669,8 @@ class MenuTableWidget(QTableWidget):
             self.insertRow(row)
             self.populate_table_row(row, menu)
 
-class ImageComboBox(NoWheelComboBox):
-    def __init__(self, parent, image_map, selected_text):
-        NoWheelComboBox.__init__(self, parent)
-        self.populate_combo(image_map, selected_text)
-    
-    def populate_combo(self, image_map, selected_text):
-        self.clear()
-        for i, image in enumerate(get_image_names(image_map), 0):
-            self.insertItem(i, image_map.get(image, image), image)
-        idx = self.findText(selected_text)
-        self.setCurrentIndex(idx)
-        self.setItemData(0, idx)
-
 class SettingsButton(QToolButton):
-    def __init__(self, menu):
+    def __init__(self, table, menu):
         QToolButton.__init__(self)
         
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -694,10 +678,9 @@ class SettingsButton(QToolButton):
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.clicked.connect(self._clicked)
         
-        self._menu = menu
+        self.table = table
         self._initial_menu = copy.deepcopy(menu)
         self.setMenu(menu)
-    
     
     def setMenu(self, menu):
         self._menu = menu
@@ -726,8 +709,11 @@ class SettingsButton(QToolButton):
     
     def hasError(self):
         hasError = False
+        
         for operation in self.getOperationList():
-            if not operation_isFullValid(operation):
+            if operation_testGetError(operation,
+                    all_fields=self.table.all_fields, writable_fields=self.table.writable_fields,
+                    possible_idents=self.table.possible_idents):
                 hasError = True
                 break
         
@@ -767,6 +753,28 @@ class SettingsButton(QToolButton):
         d = ConfigOperationListDialog(self, menu=self.getMenu())
         if d.exec_() == d.Accepted:
             self.setOperationList(d.operation_list)
+
+COMBO_IMAGE_ADD = _('Add New Image...')
+def get_image_names(image_map):
+    image_names = sorted(image_map.keys())
+    # Add a blank item at the beginning of the list, and a blank then special 'Add" item at end
+    image_names.insert(0, '')
+    image_names.append('')
+    image_names.append(COMBO_IMAGE_ADD)
+    return image_names
+
+class ImageComboBox(NoWheelComboBox):
+    def __init__(self, parent, image_map, selected_text):
+        NoWheelComboBox.__init__(self, parent)
+        self.populate_combo(image_map, selected_text)
+    
+    def populate_combo(self, image_map, selected_text):
+        self.clear()
+        for i, image in enumerate(get_image_names(image_map), 0):
+            self.insertItem(i, image_map.get(image, image), image)
+        idx = self.findText(selected_text)
+        self.setCurrentIndex(idx)
+        self.setItemData(0, idx)
 
 class ImageDialog(QDialog):
     def __init__(self, parent=None, resources_dir='', image_names=[]):
@@ -849,6 +857,10 @@ class ImageDialog(QDialog):
                 return
         
         if self._radio_web.isChecked():
+            try:
+                from urllib.request import urlretrieve
+            except ImportError:
+                from urllib import urlretrieve
             domain = unicode(self._web_domain_edit.text()).strip()
             if not domain:
                 return error_dialog(self, _('Cannot import image'), _('You must specify a web domain url'), show=True)
@@ -867,46 +879,8 @@ class ImageDialog(QDialog):
             return self.accept()
 
 
-class OperationWidgetItem(QTableWidgetItem):
-    def __init__(self, operation):
-        QTableWidgetItem.__init__(self, '')
-        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
-        self._operation = operation
-        self._hasError = False
-        self.setOperation(operation)
-    
-    def setOperation(self, operation):
-        operation = operation or get_default_operation()
-        self._operation = operation
-        
-        checked = operation_is_active(self._operation)
-        if checked:
-            self.setCheckState(Qt.Checked)
-        else:
-            self.setCheckState(Qt.Unchecked)
-        
-        self.hasError()
-    
-    def getOperation(self):
-        self._operation[KEY_OPERATION.ACTIVE] = Qt.Checked == self.checkState()
-        self._operation = operation_ConvertError(self._operation)
-        return copy.copy(self._operation)
-    
-    def hasError(self):
-        err = operation_testFullError(self._operation)
-        
-        if err:
-            self.setIcon(get_icon(ICON.WARNING))
-            self.setToolTip(str(err))
-            return True
-        else:
-            self.setIcon(get_icon())
-            self.setToolTip('')
-            return False
-
 
 COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
-
 class ConfigOperationListDialog(Dialog):
     def __init__(self, parent, menu):
         menu = menu or get_default_menu()
@@ -1096,12 +1070,15 @@ class ConfigOperationListDialog(Dialog):
             return None
         return fd.get_files()[0]
 
-
 class OperationListTableWidget(QTableWidget):
     def __init__(self, operation_list=None, *args):
         QTableWidget.__init__(self, *args)
         
-        self.book_ids = GUI.library_view.get_selected_ids()[:10]
+        from .columns_metadata import get_possible_idents, get_possible_fields
+        self.possible_idents = get_possible_idents()
+        self.all_fields, self.writable_fields = get_possible_fields()
+        
+        self.book_ids = get_selected_BookIds(show_error=False)[:10]
         
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -1128,7 +1105,7 @@ class OperationListTableWidget(QTableWidget):
     def populate_table_row(self, row, operation):
         self.blockSignals(True)
         
-        self.setItem(row, 0, OperationWidgetItem(operation))
+        self.setItem(row, 0, OperationWidgetItem(self, operation))
         
         for i in range(1, len(COL_CONFIG)):
             item = ReadOnlyTableWidgetItem('')
@@ -1291,6 +1268,47 @@ class OperationListTableWidget(QTableWidget):
             d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
             self.populate_table_row(row, d.operation)
 
+class OperationWidgetItem(QTableWidgetItem):
+    def __init__(self, table, operation):
+        QTableWidgetItem.__init__(self, '')
+        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        
+        self.table = table
+        self._operation = operation
+        self._hasError = False
+        self.setOperation(operation)
+    
+    def setOperation(self, operation):
+        operation = operation or get_default_operation()
+        self._operation = operation
+        
+        checked = operation_is_active(self._operation)
+        if checked:
+            self.setCheckState(Qt.Checked)
+        else:
+            self.setCheckState(Qt.Unchecked)
+        
+        self.hasError()
+    
+    def getOperation(self):
+        self._operation[KEY_OPERATION.ACTIVE] = Qt.Checked == self.checkState()
+        self._operation = operation_ConvertError(self._operation)
+        return copy.copy(self._operation)
+    
+    def hasError(self):
+        err = operation_testFullError(self._operation,
+                    all_fields=self.table.all_fields, writable_fields=self.table.writable_fields,
+                    possible_idents=self.table.possible_idents)
+        
+        if err:
+            self.setIcon(get_icon(ICON.WARNING))
+            self.setToolTip(str(err))
+            return True
+        else:
+            self.setIcon(get_icon())
+            self.setToolTip('')
+            return False
+
 
 class ErrorStrategyDialog(Dialog):
     def __init__(self, parent):
@@ -1313,7 +1331,7 @@ class ErrorStrategyDialog(Dialog):
         operation_label = QLabel(_('Set the strategy when an invalid operation has detected:'), self)
         layout.addWidget(operation_label)
         
-        self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_OPERATION.LIST.items()}, self.error_operation)
+        self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_OPERATION.LIST)}, self.error_operation)
         self.operationStrategy.currentIndexChanged[int].connect(self.operationStrategyIndexChanged)
         layout.addWidget(self.operationStrategy)
         
@@ -1324,7 +1342,7 @@ class ErrorStrategyDialog(Dialog):
         update_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
         layout.addWidget(update_label)
         
-        self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_UPDATE.LIST.items()}, self.error_update)
+        self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_UPDATE.LIST)}, self.error_update)
         self.updateStrategy.currentIndexChanged[int].connect(self.updateStrategyIndexChanged)
         layout.addWidget(self.updateStrategy)
         

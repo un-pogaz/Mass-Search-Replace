@@ -108,6 +108,13 @@ class KEY:
     
 
 
+#Calibre
+def ThemedIcon(icon_name):
+    if calibre_version < (5, 90):
+        return QtGui.QIcon(I(icon_name))
+    else:
+        return QtGui.QIcon.ic(icon_name)
+
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QtWidgets.QWidget):
     def __init__(self, book_ids=[], refresh_books=set([])):
@@ -358,7 +365,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         ##un_pogaz template_button
         self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
-        self.template_button.setIcon(QtGui.QIcon(I('template_funcs.png')))
+        self.template_button.setIcon(ThemedIcon('template_funcs.png'))
         self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
         self.template_button.clicked.connect(self.openTemplateBox)
