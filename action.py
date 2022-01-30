@@ -244,7 +244,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, GUI)
         
-        self.setWindowTitle(_('Mass Search/Replace Progress'))
+        self.setWindowTitle(_('{:s} progress').format(MassSearchReplaceAction.name))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
