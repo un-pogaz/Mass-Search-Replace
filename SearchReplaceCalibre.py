@@ -570,7 +570,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.query_field.addItem("")
         self.query_field_values = sorted(self.queries, key=sort_key)
         self.query_field.addItems(self.query_field_values)
-        self.query_field.currentIndexChanged.connect(self.s_r_query_change)
+        self.query_field.currentIndexChanged[native_string_type].connect(self.s_r_query_change)
         self.query_field.setCurrentIndex(0)
         self.search_field.setCurrentIndex(0)
         self.s_r_search_field_changed(0)
@@ -1119,7 +1119,6 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.results_count.setValue(999)
         self.starting_from.setValue(1)
         self.multiple_separator.setText(" ::: ")
-    
     
     def load_query(self, query):
         if query:

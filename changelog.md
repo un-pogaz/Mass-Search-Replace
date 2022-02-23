@@ -1,3 +1,6 @@
+### version 1.3.2
+The saved Calibre Search/Replace operation could not be loaded
+
 ### version 1.3.1
 Various technical improvement
 
