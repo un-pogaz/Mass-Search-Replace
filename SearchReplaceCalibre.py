@@ -1123,6 +1123,11 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def load_query(self, query):
         if query:
+            
+            print('load_query', query.get(KEY.NAME, None))
+            
+            
+            
             def set_text(attr, key):
                 try:
                     attr.setText(query[key])
