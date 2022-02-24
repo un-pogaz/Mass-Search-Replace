@@ -1090,7 +1090,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.query_field.setCurrentIndex(self.query_field.findText(name))
     
     def s_r_query_change(self, idx):
-        item_name = self.query_field.currentText()
+        self.s_r_query_load(self.query_field.currentText())
+    
+    def s_r_query_load(self, item_name):
         if not item_name:
             self.s_r_reset_query_fields()
             self.saved_search_name = ''
@@ -1124,9 +1126,12 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def load_query(self, query):
         if query:
             
-            print('load_query', query.get(KEY.NAME, None))
-            
-            
+            item_name = query.get(KEY.NAME, None)
+            if item_name and self.saved_search_name != item_name and unicode_type(item_name) in self.queries:
+                idx = self.query_field.findText(item_name)
+                if idx:
+                    self.query_field.setCurrentIndex(idx)
+                    return
             
             def set_text(attr, key):
                 try:
