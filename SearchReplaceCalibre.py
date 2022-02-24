@@ -570,7 +570,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.query_field.addItem("")
         self.query_field_values = sorted(self.queries, key=sort_key)
         self.query_field.addItems(self.query_field_values)
-        self.query_field.currentIndexChanged[native_string_type].connect(self.s_r_query_change)
+        self.query_field.currentIndexChanged.connect(self.s_r_query_change)
         self.query_field.setCurrentIndex(0)
         self.search_field.setCurrentIndex(0)
         self.s_r_search_field_changed(0)
@@ -1089,7 +1089,8 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.query_field.blockSignals(False)
         self.query_field.setCurrentIndex(self.query_field.findText(name))
     
-    def s_r_query_change(self, item_name):
+    def s_r_query_change(self, idx):
+        item_name = self.query_field.currentText()
         if not item_name:
             self.s_r_reset_query_fields()
             self.saved_search_name = ''
