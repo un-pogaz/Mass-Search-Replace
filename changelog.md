@@ -1,4 +1,4 @@
-### version 1.3.2
+### version 1.3.3
 [fix] Fix the fix of saved Calibre Search/Replace operation
 
 ### version 1.3.2
