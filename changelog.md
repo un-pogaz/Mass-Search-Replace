@@ -1,8 +1,12 @@
+### version 1.4.0
+Shared Search/Replace operation: set in once, used where you want, edit them and all reference has edited
+Uses and compatible with Calibre saved Search/Replace system
+
 ### version 1.3.3
-[fix] Fix the fix of saved Calibre Search/Replace operation
+[fix] Fix the fix of Calibre saved Search/Replace operation
 
 ### version 1.3.2
-The saved Calibre Search/Replace operation could not be loaded
+The Calibre saved Search/Replace operation could not be loaded
 
 ### version 1.3.1
 Various technical improvement

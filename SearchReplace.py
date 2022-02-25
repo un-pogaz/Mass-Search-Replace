@@ -158,6 +158,7 @@ def operation_isFullValid(operation, all_fields=None, writable_fields=None, poss
 
 
 def operation_para_list(operation):
+    name = operation.get(KEY_OPERATION.NAME, '')
     column = operation.get(KEY_OPERATION.SEARCH_FIELD, '')
     field = operation.get(KEY_OPERATION.DESTINATION_FIELD, '')
     if (field and field != column):
@@ -172,7 +173,7 @@ def operation_para_list(operation):
         search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
     replace_with = operation.get(KEY_OPERATION.REPLACE_WITH, '')
     
-    return [ column, template, search_mode, search_for, replace_with ]
+    return [ name, column, template, search_mode, search_for, replace_with ]
 
 def operation_string(operation):
     val = [operation_para_list(operation)[0]]
@@ -219,9 +220,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
 
 class SearchReplaceDialog(Dialog):
     def __init__(self, operation=None, book_ids=[]):
-        if not operation:
-            operation = get_default_operation()
-        self.operation = operation
+        self.operation = operation or get_default_operation()
         self.widget = SearchReplaceWidget(book_ids[:10])
         Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace')
     
@@ -248,6 +247,21 @@ class SearchReplaceDialog(Dialog):
             else:
                 return
         
-        self.operation = self.widget.save_settings()
+        new_operation = self.widget.save_settings()
+        new_operation_name = new_operation.get(KEY_OPERATION.NAME, None)
+        if new_operation_name and new_operation_name == self.operation.get(KEY_OPERATION.NAME, None):
+            different = False
+            for k in new_operation:
+                if k in self.operation and new_operation[k] != self.operation[k]:
+                    different = True
+                    break
+            
+            if different:
+                new_operation[KEY_OPERATION.NAME] = ''
+                self.operation = new_operation
+            
+        else:
+            self.operation = new_operation
+        
         debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
         Dialog.accept(self)

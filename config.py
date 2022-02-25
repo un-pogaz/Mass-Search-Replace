@@ -47,6 +47,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_file
 from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
+from polyglot.builtins import unicode_type
 
 from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
 from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, get_selected_BookIds,
@@ -880,7 +881,7 @@ class ImageDialog(QDialog):
 
 
 
-COL_CONFIG = ['', _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
+COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 class ConfigOperationListDialog(Dialog):
     def __init__(self, parent, menu):
         menu = menu or get_default_menu()
@@ -1096,9 +1097,13 @@ class OperationListTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         
         operation_list = clean_empty_operation(operation_list)
+        calibre_queries = JSONConfig("search_replace_queries")
+        
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
-            self.populate_table_row(row, operation)
+            self.populate_table_row(row, calibre_queries.get(unicode_type(operation.get(KEY_OPERATION.NAME, None)), operation))
+        
+        self.test_column_hidden()
         
         self.selectRow(0)
     
@@ -1111,19 +1116,25 @@ class OperationListTableWidget(QTableWidget):
             item = ReadOnlyTableWidgetItem('')
             self.setItem(row, i, item)
         
-        as_template = False
-        for i_row in range(self.rowCount()):
-            item = self.item(i_row, 0)
-            if item and item.getOperation()[KEY_OPERATION.SEARCH_FIELD] == TEMPLATE_FIELD:
-                as_template = True
-                break
-        
-        self.setColumnHidden(2, not as_template)
-        
         self.update_row(row)
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
+    
+    def test_column_hidden(self):
+        no_name = True
+        no_template = True
+        for i_row in range(self.rowCount()):
+            item = self.item(i_row, 0)
+            operation = item.getOperation() if item else {}
+            if no_name and operation.get(KEY_OPERATION.NAME, ''):
+                no_name = False
+            if no_template and operation.get(KEY_OPERATION.SEARCH_FIELD, '') == TEMPLATE_FIELD:
+                no_template = False
+        
+        self.setColumnHidden(1, no_name)
+        self.setColumnHidden(3, no_template)
+        self.resizeColumnsToContents()
     
     def update_row(self, row):
         operation = self.convert_row_to_operation(row)
@@ -1256,6 +1267,8 @@ class OperationListTableWidget(QTableWidget):
             row = self.currentRow() + 1
             self.insertRow(row)
             self.populate_table_row(row, operation)
+        
+        self.test_column_hidden()
     
     
     def settingsDoubleClicked(self):
@@ -1267,6 +1280,8 @@ class OperationListTableWidget(QTableWidget):
         if d.exec_() == d.Accepted:
             d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
             self.populate_table_row(row, d.operation)
+        
+        self.test_column_hidden()
 
 class OperationWidgetItem(QTableWidgetItem):
     def __init__(self, table, operation):
