@@ -1058,7 +1058,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             dex = 0
         name = ''
         while not name:
-            name, ok =  QtWidgets.QInputDialog.getItem(self, _('Save search/replace'),
+            name, ok = QtWidgets.QInputDialog.getItem(self, _('Save search/replace'),
                     _('Search/replace name:'), names, dex, True)
             if not ok:
                 return
@@ -1074,7 +1074,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 return
             new = False
         
-        query = self.get_query()
+        query = self._get_query_without_error()
         query[KEY.NAME] = name
         
         self.queries[name] = query
