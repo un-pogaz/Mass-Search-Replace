@@ -173,28 +173,32 @@ def operation_para_list(operation):
         search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
     replace_with = operation.get(KEY_OPERATION.REPLACE_WITH, '')
     
+    if column == 'identifiers':
+        src_ident = operation.get(KEY_OPERATION.S_R_SRC_IDENT, '')
+        search_for = src_ident+':'+search_for
+        if replace_with.strip():
+            dst_ident = operation.get(KEY_OPERATION.S_R_DST_IDENT, src_ident)
+            replace_with = dst_ident+':'+replace_with
+    
     return [ name, column, template, search_mode, search_for, replace_with ]
 
 def operation_string(operation):
-    val = [operation_para_list(operation)[0]]
-    temp = operation_para_list(operation)[1]
-    if temp:
-        val.append(temp)
-    val = val + operation_para_list(operation)[2:]
+    tbl = operation_para_list(operation)
+    if not tbl[2]: del tbl[2]
     
-    return '"'+ '" | "'.join(val)+'"'
+    return ('name:"'+tbl[0]+'" => ' if tbl[0] else '') + '"'+ '" | "'.join(tbl[1:])+'"'
 
 
 def SearchReplaceWidget_NoWindows(book_ids=[]):
     rslt = SearchReplaceWidget(book_ids)
     rslt.resize(QSize(0, 0))
-    return rslt;
+    return rslt
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, book_ids=[], refresh_books=set([])):
         
         if not book_ids or len(book_ids) == 0:
-            book_ids = GUI.library_view.get_selected_ids();
+            book_ids = GUI.library_view.get_selected_ids()
         
         MetadataBulkWidget.__init__(self, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls

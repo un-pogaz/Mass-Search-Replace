@@ -979,10 +979,10 @@ class ConfigOperationListDialog(Dialog):
         if len(self.operation_list)==0:
             debug_print('Saving a empty list')
         else:
-            txt = 'Saved operation list:'
-            for i, operation in enumerate(self.operation_list, 1):
-                txt += '\nOperation {:d} > {:s}'.format(i, operation_string(operation))
-            txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
+            txt = 'Saved operation list:\n' + '\n'.join(
+                'Operation {:d} > {:s}'.format(i, operation_string(operation)) for i, operation in enumerate(self.operation_list, 1)
+            )
+            #txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
             debug_print(txt)
         
         Dialog.accept(self)

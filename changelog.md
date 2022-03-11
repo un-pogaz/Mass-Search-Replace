@@ -1,3 +1,6 @@
+### version 1.4.2
+Small improvement for identifier operation
+
 ### version 1.4.1
 [fix] Calibre Search/Replace operation are not saved if it contains an error
 
