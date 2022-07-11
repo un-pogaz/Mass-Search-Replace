@@ -539,15 +539,15 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         
         self.replace_mode.currentIndexChanged.connect(self.s_r_paint_results)
         self.replace_func.currentIndexChanged.connect(self.s_r_paint_results)
-        self.search_for.editTextChanged[native_string_type].connect(self.s_r_paint_results)
-        self.replace_with.editTextChanged[native_string_type].connect(self.s_r_paint_results)
-        self.test_text.editTextChanged[native_string_type].connect(self.s_r_paint_results)
+        self.search_for.editTextChanged.connect(self.s_r_paint_results)
+        self.replace_with.editTextChanged.connect(self.s_r_paint_results)
+        self.test_text.editTextChanged.connect(self.s_r_paint_results)
         self.comma_separated.stateChanged.connect(self.s_r_paint_results)
         self.case_sensitive.stateChanged.connect(self.s_r_paint_results)
         self.s_r_src_ident.currentIndexChanged.connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        self.s_r_template.editTextChanged[native_string_type].connect(self.s_r_template_changed) ##un_pogaz template_button
+        self.s_r_template.editTextChanged.connect(self.s_r_template_changed) ##un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
@@ -559,8 +559,8 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.multiple_separator.setFixedWidth(30)
         self.multiple_separator.setText(' ::: ')
         self.multiple_separator.textChanged.connect(self.s_r_separator_changed)
-        self.results_count.valueChanged[int].connect(self.s_r_display_bounds_changed)
-        self.starting_from.valueChanged[int].connect(self.s_r_display_bounds_changed)
+        self.results_count.valueChanged.connect(self.s_r_display_bounds_changed)
+        self.starting_from.valueChanged.connect(self.s_r_display_bounds_changed)
         
         self.save_button.clicked.connect(self.s_r_save_query)
         self.remove_button.clicked.connect(self.s_r_remove_query)
@@ -646,7 +646,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
             self.s_r_dst_ident.setText(self.s_r_src_ident.currentText())
         
-        self.s_r_paint_results(idx)
+        self.s_r_paint_results(None)
     
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
@@ -761,7 +761,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         
         self.s_r_paint_results(None)
     
-    def s_r_separator_changed(self, txt):
+    def s_r_separator_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
     
     def s_r_set_colors(self):
@@ -864,7 +864,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             return ','
         return ''
     
-    def s_r_paint_results(self, txt):
+    def s_r_paint_results(self, idx):
         self.s_r_error = None
         self.s_r_set_colors()
         flags = regex.FULLCASE | regex.UNICODE

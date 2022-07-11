@@ -1347,7 +1347,7 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(operation_label)
         
         self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_OPERATION.LIST)}, self.error_operation)
-        self.operationStrategy.currentIndexChanged[int].connect(self.operationStrategyIndexChanged)
+        self.operationStrategy.currentIndexChanged.connect(self.operationStrategyIndexChanged)
         layout.addWidget(self.operationStrategy)
         
         operation_label.setBuddy(self.operationStrategy)
@@ -1358,7 +1358,7 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(update_label)
         
         self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_UPDATE.LIST)}, self.error_update)
-        self.updateStrategy.currentIndexChanged[int].connect(self.updateStrategyIndexChanged)
+        self.updateStrategy.currentIndexChanged.connect(self.updateStrategyIndexChanged)
         layout.addWidget(self.updateStrategy)
         
         update_label.setBuddy(self.updateStrategy)
