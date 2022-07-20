@@ -1,3 +1,6 @@
+### version 1.4.4
+Small incompatibility Calibre6/Qt6
+
 ### version 1.4.3
 More compatibility Calibre6/Qt6
 

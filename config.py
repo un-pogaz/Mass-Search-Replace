@@ -387,7 +387,7 @@ class ConfigWidget(QWidget):
     
     def pick_archive_to_export(self):
         fd = FileDialog(name='owp archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
-                        parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
+                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
             return None
@@ -1065,7 +1065,7 @@ class ConfigOperationListDialog(Dialog):
     
     def pick_json_to_export(self):
         fd = FileDialog(name='json dialog', title=_('Save the operations as...'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
-                        parent=self, add_all_files_filter=False, mode=QFileDialog.AnyFile)
+                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
             return None
