@@ -22,7 +22,7 @@ class FIELD_NAME:
     IDENTIFIER_TYPE = _('Identifier type')
 
 S_R_REPLACE = _('Replace field')
-REPLACE_REGEX = '(?s)^.*$'
+REPLACE_REGEX = '(?msi)^.*$'
 REPLACE_HEADING = _(
                  'In field replacement mode, the specified field is set '
                  'to the text and all previous values are erased. After '

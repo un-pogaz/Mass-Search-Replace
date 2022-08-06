@@ -1,3 +1,6 @@
+### version 1.4.5
+Improvement of the 'Replace Field' mode
+
 ### version 1.4.4
 Small incompatibility Calibre6/Qt6
 
