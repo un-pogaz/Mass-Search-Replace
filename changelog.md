@@ -1,3 +1,6 @@
+### version 1.5.0
+Add menu to perform a Search/Replace on 'All books in...' (Library / Virtual library / Current Search)
+
 ### version 1.4.5
 Improvement of the 'Replace Field' mode
 

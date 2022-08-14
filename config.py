@@ -50,7 +50,7 @@ from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
 from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
-from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, get_selected_BookIds,
+from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, get_BookIds_selected,
                             NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox)
 
 GUI = get_gui()
@@ -751,7 +751,7 @@ class SettingsButton(QToolButton):
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
-        d = ConfigOperationListDialog(self, menu=self.getMenu())
+        d = ConfigOperationListDialog(self, self.getMenu())
         if d.exec_() == d.Accepted:
             self.setOperationList(d.operation_list)
 
@@ -883,11 +883,12 @@ class ImageDialog(QDialog):
 
 COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 class ConfigOperationListDialog(Dialog):
-    def __init__(self, parent, menu):
+    def __init__(self, parent, menu, book_ids=None):
         menu = menu or get_default_menu()
         name = menu[KEY_MENU.TEXT]
         sub_menu = menu[KEY_MENU.SUBMENU]
         self.operation_list = menu[KEY_MENU.OPERATIONS]
+        self.book_ids = book_ids
         
         title = ''
         if not name:
@@ -921,7 +922,7 @@ class ConfigOperationListDialog(Dialog):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the operation list
-        self._table = OperationListTableWidget(self.operation_list, self)
+        self._table = OperationListTableWidget(self.operation_list, self.book_ids, self)
         heading_label.setBuddy(self._table)
         table_layout.addWidget(self._table)
         
@@ -1072,14 +1073,14 @@ class ConfigOperationListDialog(Dialog):
         return fd.get_files()[0]
 
 class OperationListTableWidget(QTableWidget):
-    def __init__(self, operation_list=None, *args):
+    def __init__(self, operation_list=None, book_ids=None, *args):
         QTableWidget.__init__(self, *args)
         
         from .columns_metadata import get_possible_idents, get_possible_fields
         self.possible_idents = get_possible_idents()
         self.all_fields, self.writable_fields = get_possible_fields()
         
-        self.book_ids = get_selected_BookIds(show_error=False)[:10]
+        self.book_ids = (book_ids or get_BookIds_selected(show_error=False))[:10]
         
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
