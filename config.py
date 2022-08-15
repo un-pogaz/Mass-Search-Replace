@@ -896,8 +896,6 @@ class ConfigOperationListDialog(Dialog):
         else:
             if sub_menu:
                 name = '{:s} > {:s}'.format(sub_menu, name)
-            else:
-                name = '{:s}'.format(name)
             
             title = _('List of Search/Replace operations for {:s}').format(name)
         

@@ -37,7 +37,7 @@ from calibre.library import current_library_name
 
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources,
-                            get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual,
+                            get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked,
                             create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 from . import SearchReplaceCalibreText as CalibreText
@@ -81,10 +81,8 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
-        debug_print('rebuild_menus')
         menu_list = PREFS[KEY_MENU.MENU]
         self.menu.clear()
-        self.menu_list = []
         sub_menus = {}
         
         
@@ -104,30 +102,28 @@ class MassSearchReplaceAction(InterfaceAction):
         
         self.menu.addSeparator()
         
-        ac = create_menu_action_unique(self, self.menu, _('&Quick Search/Replace...'), ICON.PLUGIN,
-                                             triggered=self.quickSearchReplace,
-                                             unique_name='&Quick Search/Replace')
-        self.menu_actions.append(ac)
-        
-        self.menu.addSeparator()
-        
-        ac = create_menu_item(self, self.menu, _('&All books in...'), 'library.png')
+        ac = create_menu_item(self, self.menu, _('&Quick Search/Replace...'), ICON.PLUGIN)
         mn_books = QMenu()
         ac.setMenu(mn_books)
         
-        ac = create_menu_action_unique(self, mn_books, _('&Library'), 'library.png',
-                                             triggered=self.quickAllBooks_library,
-                                             unique_name='&Quick Search/Replace in all books>&Library')
+        ac = create_menu_action_unique(self, mn_books, _('&Selection'), 'highlight_only_on.png',
+                                             triggered=self.quick_selected,
+                                             unique_name='&Quick Search/Replace in all books>&Selection')
+        self.menu_actions.append(ac)
+        
+        ac = create_menu_action_unique(self, mn_books, _('&Current Search'), 'search.png',
+                                             triggered=self.quick_search,
+                                             unique_name='&Quick Search/Replace in all books>&Current Search')
         self.menu_actions.append(ac)
         
         ac = create_menu_action_unique(self, mn_books, _('&Virtual Library'), 'vl.png',
-                                             triggered=self.quickAllBooks_virtual,
-                                             unique_name='&Quick Search/Replace in all books>&Virtual')
+                                             triggered=self.quick_virtual,
+                                             unique_name='&Quick Search/Replace in all books>&Virtual Library')
         self.menu_actions.append(ac)
         
-        ac = create_menu_action_unique(self, mn_books, _('Current &Search'), 'search.png',
-                                             triggered=self.quickAllBooks_search,
-                                             unique_name='&Quick Search/Replace in all books>&Search')
+        ac = create_menu_action_unique(self, mn_books, _('&Library'), 'library.png',
+                                             triggered=self.quick_library,
+                                             unique_name='&Quick Search/Replace in all books>&Library')
         self.menu_actions.append(ac)
         
         self.menu.addSeparator()
@@ -167,53 +163,35 @@ class MassSearchReplaceAction(InterfaceAction):
             debug_print('Rebuilding menu for:', name)
             
             ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
-                           triggered=partial(self.run_SearchReplace, menu),
+                           triggered=partial(self.run_SearchReplace, menu, None),
                            unique_name=name, shortcut_name=name)
         
         if ac:
             # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
             self.menu_actions.append(ac)
-            self.menu_list.append((menu, ac))
     
     
-    def quickSearchReplace(self):
-        
-        menu = get_default_menu()
-        menu[KEY_MENU.TEXT] = None
-        menu[KEY_MENU.OPERATIONS] = PREFS[KEY_MENU.QUICK]
-        
-        book_ids = get_BookIds_selected()
-        d = ConfigOperationListDialog(self, menu, book_ids)
-        
-        if len(d.operation_list)==0:
-            d.add_empty_operation()
-        
-        if d.exec_() == d.Accepted:
-            
-            if len(d.operation_list)>0:
-                menu[KEY_MENU.OPERATIONS] = d.operation_list
-                PREFS[KEY_MENU.QUICK] = d.operation_list
-                
-                self.run_SearchReplace(menu, book_ids)
+    def quick_selected(self):
+        self.quickSearchReplace(get_BookIds_selected(), _('the selected books'))
     
+    def quick_library(self):
+        self.quickSearchReplace(get_BookIds_all(), _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name()))
     
-    def quickAllBooks_library(self):
-        self.quickAllBooks(get_BookIds_all(), _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name()))
-    
-    def quickAllBooks_virtual(self):
+    def quick_virtual(self):
         vl = get_curent_virtual()
         if vl[0]:
-            self.quickAllBooks(get_BookIds_virtual(), _('the virtual library {:s}').format(vl[0]))
+            self.quickSearchReplace(get_BookIds_virtual(), _('the virtual library {:s}').format(vl[0]))
         else:
-            self.quickAllBooks_library()
+            self.quick_library()
     
-    def quickAllBooks_search(self):
-        self.quickAllBooks(get_BookIds_search(), _('the current search'))
+    def quick_search(self):
+        self.quickSearchReplace(get_BookIds_search(), _('the current search'))
     
-    def quickAllBooks(self, book_ids, text=None):
+    def quickSearchReplace(self, book_ids, text):
         
         menu = get_default_menu()
-        menu[KEY_MENU.TEXT] = text
+        menu[KEY_MENU.TEXT] = text +' '+ _('({:d} books)').format(len(book_ids))
+        menu[KEY_MENU.OPERATIONS] = PREFS[KEY_MENU.QUICK]
         
         d = ConfigOperationListDialog(self, menu=menu, book_ids=book_ids)
         
@@ -226,11 +204,13 @@ class MassSearchReplaceAction(InterfaceAction):
                 menu[KEY_MENU.OPERATIONS] = d.operation_list
                 
                 self.run_SearchReplace(menu, book_ids)
+        
+        PREFS[KEY_MENU.QUICK] = d.operation_list
     
     
-    def run_SearchReplace(self, menu, book_ids=None):
-        if not book_ids:
-            book_ids = get_BookIds_selected()
+    def run_SearchReplace(self, menu, book_ids):
+        if book_ids == None:
+            book_ids = get_BookIds_selected(show_error=True)
         
         srpg = SearchReplacesProgressDialog(book_ids, menu)
         srpg.close()
@@ -395,9 +375,10 @@ class SearchReplacesProgressDialog(QProgressDialog):
         book_id_update = defaultdict(dict)
         start = time.time()
         alreadyOperationError = False
+        
         try:
             self.setValue(0)
-            self.show()
+            self.hide()
             
             for op, operation in enumerate(self.operation_list, 1):
                 
@@ -465,7 +446,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                                     raise err
                             else:
                                 raise Exception(err)
-                        
+        
         
         except Exception as e:
             self.exception_unhandled = True
@@ -476,8 +457,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
             lst_id = []
             for field, book_id_val_map in iteritems(self.s_r.updated_fields):
                 lst_id += book_id_val_map.keys()
-            self.fields_update = len(lst_id)
             
+            self.fields_update = len(lst_id)
             lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
             
@@ -555,6 +536,13 @@ class SearchReplacesProgressDialog(QProgressDialog):
             
             lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
+            
+            from .common_utils import get_marked
+            debug_print(get_marked())
+            
+            if self.fields_update and calibre_version >= (5, 41,0):
+                set_marked('mass_search_replace_updated', lst_id)
+            
             
             self.time_execut = round(time.time() - start, 3)
             self.db.clean()

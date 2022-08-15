@@ -1,5 +1,5 @@
 ### version 1.5.0
-Add menu to perform a Search/Replace on 'All books in...' (Library / Virtual library / Current Search)
+Rework of the Quick Search/Replace for add alternatives range target (Selection / Current Search / Virtual library / Library)
 
 ### version 1.4.5
 Improvement of the 'Replace Field' mode
