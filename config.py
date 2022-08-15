@@ -41,7 +41,7 @@ except ImportError:
     from urllib import urlretrieve
 
 from calibre import prints
-from calibre.constants import iswindows
+from calibre.constants import iswindows, numeric_version as calibre_version
 from calibre.utils.config import config_dir, JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
 from calibre.gui2.ui import get_gui
@@ -88,6 +88,7 @@ class KEY_MENU:
     
     QUICK = 'Quick'
     UPDATE_REPORT = 'UpdateReport'
+    USE_MARK = 'UseMark'
 
 class KEY_ERROR:
     ERROR = 'ErrorStrategy'
@@ -152,6 +153,7 @@ PREFS = PREFS_json()
 PREFS.defaults[KEY_MENU.MENU] = []
 PREFS.defaults[KEY_MENU.QUICK] = []
 PREFS.defaults[KEY_MENU.UPDATE_REPORT] = False
+PREFS.defaults[KEY_MENU.USE_MARK] = True
 
 PREFS.defaults[KEY_ERROR.ERROR] = {
     KEY_ERROR.OPERATION : ERROR_UPDATE.DEFAULT,
@@ -249,9 +251,13 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(keyboard_shortcuts_button)
         keyboard_layout.insertStretch(-1)
         
+        if calibre_version >= (5, 41,0):
+            self.useMark = QCheckBox(_('Mark the updated books'), self)
+            self.useMark.setChecked(PREFS[KEY_MENU.USE_MARK])
+            keyboard_layout.addWidget(self.useMark)
+        
         self.updateReport = QCheckBox(_('Display a update report'), self)
         self.updateReport.setChecked(PREFS[KEY_MENU.UPDATE_REPORT])
-        
         keyboard_layout.addWidget(self.updateReport)
         
         error_button = QPushButton(_('Error strategy...'), self)
@@ -265,6 +271,8 @@ class ConfigWidget(QWidget):
     def save_settings(self):
         PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
+        if calibre_version >= (5, 41,0):
+            PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     def edit_error_strategy(self):

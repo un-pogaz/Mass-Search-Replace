@@ -266,6 +266,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
         self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         self.operationErrorList = []
         
+        # use mark
+        self.useMark = PREFS[KEY_MENU.USE_MARK]
+        
         # show Update Report
         self.showUpdateReport = PREFS[KEY_MENU.UPDATE_REPORT]
         
@@ -537,12 +540,8 @@ class SearchReplacesProgressDialog(QProgressDialog):
             lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
             
-            from .common_utils import get_marked
-            debug_print(get_marked())
-            
-            if self.fields_update and calibre_version >= (5, 41,0):
+            if calibre_version >= (5, 41,0) and self.useMark and self.fields_update:
                 set_marked('mass_search_replace_updated', lst_id)
-            
             
             self.time_execut = round(time.time() - start, 3)
             self.db.clean()
