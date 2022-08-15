@@ -176,9 +176,9 @@ def operation_para_list(operation):
     if column == 'identifiers':
         src_ident = operation.get(KEY_OPERATION.S_R_SRC_IDENT, '')
         search_for = src_ident+':'+search_for
-        if replace_with.strip():
-            dst_ident = operation.get(KEY_OPERATION.S_R_DST_IDENT, src_ident)
-            replace_with = dst_ident+':'+replace_with
+        
+        dst_ident = operation.get(KEY_OPERATION.S_R_DST_IDENT, src_ident)
+        replace_with = dst_ident+':'+replace_with.strip()
     
     return [ name, column, template, search_mode, search_for, replace_with ]
 
