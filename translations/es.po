@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-08-15 18:19+0200\n"
-"PO-Revision-Date: 2022-08-15 18:19+0200\n"
+"POT-Creation-Date: 2022-08-16 15:55+0200\n"
+"PO-Revision-Date: 2022-08-16 15:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -40,7 +40,7 @@ msgstr "El tipo de identificador \"{:s}\" no está disponible para esta bibliote
 msgid "Configuration of a Search/Replace operation"
 msgstr "Configuración de una operación de Buscar/Reemplazar"
 
-#: SearchReplace.py:245 action.py:313 action.py:359 action.py:405
+#: SearchReplace.py:245 action.py:312 action.py:358 action.py:404
 msgid "Invalid operation"
 msgstr "Operación Invalida"
 
@@ -106,67 +106,67 @@ msgstr "El valor de este campo está localizado (traducido). Esto puede causar p
 msgid "Easily apply a list of multiple saved Find and Replace operations to your books metadata"
 msgstr "Aplica fácilmente una lista de múltiples operaciones de Buscar y Reemplazar guardadas a los metadatos de tus libros"
 
-#: action.py:52
+#: action.py:51
 msgid "Apply a list of multiple saved Find and Replace operations"
 msgstr "Aplicar una lista de múltiples operaciones de Buscar y Reemplazar guardadas"
 
-#: action.py:105
+#: action.py:104
 msgid "&Quick Search/Replace..."
 msgstr "&Rápido Buscar/Reemplazar..."
 
-#: action.py:109
+#: action.py:108
 msgid "&Selection"
 msgstr ""
 
-#: action.py:114
+#: action.py:113
 msgid "&Current Search"
 msgstr ""
 
-#: action.py:119
+#: action.py:118
 msgid "&Virtual Library"
 msgstr ""
 
-#: action.py:124
+#: action.py:123
 msgid "&Library"
 msgstr ""
 
-#: action.py:131
+#: action.py:130
 msgid "&Customize plugin..."
 msgstr "&Personalizar complemento..."
 
-#: action.py:175
+#: action.py:174
 msgid "the selected books"
 msgstr ""
 
-#: action.py:178
+#: action.py:177
 msgid "all books in the library {:s}"
 msgstr ""
 
-#: action.py:183
+#: action.py:182
 msgid "the virtual library {:s}"
 msgstr ""
 
-#: action.py:188
+#: action.py:187
 msgid "the current search"
 msgstr ""
 
-#: action.py:193
+#: action.py:192
 msgid "({:d} books)"
 msgstr ""
 
-#: action.py:227
+#: action.py:226
 msgid "Invalide menu configuration, the \"{:s}\" key is missing."
 msgstr "Configuración de menú no válida, falta la tecla \"{:s}\"."
 
-#: action.py:285
+#: action.py:284
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: action.py:287
+#: action.py:286
 msgid "Mass Search/Replace progress"
 msgstr "Mass Search/Replace progresos"
 
-#: action.py:314
+#: action.py:313
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -178,23 +178,23 @@ msgstr ""
 "\n"
 "Se canceló Mass Search/Replace."
 
-#: action.py:341
+#: action.py:340
 msgid "Mass Search/Replace encountered an error during the library update."
 msgstr "Mass Search/Replace encontró un error durante la actualización de la biblioteca."
 
-#: action.py:343
+#: action.py:342
 msgid "The library a was restored to its original state."
 msgstr "La biblioteca a fue restaurada a su estado original."
 
-#: action.py:346
+#: action.py:345
 msgid "Cannot update the library"
 msgstr "No se puede actualizar la biblioteca"
 
-#: action.py:352
+#: action.py:351
 msgid "Exceptions during the library update"
 msgstr "Excepciones durante la actualización de la biblioteca"
 
-#: action.py:353
+#: action.py:352
 msgid ""
 "{:d} exceptions have occurred during the library update.\n"
 "Some fields may not have been updated."
@@ -202,19 +202,19 @@ msgstr ""
 "Se han producido {:d} excepciones durante la actualización de la biblioteca.\n"
 "Algunos campos pueden no haber sido actualizados."
 
-#: action.py:360
+#: action.py:359
 msgid "{:d} invalid operations has detected and have been ignored."
 msgstr "{:d} se han detectado operaciones no válidas y se han ignorado."
 
-#: action.py:364
+#: action.py:363
 msgid "Update Report"
 msgstr "Actualizar informe"
 
-#: action.py:365
+#: action.py:364
 msgid "Mass Search/Replace performed for {:d} books with a total of {:d} fields modify."
 msgstr "Mass Search/Replace realizado para {:d} libros con un total de {:d} campos modificados."
 
-#: action.py:406
+#: action.py:405
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -228,59 +228,59 @@ msgstr ""
 "¿Continuar la ejecución de Mass Search/Replace?\n"
 "Pueden existir otros errores y serán ignorados."
 
-#: action.py:421
+#: action.py:420
 msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
 msgstr "Buscar/Sustituir {:d} de {:d}. Libro {:d} de {:d}."
 
-#: action.py:473
+#: action.py:472
 msgid "Update the library for {:d} books with a total of {:d} fields..."
 msgstr "Actualizar la biblioteca de los libros {:d} con un total de {:d} campos..."
 
-#: common_utils.py:258
-msgid "Could not to launch {:s}"
-msgstr "No se pudo iniciar {:s}"
-
-#: common_utils.py:278
-msgid "No book selected"
-msgstr "Ningún libro seleccionado"
-
-#: common_utils.py:283
-msgid "No book in the library"
-msgstr ""
-
-#: common_utils.py:290 common_utils.py:298
-msgid "No book in the virtual library"
-msgstr ""
-
-#: common_utils.py:305
-msgid "No book in the current search"
-msgstr ""
-
-#: common_utils.py:435
+#: common_utils.py:252
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr ""
 
-#: common_utils.py:461
+#: common_utils.py:265
+msgid "Could not to launch {:s}"
+msgstr "No se pudo iniciar {:s}"
+
+#: common_utils.py:281
+msgid "No book selected"
+msgstr "Ningún libro seleccionado"
+
+#: common_utils.py:286
+msgid "No book in the library"
+msgstr ""
+
+#: common_utils.py:291 common_utils.py:297
+msgid "No book in the virtual library"
+msgstr ""
+
+#: common_utils.py:302
+msgid "No book in the current search"
+msgstr ""
+
+#: common_utils.py:502
 msgid "Restart required"
 msgstr "Se requiere reiniciar"
 
-#: common_utils.py:462
+#: common_utils.py:503
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr "La imagen del título no se encuentra - ¡debe reiniciar Calibre antes de usar este plugin!"
 
-#: common_utils.py:806
+#: common_utils.py:847
 msgid "Keyboard shortcut dialog"
 msgstr "Diálogo de atajos de teclado"
 
-#: common_utils.py:807
+#: common_utils.py:848
 msgid "Keyboard shortcuts"
 msgstr "Atajos de teclado"
 
-#: common_utils.py:936
+#: common_utils.py:968
 msgid "Unhandled exception"
 msgstr "Excepción no controlada"
 
-#: common_utils.py:941
+#: common_utils.py:973
 msgid "The {:s} plugin has encounter a unhandled exception."
 msgstr ""
 
