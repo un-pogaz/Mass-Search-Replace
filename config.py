@@ -41,7 +41,6 @@ except ImportError:
     from urllib import urlretrieve
 
 from calibre import prints
-from calibre.constants import iswindows, numeric_version as calibre_version
 from calibre.utils.config import config_dir, JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
 from calibre.gui2.ui import get_gui
@@ -50,7 +49,8 @@ from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
 from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, TEMPLATE_FIELD, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
-from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, get_BookIds_selected,
+from .common_utils import (debug_print, get_icon, PREFS_json, KeyboardConfigDialog, calibre_version, iswindows,
+                            get_BookIds_selected,
                             NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox)
 
 GUI = get_gui()

@@ -29,14 +29,13 @@ except ImportError:
 
 from calibre import prints
 from calibre.ebooks.metadata.book.base import Metadata
-from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from calibre.library import current_library_name
 
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources,
+from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version,
                             get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked,
                             create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
