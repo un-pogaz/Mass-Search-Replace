@@ -501,7 +501,7 @@ class MenuTableWidget(QTableWidget):
             item = QTableWidgetItem()
             item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
             self.setItem(row, col, item)
-        self.item(row, 1).setIcon(get_icon())
+        self.item(row, 1).setIcon(get_icon(None))
     
     def display_add_new_image_dialog(self, select_in_combo=False, combo=None):
         add_image_dialog = ImageDialog(self, self.resources_dir, get_image_names(self.image_map))
@@ -1327,7 +1327,7 @@ class OperationWidgetItem(QTableWidgetItem):
             self.setToolTip(str(err))
             return True
         else:
-            self.setIcon(get_icon())
+            self.setIcon(get_icon(None))
             self.setToolTip('')
             return False
 
