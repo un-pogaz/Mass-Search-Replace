@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-08-16 15:55+0200\n"
-"PO-Revision-Date: 2022-08-16 15:55+0200\n"
+"POT-Creation-Date: 2022-08-17 13:00+0200\n"
+"PO-Revision-Date: 2022-08-17 13:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: SearchReplace.py:114
 msgid "Invalid operation, the \"{:s}\" key is missing."
-msgstr "Operación no válida, falta la clave \"{:s}\"."
+msgstr "Operación no válida, falta la tecla \"{:s}\"."
 
 #: SearchReplace.py:133
 msgid "Search field \"{:s}\" is not available for this library"
@@ -42,7 +42,7 @@ msgstr "Configuración de una operación de Buscar/Reemplazar"
 
 #: SearchReplace.py:245 action.py:312 action.py:358 action.py:404
 msgid "Invalid operation"
-msgstr "Operación Invalida"
+msgstr "Operación no válida"
 
 #: SearchReplace.py:246
 msgid ""
@@ -56,11 +56,11 @@ msgstr ""
 
 #: SearchReplaceCalibreText.py:16
 msgid "You must specify a \"Search field\""
-msgstr "Debe especificar un \"campo de búsqueda\\"
+msgstr "Debes especificar un \"campo de búsqueda\""
 
 #: SearchReplaceCalibreText.py:19
 msgid "Case to be applied"
-msgstr "Aplica a Mayúscula"
+msgstr "Aplicar mayúsculas"
 
 #: SearchReplaceCalibreText.py:20
 msgid "Replace mode"
@@ -68,7 +68,7 @@ msgstr "Modo de reemplazo"
 
 #: SearchReplaceCalibreText.py:21 config.py:892
 msgid "Search mode"
-msgstr "Modo de búsqueda"
+msgstr "Modo de busqueda"
 
 #: SearchReplaceCalibreText.py:22
 msgid "Identifier type"
@@ -80,7 +80,7 @@ msgstr "Reemplazar campo"
 
 #: SearchReplaceCalibreText.py:27
 msgid "In field replacement mode, the specified field is set to the text and all previous values are erased. After replacement is finished, the text can be changed to upper-case, lower-case, or title-case."
-msgstr "En el modo de reemplazo de campo, el campo especificado se establece en el texto y se borran todos los valores anteriores. Una vez finalizada la sustitución, el texto se puede cambiar a mayúsculas, minúsculas o el título."
+msgstr "En el modo de reemplazo de campo, el campo especificado se establece en el texto y todos los valores anteriores se borran. Una vez que finaliza el reemplazo, el texto se puede cambiar a mayúsculas, minúsculas o título."
 
 #: SearchReplaceCalibreText.py:32
 msgid "Open the template editor"
@@ -88,7 +88,7 @@ msgstr "Abrir el editor de plantillas"
 
 #: SearchReplaceCalibreText.py:34
 msgid "Invalid identifier string. It must be a comma-separated list of pairs of strings separated by a colon."
-msgstr "Cadena de identificación no válida. Debe ser una lista de pares de cadenas separados por comas separados por dos puntos."
+msgstr "Cadena de identificador no válida. Debe ser una lista separada por comas de pares de cadenas separadas por dos puntos."
 
 #: SearchReplaceCalibreText.py:37
 msgid "The field \"{:s}\" is not defined"
@@ -108,7 +108,7 @@ msgstr "Aplica fácilmente una lista de múltiples operaciones de Buscar y Reemp
 
 #: action.py:51
 msgid "Apply a list of multiple saved Find and Replace operations"
-msgstr "Aplicar una lista de múltiples operaciones de Buscar y Reemplazar guardadas"
+msgstr "Aplicar una lista de múltiples operaciones guardadas de Buscar y Reemplazar"
 
 #: action.py:104
 msgid "&Quick Search/Replace..."
@@ -116,19 +116,19 @@ msgstr "&Rápido Buscar/Reemplazar..."
 
 #: action.py:108
 msgid "&Selection"
-msgstr ""
+msgstr "&Selección"
 
 #: action.py:113
-msgid "&Current Search"
-msgstr ""
+msgid "&Current search"
+msgstr "&Búsqueda actual"
 
 #: action.py:118
-msgid "&Virtual Library"
-msgstr ""
+msgid "&Virtual library"
+msgstr "&Biblioteca virtual"
 
 #: action.py:123
 msgid "&Library"
-msgstr ""
+msgstr "&Biblioteca"
 
 #: action.py:130
 msgid "&Customize plugin..."
@@ -136,23 +136,23 @@ msgstr "&Personalizar complemento..."
 
 #: action.py:174
 msgid "the selected books"
-msgstr ""
+msgstr "los libros seleccionados"
 
 #: action.py:177
 msgid "all books in the library {:s}"
-msgstr ""
+msgstr "todos los libros de la biblioteca {:s}"
 
 #: action.py:182
 msgid "the virtual library {:s}"
-msgstr ""
+msgstr "la biblioteca virtual {:s}"
 
 #: action.py:187
 msgid "the current search"
-msgstr ""
+msgstr "la búsqueda actual"
 
 #: action.py:192
 msgid "({:d} books)"
-msgstr ""
+msgstr "({:d} libros)"
 
 #: action.py:226
 msgid "Invalide menu configuration, the \"{:s}\" key is missing."
@@ -164,7 +164,7 @@ msgstr "Cancelar"
 
 #: action.py:286
 msgid "Mass Search/Replace progress"
-msgstr "Mass Search/Replace progresos"
+msgstr "Progreso Mass Search/Replace"
 
 #: action.py:313
 msgid ""
@@ -199,16 +199,16 @@ msgid ""
 "{:d} exceptions have occurred during the library update.\n"
 "Some fields may not have been updated."
 msgstr ""
-"Se han producido {:d} excepciones durante la actualización de la biblioteca.\n"
-"Algunos campos pueden no haber sido actualizados."
+"{:d} se han producido excepciones durante la actualización de la biblioteca.\n"
+"Es posible que algunos campos no se hayan actualizado."
 
 #: action.py:359
 msgid "{:d} invalid operations has detected and have been ignored."
-msgstr "{:d} se han detectado operaciones no válidas y se han ignorado."
+msgstr "{:d} operaciones no válidas han sido detectadas y han sido ignoradas."
 
 #: action.py:363
 msgid "Update Report"
-msgstr "Actualizar informe"
+msgstr "Informe de actualización"
 
 #: action.py:364
 msgid "Mass Search/Replace performed for {:d} books with a total of {:d} fields modify."
@@ -230,15 +230,15 @@ msgstr ""
 
 #: action.py:420
 msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
-msgstr "Buscar/Sustituir {:d} de {:d}. Libro {:d} de {:d}."
+msgstr "Buscar/Reemplazar {:d} de {:d}. Libro {:d} de {:d}."
 
 #: action.py:472
 msgid "Update the library for {:d} books with a total of {:d} fields..."
-msgstr "Actualizar la biblioteca de los libros {:d} con un total de {:d} campos..."
+msgstr "Actualizar la biblioteca para {:d} libros con un total de {:d} campos..."
 
 #: common_utils.py:252
 msgid "You cannot configure this plugin before calibre is restarted."
-msgstr ""
+msgstr "No puede configurar este complemento antes de reiniciar calibre."
 
 #: common_utils.py:265
 msgid "Could not to launch {:s}"
@@ -250,27 +250,27 @@ msgstr "Ningún libro seleccionado"
 
 #: common_utils.py:286
 msgid "No book in the library"
-msgstr ""
+msgstr "No hay libro en la biblioteca"
 
 #: common_utils.py:291 common_utils.py:297
 msgid "No book in the virtual library"
-msgstr ""
+msgstr "No hay libro en la biblioteca virtual"
 
 #: common_utils.py:302
 msgid "No book in the current search"
-msgstr ""
+msgstr "Ningún libro en la búsqueda actual"
 
 #: common_utils.py:502
 msgid "Restart required"
-msgstr "Se requiere reiniciar"
+msgstr "Reinicio requerido"
 
 #: common_utils.py:503
 msgid "Title image not found - you must restart Calibre before using this plugin!"
-msgstr "La imagen del título no se encuentra - ¡debe reiniciar Calibre antes de usar este plugin!"
+msgstr "No se encontró la imagen del título. ¡Debe reiniciar Calibre antes de usar este complemento!"
 
 #: common_utils.py:847
 msgid "Keyboard shortcut dialog"
-msgstr "Diálogo de atajos de teclado"
+msgstr "Diálogo de atajo de teclado"
 
 #: common_utils.py:848
 msgid "Keyboard shortcuts"
@@ -282,15 +282,15 @@ msgstr "Excepción no controlada"
 
 #: common_utils.py:973
 msgid "The {:s} plugin has encounter a unhandled exception."
-msgstr ""
+msgstr "El complemento {:s} ha encontrado una excepción no controlada."
 
 #: config.py:101
 msgid "Interrupt execution"
-msgstr "Interrumpir la ejecucion"
+msgstr "Interrumpir la ejecución"
 
 #: config.py:102
 msgid "Stop Mass Search/Replace and display the error normally without further action."
-msgstr "Detener Mass Search/Replace y mostrar el error normalmente sin mas acciones."
+msgstr "Detener Mass Search/Replace y mostrar el error normalmente sin más acción."
 
 #: config.py:105
 msgid "Restore the library"
@@ -306,7 +306,7 @@ msgstr "Actualiza los campos uno por uno. Esta operación puede ser más lenta q
 
 #: config.py:112
 msgid "Carefully executed (slower)"
-msgstr "Se ejecuta cuidadosamente (más lento)"
+msgstr "Cuidadosamente ejecutado (más lento)"
 
 #: config.py:113
 msgid "When a error occurs, stop Mass Search/Replace and display the error normally without further action."
@@ -330,7 +330,7 @@ msgstr "Si se detecta una operación no válida, cancele los cambios."
 
 #: config.py:135
 msgid "Asked"
-msgstr "Preguntar"
+msgstr "Pregunta"
 
 #: config.py:136
 msgid "If an invalid operation is detected, asked whether to continue or abort the changes."
@@ -378,7 +378,7 @@ msgstr "Editar los atajos de teclado asociados con este complemento"
 
 #: config.py:255
 msgid "Mark the updated books"
-msgstr ""
+msgstr "Marcar los libros actualizados"
 
 #: config.py:259
 msgid "Display a update report"
@@ -470,7 +470,7 @@ msgstr "Operación"
 
 #: config.py:546
 msgid "(copy)"
-msgstr "(copia)"
+msgstr "(copiar)"
 
 #: config.py:559
 msgid "Are you sure you want to delete this menu item?"
@@ -514,7 +514,7 @@ msgstr "&Seleccionar fuente de imagen"
 
 #: config.py:799
 msgid "From &web domain favicon"
-msgstr "Desde dominio &web favicon"
+msgstr "Desde &dominio web favicon"
 
 #: config.py:806
 msgid "From .png &file"
@@ -591,7 +591,7 @@ msgstr "Lista de operaciones de búsqueda/reemplazo para {:s}"
 
 #: config.py:919
 msgid "Select and configure the order of execution of the operations of Search/Replace operations:"
-msgstr "Seleccionar y configurar el orden de ejecución de las operaciones de Búsqueda / Reemplazo:"
+msgstr "Seleccione y configure el orden de ejecución de las operaciones de búsqueda/reemplazo:"
 
 #: config.py:939
 msgid "Move operation up"
@@ -611,7 +611,7 @@ msgstr "Eliminar operación"
 
 #: config.py:967
 msgid "Move operation down"
-msgstr "Mover operación abajo"
+msgstr "Mover la operación hacia abajo"
 
 #: config.py:1026
 msgid "This is not a valid JSON file"
@@ -663,7 +663,7 @@ msgstr "Desconocido"
 
 #: templates.py:63
 msgid "Template Error"
-msgstr "Error Plantilla"
+msgstr "Error de plantilla"
 
 #: templates.py:64
 msgid "Running the template returned an error:"
@@ -675,4 +675,4 @@ msgstr "Ingrese una plantilla para probar usando datos del libro seleccionado"
 
 #: templates.py:96
 msgid "Template editor"
-msgstr "Editor de plantillas"
+msgstr "Editor de plantilla"

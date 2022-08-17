@@ -110,14 +110,14 @@ class MassSearchReplaceAction(InterfaceAction):
                                              unique_name='&Quick Search/Replace in all books>&Selection')
         self.menu_actions.append(ac)
         
-        ac = create_menu_action_unique(self, mn_books, _('&Current Search'), 'search.png',
+        ac = create_menu_action_unique(self, mn_books, _('&Current search'), 'search.png',
                                              triggered=self.quick_search,
-                                             unique_name='&Quick Search/Replace in all books>&Current Search')
+                                             unique_name='&Quick Search/Replace in all books>&Current search')
         self.menu_actions.append(ac)
         
-        ac = create_menu_action_unique(self, mn_books, _('&Virtual Library'), 'vl.png',
+        ac = create_menu_action_unique(self, mn_books, _('&Virtual library'), 'vl.png',
                                              triggered=self.quick_virtual,
-                                             unique_name='&Quick Search/Replace in all books>&Virtual Library')
+                                             unique_name='&Quick Search/Replace in all books>&Virtual library')
         self.menu_actions.append(ac)
         
         ac = create_menu_action_unique(self, mn_books, _('&Library'), 'library.png',
