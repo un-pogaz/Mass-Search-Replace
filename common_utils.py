@@ -114,7 +114,7 @@ def get_theme_color():
 
 def get_icon_themed(icon_name, theme_color=None):
     """Apply the theme color to a path"""
-    theme_color = theme_color or get_theme_color()
+    theme_color = get_theme_color() if theme_color is None else theme_color
     return icon_name.replace('/', '/'+theme_color+'/', 1).replace('//', '/')
 
 def load_plugin_resources(plugin_path, names=[]):
