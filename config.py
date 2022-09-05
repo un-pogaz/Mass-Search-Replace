@@ -273,6 +273,7 @@ class ConfigWidget(QWidget):
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
         if calibre_version >= (5, 41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
+        debug_print('Save settings:\n{0}\n'.format(len(PREFS)))
         #debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     def edit_error_strategy(self):

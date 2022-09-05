@@ -524,6 +524,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
                         if is_restore:
                             for field, book_id_val_map in iteritems(backup_fields):
                                self.dbAPI.set_field(field, book_id_val_map)
+                            book_id_update = {}
                 
                 GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
                 
