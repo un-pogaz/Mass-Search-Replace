@@ -1,6 +1,6 @@
 ### version 1.5.1
 Fix a bug where the books are marked, even if an error has occurred in restore books
-[fix] theme color not correctly appli to the icons
+[fix] icon not display when a theme colors is used
 
 ### version 1.5.0
 Rework of the Quick Search/Replace for add alternatives range target (Selection / Current Search / Virtual library / Library)
