@@ -439,7 +439,7 @@ class MenuTableWidget(QTableWidget):
         for row, menu in enumerate(menu_list, 0):
             self.populate_table_row(row, menu)
         
-        self.selectRow(0)
+        self.selectRow(-1)
     
     def populate_table_row(self, row, menu):
         self.blockSignals(True)
@@ -1113,7 +1113,7 @@ class OperationListTableWidget(QTableWidget):
         
         self.test_column_hidden()
         
-        self.selectRow(0)
+        self.selectRow(-1)
     
     def populate_table_row(self, row, operation):
         self.blockSignals(True)
