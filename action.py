@@ -37,7 +37,7 @@ from calibre.library import current_library_name
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version,
                             get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked,
-                            create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
+                            unregister_menu_actions, create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 from . import SearchReplaceCalibreText as CalibreText
 
@@ -76,7 +76,6 @@ class MassSearchReplaceAction(InterfaceAction):
         # we implement here to have access to current_db
         # if we try this in genesis() we get the error:
         # AttributeError: 'Main' object has no attribute 'current_db'
-        self.menu_actions = []
         self.rebuild_menus()
     
     def rebuild_menus(self):
@@ -85,14 +84,7 @@ class MassSearchReplaceAction(InterfaceAction):
         sub_menus = {}
         
         
-        for i, action in enumerate(self.menu_actions, 0):
-            if hasattr(action, 'calibre_shortcut_unique_name'):
-                GUI.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
-            # starting in calibre 2.10.0, actions are registers at the top gui level for OSX' benefit.
-            if calibre_version >= (2,10,0) :
-                GUI.removeAction(action)
-        
-        self.menu_actions = []
+        unregister_menu_actions()
         
         debug_print('Rebuilding menu')
         for menu in menu_list:
@@ -105,32 +97,27 @@ class MassSearchReplaceAction(InterfaceAction):
         mn_books = QMenu()
         ac.setMenu(mn_books)
         
-        ac = create_menu_action_unique(self, mn_books, _('&Selection'), 'highlight_only_on.png',
-                                             triggered=self.quick_selected,
-                                             unique_name='&Quick Search/Replace in all books>&Selection')
-        self.menu_actions.append(ac)
-        
-        ac = create_menu_action_unique(self, mn_books, _('&Current search'), 'search.png',
-                                             triggered=self.quick_search,
-                                             unique_name='&Quick Search/Replace in all books>&Current search')
-        self.menu_actions.append(ac)
-        
-        ac = create_menu_action_unique(self, mn_books, _('&Virtual library'), 'vl.png',
-                                             triggered=self.quick_virtual,
-                                             unique_name='&Quick Search/Replace in all books>&Virtual library')
-        self.menu_actions.append(ac)
-        
-        ac = create_menu_action_unique(self, mn_books, _('&Library'), 'library.png',
-                                             triggered=self.quick_library,
-                                             unique_name='&Quick Search/Replace in all books>&Library')
-        self.menu_actions.append(ac)
+        create_menu_action_unique(self, mn_books, _('&Selection'), 'highlight_only_on.png',
+                                        triggered=self.quick_selected,
+                                        unique_name='&Quick Search/Replace in all books>&Selection')
+    
+        create_menu_action_unique(self, mn_books, _('&Current search'), 'search.png',
+                                        triggered=self.quick_search,
+                                        unique_name='&Quick Search/Replace in all books>&Current search')
+    
+        create_menu_action_unique(self, mn_books, _('&Virtual library'), 'vl.png',
+                                        triggered=self.quick_virtual,
+                                        unique_name='&Quick Search/Replace in all books>&Virtual library')
+    
+        create_menu_action_unique(self, mn_books, _('&Library'), 'library.png',
+                                        triggered=self.quick_library,
+                                        unique_name='&Quick Search/Replace in all books>&Library')
         
         self.menu.addSeparator()
         
-        ac = create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
-                                             triggered=self.show_configuration,
-                                             unique_name='&Customize plugin')
-        self.menu_actions.append(ac)
+        create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
+                                        triggered=self.show_configuration,
+                                        unique_name='&Customize plugin')
         GUI.keyboard.finalize()
     
     def append_menu_item_ex(self, parent_menu, sub_menus, menu):
@@ -161,13 +148,10 @@ class MassSearchReplaceAction(InterfaceAction):
             name = name.replace('&','')
             debug_print('Rebuilding menu for:', name)
             
-            ac = create_menu_action_unique(self, parent_menu, menu_text, image_name,
-                           triggered=partial(self.run_SearchReplace, menu, None),
-                           unique_name=name, shortcut_name=name)
+            create_menu_action_unique(self, parent_menu, menu_text, image_name,
+                      triggered=partial(self.run_SearchReplace, menu, None),
+                      unique_name=name, shortcut_name=name)
         
-        if ac:
-            # Maintain our list of menus by query references so we can easily enable/disable menus when user right-clicks.
-            self.menu_actions.append(ac)
     
     
     def quick_selected(self):
