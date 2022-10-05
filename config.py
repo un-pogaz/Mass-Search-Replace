@@ -61,14 +61,6 @@ class ICON:
     EXPORT    = 'images/export.png'
     IMPORT    = 'images/import.png'
     WARNING   = 'images/warning.png'
-    
-    ALL = [
-        PLUGIN,
-        ADD_IMAGE,
-        EXPORT,
-        IMPORT,
-        WARNING,
-    ]
 
 class KEY_MENU:
     MENU = 'Menu'

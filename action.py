@@ -57,7 +57,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.is_library_selected = True
         self.menu = QMenu(GUI)
         
-        load_plugin_resources(self.plugin_path, ICON.ALL)
+        load_plugin_resources(self.plugin_path)
         
         error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         if error_operation not in ERROR_OPERATION.LIST.keys():
