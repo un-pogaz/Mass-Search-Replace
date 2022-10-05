@@ -321,9 +321,9 @@ class SearchReplacesProgressDialog(QProgressDialog):
             #info dialog
             if self.exception_update:
                 
-                msg = _('Mass Search/Replace encountered an error during the library update.')
+                msg = None
                 if self.exceptionStrategy == ERROR_UPDATE.RESTORE:
-                    msg += '\n' + _('The library a was restored to its original state.')
+                    msg = _('The library a was restored to its original state.')
                 
                 id, book_info, field, e = self.exception[0]
                 CustomExceptionErrorDialog(e, custome_msg=msg, custome_title=_('Cannot update the library'))
