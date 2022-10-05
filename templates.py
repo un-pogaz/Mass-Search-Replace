@@ -38,7 +38,7 @@ except NameError:
     pass
 
 def check_template(template, show_error=False):
-    db = current_db()
+    db = GUI.current_db
     error_msgs = [
         TEMPLATE_ERROR,
         'unknown function',
@@ -69,7 +69,7 @@ def check_template(template, show_error=False):
 
 class TemplateBox(TemplateDialog):
     def __init__(self, parent=None, template_text=''):
-        self.db = current_db()
+        self.db = GUI.current_db
         self.template = template_text
         parent = parent or GUI
         

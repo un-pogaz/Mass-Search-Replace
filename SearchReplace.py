@@ -50,16 +50,16 @@ _default_operation = None
 _s_r = None
 
 def get_default_operation():
-        global _default_operation
-        global _s_r
-        
-        if not _s_r or _s_r.db != current_db():
-            _s_r = SearchReplaceWidget_NoWindows([0])
-        if not _default_operation:
-            _default_operation = _s_r.save_settings()
-            _default_operation[KEY_OPERATION.ACTIVE] = True
-        
-        return copy.copy(_default_operation)
+    global _default_operation
+    global _s_r
+    
+    if not _s_r or _s_r.db != current_db():
+        _s_r = SearchReplaceWidget_NoWindows([0])
+    if not _default_operation:
+        _default_operation = _s_r.save_settings()
+        _default_operation[KEY_OPERATION.ACTIVE] = True
+    
+    return copy.copy(_default_operation)
 
 def operation_ConvertError(operation):
     err = operation.get(KEY_OPERATION.S_R_ERROR, None)

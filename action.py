@@ -216,7 +216,7 @@ class SearchReplacesProgressDialog(QProgressDialog):
     def __init__(self, book_ids, menu):
         
         # DB
-        self.db = current_db()
+        self.db = GUI.current_db
         # DB API
         self.dbAPI = self.db.new_api
         
