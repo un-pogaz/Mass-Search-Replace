@@ -237,7 +237,7 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts...'), self)
+        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts')+'...', self)
         keyboard_shortcuts_button.setToolTip(_('Edit the keyboard shortcuts associated with this plugin'))
         keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
         keyboard_layout.addWidget(keyboard_shortcuts_button)
@@ -252,7 +252,7 @@ class ConfigWidget(QWidget):
         self.updateReport.setChecked(PREFS[KEY_MENU.UPDATE_REPORT])
         keyboard_layout.addWidget(self.updateReport)
         
-        error_button = QPushButton(_('Error strategy...'), self)
+        error_button = QPushButton(_('Error strategy')+'...', self)
         error_button.setToolTip(_('Define the strategy when a error occurs during the library update'))
         error_button.clicked.connect(self.edit_error_strategy)
         keyboard_layout.addWidget(error_button)
