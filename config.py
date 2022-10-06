@@ -402,10 +402,6 @@ class MenuTableWidget(QTableWidget):
     def __init__(self, menu_list=None, *args):
         QTableWidget.__init__(self, *args)
         
-        from .columns_metadata import get_possible_idents, get_possible_fields
-        self.possible_idents = get_possible_idents()
-        self.all_fields, self.writable_fields = get_possible_fields()
-        
         self.resources_dir = os.path.join(config_dir, 'resources/images')
         if iswindows:
             self.resources_dir = os.path.normpath(self.resources_dir)
@@ -713,9 +709,7 @@ class SettingsButton(QToolButton):
         hasError = False
         
         for operation in self.getOperationList():
-            if operation_testGetError(operation,
-                    all_fields=self.table.all_fields, writable_fields=self.table.writable_fields,
-                    possible_idents=self.table.possible_idents):
+            if operation_testGetError(operation):
                 hasError = True
                 break
         
@@ -1075,10 +1069,6 @@ class OperationListTableWidget(QTableWidget):
     def __init__(self, operation_list=None, book_ids=None, *args):
         QTableWidget.__init__(self, *args)
         
-        from .columns_metadata import get_possible_idents, get_possible_fields
-        self.possible_idents = get_possible_idents()
-        self.all_fields, self.writable_fields = get_possible_fields()
-        
         self.book_ids = (book_ids or get_BookIds_selected(show_error=False))[:10]
         
         self.setAlternatingRowColors(True)
@@ -1311,9 +1301,7 @@ class OperationWidgetItem(QTableWidgetItem):
         return copy.copy(self._operation)
     
     def hasError(self):
-        err = operation_testFullError(self._operation,
-                    all_fields=self.table.all_fields, writable_fields=self.table.writable_fields,
-                    possible_idents=self.table.possible_idents)
+        err = operation_testFullError(self._operation)
         
         if err:
             self.setIcon(get_icon(ICON.WARNING))
