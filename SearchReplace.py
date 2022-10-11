@@ -100,7 +100,7 @@ def operation_list_active(operation_list):
 class OperationError(ValueError):
     pass
 
-def operation_testGetError(operation, all_fields=None, writable_fields=None, possible_idents=None):
+def operation_testGetError(operation):
     
     if not operation:
         return TypeError
@@ -123,8 +123,7 @@ def operation_testGetError(operation, all_fields=None, writable_fields=None, pos
         return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_OPERATION.SEARCH_MODE]))
     
     #Field test
-    if not all_fields or not writable_fields:
-        all_fields, writable_fields = get_possible_fields()
+    all_fields, writable_fields = get_possible_fields()
     
     search_field = operation[KEY_OPERATION.SEARCH_FIELD]
     dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
@@ -135,7 +134,7 @@ def operation_testGetError(operation, all_fields=None, writable_fields=None, pos
     if dest_field and (dest_field not in writable_fields):
         return OperationError(_('Destination field "{:s}" is not available for this library').format(dest_field))
     
-    possible_idents = possible_idents or get_possible_idents()
+    possible_idents = get_possible_idents()
     
     if search_field == 'identifiers':
         src_ident = operation[KEY_OPERATION.S_R_SRC_IDENT]
@@ -144,8 +143,8 @@ def operation_testGetError(operation, all_fields=None, writable_fields=None, pos
     
     return None
 
-def operation_testFullError(operation, all_fields=None, writable_fields=None, possible_idents=None):
-    err = operation_testGetError(operation, all_fields, writable_fields, possible_idents)
+def operation_testFullError(operation):
+    err = operation_testGetError(operation)
     if err:
         return err
     get_default_operation()
@@ -153,8 +152,8 @@ def operation_testFullError(operation, all_fields=None, writable_fields=None, po
     _s_r.load_settings(operation)
     return _s_r.testGetError()
 
-def operation_isFullValid(operation, all_fields=None, writable_fields=None, possible_idents=None):
-    return operation_testFullError(operation, all_fields, writable_fields, possible_idents) == None
+def operation_isFullValid(operation):
+    return operation_testFullError(operation) == None
 
 
 def operation_para_list(operation):
