@@ -1,3 +1,6 @@
+### version 1.6.0
+[internal] big rework of common_utils.py
+
 ### version 1.5.1
 Fix a bug where the books are marked, even if an error has occurred in restore books
 [fix] icon not display when a theme colors is used
