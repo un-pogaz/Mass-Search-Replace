@@ -31,6 +31,7 @@ GUI = get_gui()
 
 TEMPLATE_PREFIX = 'TEMPLATE: '
 TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
+TEMPLATE_FIELD = '{template}'
 
 try:
     load_translations()
@@ -68,22 +69,10 @@ def check_template(template, show_error=False):
 
 
 class TemplateBox(TemplateDialog):
-    def __init__(self, parent=None, template_text=''):
+    def __init__(self, parent=None, mi=None, fm=None, template_text=''):
         self.db = GUI.current_db
         self.template = template_text
         parent = parent or GUI
-        
-        rows = GUI.current_view().selectionModel().selectedRows()
-        if rows:
-            index = rows[0]
-            mi = self.db.get_metadata(index.row(), index_is_id=False, get_cover=False)
-        else:
-            try:
-                book_id = list(self.db.all_ids())[0]
-                mi = self.db.get_metadata(book_id, index_is_id=True, get_user_categories=True)
-            except:
-                mi = MetaInformation(_('Unknown'))
-        ## add any extra fields by actions that define update_metadata
         
         if not template_text:
             text = _('Enter a template to test using data from the selected book')
@@ -92,8 +81,9 @@ class TemplateBox(TemplateDialog):
             text = None
             text_is_placeholder = False
          
-        TemplateDialog.__init__(self, parent, text, mi=mi, text_is_placeholder=text_is_placeholder)
+        TemplateDialog.__init__(self, parent, text, mi=mi, fm=fm, text_is_placeholder=text_is_placeholder)
         self.setWindowTitle(_('Template editor'))
+        self.setWindowIcon(get_icon('template_funcs.png'))
         if template_text:
             self.textbox.insertPlainText(template_text)
     

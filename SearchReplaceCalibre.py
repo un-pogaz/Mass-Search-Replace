@@ -34,12 +34,10 @@ from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
 from calibre.gui2.widgets2 import Dialog
 from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
 
-from .templates import TemplateBox, check_template
+from .templates import TemplateBox, TEMPLATE_FIELD, check_template
 from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
-
-TEMPLATE_FIELD = '{template}'
 
 S_R_FUNCTIONS = {
         '' : lambda x: x,
@@ -1243,7 +1241,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def openTemplateBox(self):
         
-        temp = TemplateBox(self, template_text=unicode_type(self.s_r_template.text()))
+        temp = TemplateBox(self, mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()))
         temp.exec_()
         if temp.template:
             self.s_r_template.setText(temp.template)
