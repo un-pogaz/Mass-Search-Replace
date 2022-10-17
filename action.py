@@ -195,6 +195,9 @@ class MassSearchReplaceAction(InterfaceAction):
         if book_ids == None:
             book_ids = get_BookIds_selected(show_error=True)
         
+        if not book_ids:
+            return
+        
         srpg = SearchReplacesProgressDialog(book_ids, menu)
         srpg.close()
         del srpg
