@@ -1047,7 +1047,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.query_field.setCurrentIndex(0)
         
         if item_name in list(self.queries.keys()):
-            del(self.queries[item_name])
+            del self.queries[item_name]
             self.queries.commit()
     
     def s_r_save_query(self, *args):
