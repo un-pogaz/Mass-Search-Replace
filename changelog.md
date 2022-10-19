@@ -1,3 +1,6 @@
+### version 1.7.0
+[internal] again, big rework of common_utils (use submodule)
+
 ### version 1.6.1
 fix a error when a user categorie exist in the library
 

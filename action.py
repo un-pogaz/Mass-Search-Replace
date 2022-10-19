@@ -35,9 +35,10 @@ from calibre.gui2.ui import get_gui
 from calibre.library import current_library_name
 
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version,
-                            get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked,
-                            unregister_menu_actions, create_menu_item, create_menu_action_unique, CustomExceptionErrorDialog)
+from .common_utils import debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version
+from .common_utils.library import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
+from .common_utils.menu import unregister_menu_actions, create_menu_item, create_menu_action_unique
+from .common_utils.dialog import CustomExceptionErrorDialog
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 from . import SearchReplaceCalibreText as CalibreText
 

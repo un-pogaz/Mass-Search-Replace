@@ -49,9 +49,12 @@ from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
 from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
-from .common_utils import (debug_print, get_icon, PREFS_json, edit_keyboard_shortcuts, calibre_version, iswindows,
-                            get_BookIds_selected,
-                            NoWheelComboBox, CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, KeyValueComboBox)
+from .common_utils import debug_print, get_icon, PREFS_json, calibre_version, iswindows
+from .common_utils.dialog import edit_keyboard_shortcuts
+from .common_utils.library import get_BookIds_selected
+from .common_utils.controls import NoWheelComboBox, KeyValueComboBox
+from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem
+
 from .templates import TEMPLATE_FIELD
 
 GUI = get_gui()

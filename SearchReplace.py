@@ -33,9 +33,9 @@ from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 
 from .common_utils import debug_print, get_icon, current_db
+from .common_utils.columns import get_possible_idents, get_possible_fields
 from .SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
 from .templates import TemplateBox, check_template
-from .columns_metadata import get_possible_idents, get_possible_fields
 from . import SearchReplaceCalibreText as CalibreText
 
 GUI = get_gui()
