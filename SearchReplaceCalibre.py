@@ -27,12 +27,18 @@ from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
 from calibre.utils.config import JSONConfig, dynamic, prefs, tweaks
 from calibre.utils.date import now
-from calibre.utils.icu import capitalize, sort_key
+from calibre.utils.icu import sort_key, capitalize, lower as icu_lower, upper as icu_upper
 from calibre.utils.titlecase import titlecase
 from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
 from calibre.gui2.widgets2 import Dialog
 from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
+
+try:
+    from calibre.utils.localization import ngettext
+    from calibre.gui2.widgets import setup_status_actions, update_status_actions
+except:
+    setup_status_actions, update_status_actions = None, None
 
 from .templates import TemplateBox, TEMPLATE_FIELD, check_template
 from . import SearchReplaceCalibreText as CalibreText
@@ -123,6 +129,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.set_field_calls = defaultdict(dict)
         self.changed = False
         self._init_controls()
+        
+        if calibre_version >= (6,12,0):
+            setup_status_actions(self.test_result)
         self.prepare_search_and_replace()
     
     def _init_controls(self):
@@ -762,12 +771,16 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def s_r_set_colors(self):
         if self.s_r_error is not None:
-            self.test_result.setText(error_message(self.s_r_error))
+            tt = error_message(self.s_r_error)
+            self.test_result.setText(tt)
             col = 'rgba(255, 0, 0, 20%)'
         else:
+            tt = ''
             col = 'rgba(0, 255, 0, 20%)'
-            
-        if calibre_version >= (5,0,0):
+        
+        if calibre_version >= (6,12,0):
+            update_status_actions(self.test_result, self.s_r_error is None, tt)
+        elif calibre_version >= (5,0,0):
             self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
         else:
             self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)

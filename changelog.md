@@ -1,3 +1,6 @@
+### version 1.7.1
+fix broken compatibility with 6.12 (use a icon instead of a red border to warn about a regex error)
+
 ### version 1.7.0
 [internal] again, big rework of common_utils (use submodule)
 
