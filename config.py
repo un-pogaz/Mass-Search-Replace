@@ -1094,7 +1094,11 @@ class OperationListTableWidget(QTableWidget):
         
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
-            self.populate_table_row(row, calibre_queries.get(unicode_type(operation.get(KEY_OPERATION.NAME, None)), operation))
+            is_active = operation[KEY_OPERATION.ACTIVE]
+            operation = calibre_queries.get(unicode_type(operation.get(KEY_OPERATION.NAME, None)), operation)
+            operation[KEY_OPERATION.ACTIVE] = is_active
+            
+            self.populate_table_row(row, operation)
         
         self.test_column_hidden()
         

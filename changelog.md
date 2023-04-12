@@ -1,3 +1,6 @@
+### version 1.7.2
+fix active statue of Shared Search/Replace operation not conserved (always active)
+
 ### version 1.7.1
 fix broken compatibility with 6.12 (use a icon instead of a red border to warn about a regex error)
 
