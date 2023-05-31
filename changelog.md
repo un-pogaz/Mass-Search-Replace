@@ -1,3 +1,9 @@
+### version 1.7.3
+fix columns list not the same as Calibre
+
+### version 1.7.2
+fix columns list not the same as Calibre
+
 ### version 1.7.2
 fix active statue of Shared Search/Replace operation not conserved (always active)
 

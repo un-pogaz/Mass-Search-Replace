@@ -446,18 +446,13 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             if (f in ['author_sort'] or
                     (fm[f]['datatype'] in ['text', 'series', 'enumeration', 'comments', 'rating'] and
                      fm[f].get('search_terms', None) and
-                     f not in ['formats', 'ondevice', 'series_sort']) or
+                     f not in ['formats', 'ondevice', 'series_sort', 'in_tag_browser']) or
                     (fm[f]['datatype'] in ['int', 'float', 'bool', 'datetime'] and
                      f not in ['id', 'timestamp'])):
                 self.all_fields.append(f)
                 self.writable_fields.append(f)
             if fm[f]['datatype'] == 'composite':
                 self.all_fields.append(f)
-        
-        ##un_pogaz exclude unsupported cover
-        self.all_fields.remove('cover')
-        self.writable_fields.remove('cover')
-        
         self.all_fields.sort()
         self.all_fields.insert(1, TEMPLATE_FIELD)
         self.writable_fields.sort()
