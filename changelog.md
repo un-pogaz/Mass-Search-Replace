@@ -1,97 +1,155 @@
-### version 1.7.3
-fix columns list not the same as Calibre
+# Changelog - Mass Search/Replace
 
-### version 1.7.2
-fix columns list not the same as Calibre
+## [1.7.3] - 2023/05/31
 
-### version 1.7.2
-fix active statue of Shared Search/Replace operation not conserved (always active)
+### Bug fixes
+- Fix columns list not the same as Calibre
 
-### version 1.7.1
-fix broken compatibility with 6.12 (use a icon instead of a red border to warn about a regex error)
+## [1.7.2] - 2023/04/12
 
-### version 1.7.0
-[internal] again, big rework of common_utils (use submodule)
+### Bug fixes
+- Fix active statue of Shared Search/Replace operation not conserved (always active)
 
-### version 1.6.1
-fix a error when a user categorie exist in the library
+## [1.7.1] - 2023/02/03
 
-### version 1.6.0
-[internal] big rework of common_utils.py
+### Bug fixes
+- Fix broken compatibility with 6.12 (use a icon instead of a red border to warn about a regex error)
 
-### version 1.5.1
-Fix a bug where the books are marked, even if an error has occurred in restore books
-[fix] icon not display when a theme colors is used
+## [1.7.0] - 2022/10/19
 
-### version 1.5.0
-Rework of the Quick Search/Replace for add alternatives range target (Selection / Current Search / Virtual library / Library)
+### Changed
+- Again, big rework of common_utils (use submodule)
 
-### version 1.4.5
-Improvement of the 'Replace Field' mode
+## [1.6.1] - 2022/10/17
 
-### version 1.4.4
-Small incompatibility Calibre6/Qt6
+### Bug fixes
+- Fix a error when a user categorie exist in the library
 
-### version 1.4.3
-More compatibility Calibre6/Qt6
+## [1.6.0] - 2022/10/11
 
-### version 1.4.2
-Small improvement for identifier operation
+### Changed
+- Big rework of common_utils.py
 
-### version 1.4.1
-[fix] Calibre Search/Replace operation are not saved if it contains an error
+## [1.5.1] - 2022/09/08
 
-### version 1.4.0
-Shared Search/Replace operation: set in once, used where you want, edit them and all reference has edited
-Uses and compatible with Calibre saved Search/Replace system
+### Bug fixes
+- Fix a bug where the books are marked, even if an error has occurred in restore books
+- Icon not display when a theme colors is used
 
-### version 1.3.3
-[fix] Fix the fix of Calibre saved Search/Replace operation
+## [1.5.0] - 2022/08/17
 
-### version 1.3.2
-The Calibre saved Search/Replace operation could not be loaded
+### Changed
+- Rework of the Quick Search/Replace for add alternatives range target (Selection / Current Search / Virtual library / Library)
 
-### version 1.3.1
-Various technical improvement
+## [1.4.5] - 2022/08/06
 
-### version 1.3.0
-Compatible Calibre6/Qt6
+### Changed
+- Improvement of the 'Replace Field' mode
 
-### version 1.2.2
-FIX wrong error message when an error occurs during the update of the library
+## [1.4.4] - 2022/07/20
 
-### version 1.2.1
-FIX ghost identifier with empty value
+### Changed
+- Small incompatibility Calibre6/Qt6
 
-### version 1.2.0
-Add a 'Replace Field' mode that replace any values with the specified string
-FIX Freeze when your config the settings of operations when many books are selected
-FIX the displaying of a error in dialog
+## [1.4.3] - 2022/07/11
 
-### version 1.1.0
-Improved handling of errors with invalid identifiers
+### Changed
+- More compatibility Calibre6/Qt6
 
-### version 1.0.2
-[Follow Calibre] Fix invalide identifier with colon
+## [1.4.2] - 2022/03/11
 
-### version 1.0.1
-Fix error in search mode "Character match"
+### Changed
+- Small improvement for identifier operation
 
-### version 1.0.0
-Full release
-Fix regression with case sensitivity
+## [1.4.1] - 2022/02/25
 
-### version 0.9.3
-Add Spanish translation
-Thanks *dunhill*
+### Bug fixes
+- Calibre Search/Replace operation are not saved if it contains an error
 
-### version 0.9.2
-FIX case for the test result field
-FIX detection of None and inchanged value
+## [1.4.0] - 2022/02/25
 
-### version 0.9.1
-fix library switch
+### Added
+- Shared Search/Replace operation: set in once, used where you want, edit them and all reference has edited<br>
+  Uses and compatible with Calibre saved Search/Replace system
 
-### version 0.9
-First release
-Beta public test
+## [1.3.3] - 2022/02/24
+
+### Bug fixes
+- Fix the fix of Calibre saved Search/Replace operation
+
+## [1.3.2] - 2022/02/23
+
+### Bug fixes
+- The Calibre saved Search/Replace operation could not be loaded
+
+## [1.3.1] - 2022/02/22
+
+### Changed
+- Various technical improvement
+
+## [1.3.0] - 2022/01/04
+
+### Changed
+- Compatible Calibre6/Qt6
+
+## [1.2.2] - 2021/07/01
+
+### Bug fixes
+- Fix wrong error message when an error occurs during the update of the library
+
+## [1.2.1] - 2021/06/08
+
+### Bug fixes
+- Fix ghost identifier with empty value
+
+## [1.2.0] - 2021/05/28
+
+### Added
+- Add a 'Replace Field' mode that replace any values with the specified string
+
+### Bug fixes
+- Fix freeze when your config the settings of operations when many books are selected
+- Fix the displaying of a error in dialog
+
+## [1.1.0] - 2021/05/25
+
+### Bug fixes
+- Improved handling of errors with invalid identifiers
+
+## [1.0.2] - 2021/05/16
+
+### Bug fixes
+- Fix invalide identifier with colon
+
+## [1.0.1] - 2021/02/12
+
+### Bug fixes
+- Fix error in search mode "Character match"
+
+## [1.0.0] - 2021/01/18
+
+### Full release
+
+### Bug fixes
+- Fix regression with case sensitivity
+
+## [0.9.3] - 2020/12/08
+
+### Added
+- Add Spanish translation. Thanks *dunhill*
+
+## [0.9.2] - 2020/12/08
+
+### Bug fixes
+- Fix case for the test result field
+- Fix detection of None and inchanged value
+
+## [0.9.1] - 2020/12/07
+
+### Bug fixes
+- Fix library switch
+
+### [0.9.0] - 2020/12/06
+
+### First release
+- Beta public test
