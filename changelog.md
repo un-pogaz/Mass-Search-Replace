@@ -69,8 +69,7 @@
 ## [1.4.0] - 2022/02/25
 
 ### Added
-- Shared Search/Replace operation: set in once, used where you want, edit them and all reference has edited<br>
-  Uses and compatible with Calibre saved Search/Replace system
+- Shared Search/Replace operation: set in once, used where you want, edit them and all reference has edited<br>Uses and compatible with Calibre saved Search/Replace system
 
 ## [1.3.3] - 2022/02/24
 
@@ -149,7 +148,7 @@
 ### Bug fixes
 - Fix library switch
 
-### [0.9.0] - 2020/12/06
+## [0.9.0] - 2020/12/06
 
 ### First release
 - Beta public test
