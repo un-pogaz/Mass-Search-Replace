@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-10-05 14:54+0200\n"
-"PO-Revision-Date: 2022-10-05 14:54+0200\n"
+"POT-Creation-Date: 2023-08-08 19:22+0200\n"
+"PO-Revision-Date: 2023-08-08 19:22+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -10,41 +10,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.3.2\n"
 "X-Poedit-Basepath: ..\n"
-"X-Poedit-SearchPath-0: action.py\n"
-"X-Poedit-SearchPath-1: config.py\n"
-"X-Poedit-SearchPath-2: __init__.py\n"
-"X-Poedit-SearchPath-3: common_utils.py\n"
-"X-Poedit-SearchPath-4: SearchReplace.py\n"
-"X-Poedit-SearchPath-5: templates.py\n"
-"X-Poedit-SearchPath-6: SearchReplaceCalibreText.py\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: SearchReplaceCalibre.py\n"
 
-#: SearchReplace.py:114
+#: SearchReplace.py:112
 msgid "Invalid operation, the \"{:s}\" key is missing."
 msgstr "Opération non valide, la clé \"{:s}\" est manquante."
 
-#: SearchReplace.py:133
+#: SearchReplace.py:130
 msgid "Search field \"{:s}\" is not available for this library"
 msgstr "Le champ de recherche \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:136
+#: SearchReplace.py:133
 msgid "Destination field \"{:s}\" is not available for this library"
 msgstr "Le champ de destination \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:143
+#: SearchReplace.py:140
 msgid "Identifier type \"{:s}\" is not available for this library"
 msgstr "Le type d'identifiant \"{:s}\" n'est pas disponible pour cette bibliothèque"
 
-#: SearchReplace.py:229
+#: SearchReplace.py:226
 msgid "Configuration of a Search/Replace operation"
 msgstr "Configuration d'une opération de Rechercher/Remplacer"
 
-#: SearchReplace.py:245 action.py:296 action.py:342 action.py:388
+#: SearchReplace.py:242 action.py:274 action.py:320 action.py:363
 msgid "Invalid operation"
 msgstr "Opération non valide"
 
-#: SearchReplace.py:246
+#: SearchReplace.py:243
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
@@ -66,7 +61,7 @@ msgstr "Casse a appliquer"
 msgid "Replace mode"
 msgstr "Mode de remplacement"
 
-#: SearchReplaceCalibreText.py:21 config.py:885
+#: SearchReplaceCalibreText.py:21 config.py:882
 msgid "Search mode"
 msgstr "Type de recherche"
 
@@ -106,67 +101,67 @@ msgstr "La valeur de ce champ est localisée (traduite). Cela peut poser problè
 msgid "Easily apply a list of multiple saved Find and Replace operations to your books metadata"
 msgstr "Appliquer facilement une liste de plusieurs opérations de Rechercher et Remplacer sauvegardées aux métadonnées de vos livres"
 
-#: action.py:51
+#: action.py:52
 msgid "Apply a list of multiple saved Find and Replace operations"
 msgstr "Appliquer une liste de plusieurs opérations de Rechercher et Remplacer"
 
-#: action.py:96
+#: action.py:97
 msgid "&Quick Search/Replace..."
 msgstr "&Rechercher/Remplacer rapide..."
 
-#: action.py:100
+#: action.py:101
 msgid "&Selection"
 msgstr "&Sélection"
 
-#: action.py:104
+#: action.py:105
 msgid "&Current search"
 msgstr "&Recherche actuelle"
 
-#: action.py:108
+#: action.py:109
 msgid "&Virtual library"
 msgstr "Bibliothèque &virtuel"
 
-#: action.py:112
+#: action.py:113
 msgid "&Library"
 msgstr "&Bibliothèque"
 
-#: action.py:118
+#: action.py:119
 msgid "&Customize plugin..."
 msgstr "&Personnaliser l'extension..."
 
-#: action.py:158
+#: action.py:159
 msgid "the selected books"
 msgstr "les livres sélectionnés"
 
-#: action.py:161
+#: action.py:162
 msgid "all books in the library {:s}"
 msgstr "tous les livres de la bibliothèque {:s}"
 
-#: action.py:166
+#: action.py:167
 msgid "the virtual library {:s}"
 msgstr "la bibliothèque virtuel {:s}"
 
-#: action.py:171
+#: action.py:172
 msgid "the current search"
 msgstr "la recherche actuelle"
 
-#: action.py:176
+#: action.py:177
 msgid "({:d} books)"
 msgstr "({:d} livres)"
 
-#: action.py:210
+#: action.py:209
 msgid "Invalide menu configuration, the \"{:s}\" key is missing."
 msgstr "Configuration de menu non valide, la clé \"{:s}\" est manquante."
 
-#: action.py:268
-msgid "Cancel"
-msgstr "Annuler"
+#: action.py:216 common_utils/dialog.py:310
+msgid "{} progress"
+msgstr "Progression de {}"
 
-#: action.py:270
-msgid "Mass Search/Replace progress"
-msgstr "Progression de Mass Search/Replace"
+#: action.py:219
+msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
+msgstr "Rechercher/Remplacer {:d} sur {:d}. Livre {:d} sur {:d}."
 
-#: action.py:297
+#: action.py:275
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -178,19 +173,19 @@ msgstr ""
 "\n"
 "Mass Search/Replace a été annulée."
 
-#: action.py:326
+#: action.py:304
 msgid "The library a was restored to its original state."
 msgstr "La bibliothèque a été restaurée a son état d'origine."
 
-#: action.py:329
+#: action.py:307
 msgid "Cannot update the library"
 msgstr "Impossible de mettre à jour la bibliothèque"
 
-#: action.py:335
+#: action.py:313
 msgid "Exceptions during the library update"
 msgstr "Exceptions lors de la mise à jour de la bibliothèque"
 
-#: action.py:336
+#: action.py:314
 msgid ""
 "{:d} exceptions have occurred during the library update.\n"
 "Some fields may not have been updated."
@@ -198,19 +193,19 @@ msgstr ""
 "{:d} exceptions sont survenue lors de la mise à jour de la bibliothèque.\n"
 "Certains champs peuvent ne pas avoir était mis à jour."
 
-#: action.py:343
+#: action.py:321
 msgid "{:d} invalid operations has detected and have been ignored."
 msgstr "{:d} opérations non valides ont été détectées et ont été ignorées."
 
-#: action.py:347
+#: action.py:325
 msgid "Update Report"
 msgstr "Rapport de mise à jour"
 
-#: action.py:348
+#: action.py:326
 msgid "Mass Search/Replace performed for {:d} books with a total of {:d} fields modify."
 msgstr "Mass Search/Replace effectué pour {:d} livres avec un total de {:d} champs modifier."
 
-#: action.py:389
+#: action.py:364
 msgid ""
 "A invalid operations has detected:\n"
 "{:s}\n"
@@ -224,247 +219,251 @@ msgstr ""
 "Poursuivre l'exécution de Mass Search/Replace ?\n"
 "D'autres erreurs peuvent exister et seront ignorées."
 
-#: action.py:404
-msgid "Search/Replace {:d} of {:d}. Book {:d} of {:d}."
-msgstr "Rechercher/Remplacer {:d} sur {:d}. Livre {:d} sur {:d}."
-
-#: action.py:456
+#: action.py:424
 msgid "Update the library for {:d} books with a total of {:d} fields..."
 msgstr "Mise a jour de la bibliothèque pour {:d} livres avec un total de {:d} champs..."
 
-#: common_utils.py:220
+#: common_utils/__init__.py:226
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr "Vous ne pouvez pas configurer ce plugin avant le redémarrage de Calibre."
 
-#: common_utils.py:234
-msgid "Could not to launch {:s}"
-msgstr "Impossible de lancer {:s}"
-
-#: common_utils.py:249
-msgid "No book selected"
-msgstr "Aucun livre sélectionné"
-
-#: common_utils.py:254
-msgid "No book in the library"
-msgstr "Pas de livres dans bibliothèque"
-
-#: common_utils.py:259 common_utils.py:265
-msgid "No book in the virtual library"
-msgstr "Pas de livres dans la bibliothèque virtuel"
-
-#: common_utils.py:270
-msgid "No book in the current search"
-msgstr "Pas de livres dans la recherche actuelle"
-
-#: common_utils.py:532
-msgid "Restart required"
-msgstr "Redémarrage nécessaire"
-
-#: common_utils.py:533
-msgid "Title image not found - you must restart Calibre before using this plugin!"
-msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
-
-#: common_utils.py:582
-msgid "Undefined"
-msgstr "Non défini"
-
-#: common_utils.py:950 config.py:240
+#: common_utils/dialog.py:94 config.py:243
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
-#: common_utils.py:984
+#: common_utils/dialog.py:128
 msgid "Preferences for:"
 msgstr "Préférences pour :"
 
-#: common_utils.py:1018
+#: common_utils/dialog.py:162
 msgid "Clear"
 msgstr "Effacer"
 
-#: common_utils.py:1020
+#: common_utils/dialog.py:164
 msgid "Clear all settings for this plugin"
 msgstr "Effacer tous les paramètres de ce plugin"
 
-#: common_utils.py:1060
+#: common_utils/dialog.py:201
 msgid "The changes cannot be applied."
 msgstr "Les modifications ne peuvent pas être appliquées."
 
-#: common_utils.py:1064
+#: common_utils/dialog.py:205
 msgid "Are you sure you want to change your settings in this library for this plugin?"
 msgstr "Êtes-vous sûr de vouloir modifier vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils.py:1065 common_utils.py:1077
+#: common_utils/dialog.py:206 common_utils/dialog.py:218
 msgid "Any settings in other libraries or stored in a JSON file in your calibre plugins folder will not be touched."
 msgstr "Les paramètres présents dans d'autres bibliothèques ou stockés dans un fichier JSON dans le dossier des plugins de Calibre ne seront pas modifiés."
 
-#: common_utils.py:1076
+#: common_utils/dialog.py:217
 msgid "Are you sure you want to clear your settings in this library for this plugin?"
 msgstr "Êtes-vous sûr de vouloir effacer vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils.py:1158
+#: common_utils/dialog.py:300
+msgid "Cancel"
+msgstr "Annuler"
+
+#: common_utils/dialog.py:366
+msgid "Book {:d} of {:d}"
+msgstr "Livre {:d} sur {:d}"
+
+#: common_utils/dialog.py:396
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papiers"
 
-#: common_utils.py:1271
+#: common_utils/dialog.py:433
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
-#: common_utils.py:1274
+#: common_utils/dialog.py:436
 msgid "The {:s} plugin has encounter a unhandled exception."
 msgstr "Le plugin {:s} a rencontré une exception non gérée."
 
-#: config.py:93
+#: common_utils/library.py:61
+msgid "Could not to launch {:s}"
+msgstr "Impossible de lancer {:s}"
+
+#: common_utils/library.py:76
+msgid "No book selected"
+msgstr "Aucun livre sélectionné"
+
+#: common_utils/library.py:81
+msgid "No book in the library"
+msgstr "Pas de livres dans bibliothèque"
+
+#: common_utils/library.py:86 common_utils/library.py:92
+msgid "No book in the virtual library"
+msgstr "Pas de livres dans la bibliothèque virtuel"
+
+#: common_utils/library.py:97
+msgid "No book in the current search"
+msgstr "Pas de livres dans la recherche actuelle"
+
+#: common_utils/widgets.py:70
+msgid "Restart required"
+msgstr "Redémarrage nécessaire"
+
+#: common_utils/widgets.py:71
+msgid "Title image not found - you must restart Calibre before using this plugin!"
+msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
+
+#: common_utils/widgets.py:120
+msgid "Undefined"
+msgstr "Non défini"
+
+#: config.py:96
 msgid "Interrupt execution"
 msgstr "Interrompre l'exécution"
 
-#: config.py:94
+#: config.py:97
 msgid "Stop Mass Search/Replace and display the error normally without further action."
 msgstr "Arrêter Mass Search/Replace et affichez l'erreur normalement sans autre action."
 
-#: config.py:97
+#: config.py:100
 msgid "Restore the library"
 msgstr "Restaurer la bibliothèque"
 
-#: config.py:98
+#: config.py:101
 msgid "Stop Mass Search/Replace and restore the library to its original state."
 msgstr "Arrêter Mass Search/Replace et rétablir la bibliothèque dans son état initial."
 
-#: config.py:101
+#: config.py:104
 msgid "Updates the fields one by one. This operation can be slower than other strategies."
 msgstr "Met à jour les champs un par un. Cette opération peut être plus lente que les autres stratégies."
 
-#: config.py:104
+#: config.py:107
 msgid "Carefully executed (slower)"
 msgstr "Exécuter prudemment (plus lent)"
 
-#: config.py:105
+#: config.py:108
 msgid "When a error occurs, stop Mass Search/Replace and display the error normally without further action."
 msgstr "Lorsqu'une erreur se produit, arrêté Mass Search/Replace et affiché l'erreur normalement sans autre action."
 
-#: config.py:108
+#: config.py:111
 msgid "Don't stop (slower, not recomanded)"
 msgstr "Ne pas s'arrêter (plus lent, non recommandé)"
 
-#: config.py:109
+#: config.py:112
 msgid "Update the library, no matter how many errors are encountered. The problematics fields will not be updated."
 msgstr "Mettre à jour la bibliothèque, quel que soit le nombre d'erreurs rencontrées. Les champs problématiques ne seront pas mis à jour."
 
-#: config.py:123
+#: config.py:126
 msgid "Abbort"
 msgstr "Abandonner"
 
-#: config.py:124
+#: config.py:127
 msgid "If an invalid operation is detected, abort the changes."
 msgstr "Si une opération non valide est détectée, annulé les modifications."
 
-#: config.py:127
+#: config.py:130
 msgid "Asked"
 msgstr "Demander"
 
-#: config.py:128
+#: config.py:131
 msgid "If an invalid operation is detected, asked whether to continue or abort the changes."
 msgstr "Si une opération non valide est détectée, demandé s'il faut poursuivre ou annuler les modifications."
 
-#: config.py:131
+#: config.py:134
 msgid "Hidden"
 msgstr "Masquer"
 
-#: config.py:132
+#: config.py:135
 msgid "Ignore all invalid operations."
 msgstr "Ignorer toutes les opérations non valide."
 
-#: config.py:179
+#: config.py:182
 msgid "Select and configure the menu items to display:"
 msgstr "Sélectionner et configurer les éléments du menu à afficher :"
 
-#: config.py:195
+#: config.py:198
 msgid "Move menu item up"
 msgstr "Déplacer la ligne de menu vers le haut"
 
-#: config.py:202
+#: config.py:205
 msgid "Add menu item"
 msgstr "Ajouter une ligne de menu"
 
-#: config.py:209
+#: config.py:212
 msgid "Copy menu item"
 msgstr "Copier la ligne de menu"
 
-#: config.py:216
+#: config.py:219
 msgid "Delete menu item"
 msgstr "Supprimer une ligne de menu"
 
-#: config.py:223
+#: config.py:226
 msgid "Move menu item down"
 msgstr "Déplacer la ligne de menu vers le bas"
 
-#: config.py:241
+#: config.py:244
 msgid "Edit the keyboard shortcuts associated with this plugin"
 msgstr "Modifier les raccourcis clavier associés à cette extension"
 
-#: config.py:247
+#: config.py:250
 msgid "Mark the updated books"
 msgstr "Marquer les livres mis à jour"
 
-#: config.py:251
+#: config.py:254
 msgid "Display a update report"
 msgstr "Afficher un rapport de mise à jour"
 
-#: config.py:255
+#: config.py:258
 msgid "Error strategy"
 msgstr "Stratégie d'erreur"
 
-#: config.py:256
+#: config.py:259
 msgid "Define the strategy when a error occurs during the library update"
 msgstr "Définir la stratégie lorsqu'une erreur se produit lors de la mise à jour de la bibliothèque"
 
-#: config.py:283
+#: config.py:286
 msgid "&Add image..."
 msgstr "&Ajouter une image..."
 
-#: config.py:286
+#: config.py:289
 msgid "&Open images folder"
 msgstr "&Ouvrir le dossier des images"
 
-#: config.py:292 config.py:995
+#: config.py:295 config.py:992
 msgid "&Import..."
 msgstr "&Importer..."
 
-#: config.py:295 config.py:998
+#: config.py:298 config.py:995
 msgid "&Export..."
 msgstr "&Exporter..."
 
-#: config.py:319 config.py:334 config.py:1019
+#: config.py:322 config.py:337 config.py:1016
 msgid "Import failed"
 msgstr "Echec de l'importation"
 
-#: config.py:319
+#: config.py:322
 msgid "This is not a valid OWIP export archive"
 msgstr "Ceci n'est pas une archive d'exportation OWIP valide"
 
-#: config.py:331 config.py:1023
+#: config.py:334 config.py:1020
 msgid "Import completed"
 msgstr "Importation terminée"
 
-#: config.py:331 config.py:1023
+#: config.py:334 config.py:1020
 msgid "{:d} menu items imported"
 msgstr "{:d} éléments de menu importés"
 
-#: config.py:340
+#: config.py:343
 msgid "Select a menu file archive to import..."
 msgstr "Sélectionnez un fichier d'archive de menu à importer..."
 
-#: config.py:351 config.py:384 config.py:1026 config.py:1043 config.py:1061
+#: config.py:354 config.py:387 config.py:1023 config.py:1040 config.py:1058
 msgid "Export failed"
 msgstr "Echec de l'exportation"
 
-#: config.py:351
+#: config.py:354
 msgid "No menu items selected to export"
 msgstr "Aucun élément de menu sélectionné pour l'exportation"
 
-#: config.py:381 config.py:1058
+#: config.py:384 config.py:1055
 msgid "Export completed"
 msgstr "Exportation terminée"
 
-#: config.py:381
+#: config.py:384
 msgid ""
 "{:d} menu items exported to\n"
 "{:s}"
@@ -472,184 +471,184 @@ msgstr ""
 "{:d} éléments de menu importés\n"
 "{:s}"
 
-#: config.py:390
+#: config.py:393
 msgid "Save menu archive as..."
 msgstr "Enregistrer l'archive sous..."
 
-#: config.py:400 config.py:885
+#: config.py:403 config.py:882
 msgid "Name"
 msgstr "Nom"
 
-#: config.py:400
+#: config.py:403
 msgid "Submenu"
 msgstr "Sous-menu"
 
-#: config.py:400
+#: config.py:403
 msgid "Image"
 msgstr "Image"
 
-#: config.py:400
+#: config.py:403
 msgid "Operation"
 msgstr "Opération"
 
-#: config.py:539
+#: config.py:538
 msgid "(copy)"
 msgstr "(copie)"
 
-#: config.py:552
+#: config.py:551
 msgid "Are you sure you want to delete this menu item?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette ligne du menu ?"
 
-#: config.py:554
+#: config.py:553
 msgid "Are you sure you want to delete the selected {:d} menu items?"
 msgstr "Êtes-vous sûr de vouloir supprimer les {:d} lignes de menu sélectionnés ?"
 
-#: config.py:555 config.py:858 config.py:1174
+#: config.py:554 config.py:855 config.py:1171
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
-#: config.py:704
+#: config.py:703
 msgid "{:d}/{:d} operations"
 msgstr "{:d}/{:d} opérations"
 
-#: config.py:706
+#: config.py:705
 msgid "{:d} operations"
 msgstr "{:d} opérations"
 
-#: config.py:724
+#: config.py:721
 msgid "This operations list contain a error"
 msgstr "Cette liste d'opérations contient une erreur"
 
-#: config.py:727
+#: config.py:724
 msgid "Edit the operations list"
 msgstr "Modifier la liste d'opérations"
 
-#: config.py:759
+#: config.py:756
 msgid "Add New Image..."
 msgstr "Ajouter une nouvelle image..."
 
-#: config.py:786
+#: config.py:783
 msgid "Add New Image"
 msgstr "Ajouter une nouvelle image"
 
-#: config.py:789
+#: config.py:786
 msgid "&Select image source"
 msgstr "&Sélectionner la source de l'image"
 
-#: config.py:792
+#: config.py:789
 msgid "From &web domain favicon"
 msgstr "Depuis favicon de site &web"
 
-#: config.py:799
+#: config.py:796
 msgid "From .png &file"
 msgstr "Depuis un &fichier .png"
 
-#: config.py:812
+#: config.py:809
 msgid "&Save as filename:"
 msgstr "&Enregitrement comme nom de fichier :"
 
-#: config.py:836
+#: config.py:833
 msgid "menu icon dialog"
 msgstr "dialogue de l'icône du menu"
 
-#: config.py:836
+#: config.py:833
 msgid "Select a .png file for the menu icon"
 msgstr "Sélectionner un fichier .png pour l'icône du menu"
 
-#: config.py:842 config.py:850 config.py:853 config.py:868 config.py:875
-#: config.py:877 config.py:879
+#: config.py:839 config.py:847 config.py:850 config.py:865 config.py:872
+#: config.py:874 config.py:876
 msgid "Cannot import image"
 msgstr "Impossible d'importer l'image"
 
-#: config.py:842 config.py:877
+#: config.py:839 config.py:874
 msgid "Source image must be a .png file."
 msgstr "L'image source doit être un fichier .png."
 
-#: config.py:850
+#: config.py:847
 msgid "You must specify a filename to save as."
 msgstr "Vous devez spécifier un nom de fichier pour l'enregistrer."
 
-#: config.py:853
+#: config.py:850
 msgid "The save as filename should consist of a filename only."
 msgstr "L'enregitrement en tant que nom de fichier doit consister uniquement en un nom de fichier."
 
-#: config.py:858
+#: config.py:855
 msgid "An image with this name already exists - overwrite it?"
 msgstr "Une image portant ce nom existe déjà, l'écraser ?"
 
-#: config.py:868
+#: config.py:865
 msgid "You must specify a web domain url"
 msgstr "Vous devez spécifier une url de site web"
 
-#: config.py:875
+#: config.py:872
 msgid "You must specify a source file."
 msgstr "Vous devez spécifier un fichier source."
 
-#: config.py:879
+#: config.py:876
 msgid "Source image does not exist!"
 msgstr "L'image source n'existe pas !"
 
-#: config.py:885
+#: config.py:882
 msgid "Columns"
 msgstr "Colonnes"
 
-#: config.py:885
+#: config.py:882
 msgid "Template"
 msgstr "Modèle"
 
-#: config.py:885
+#: config.py:882
 msgid "Search"
 msgstr "Rechercher"
 
-#: config.py:885
+#: config.py:882
 msgid "Replace"
 msgstr "Remplacer"
 
-#: config.py:896
+#: config.py:893
 msgid "List of operations for a quick Search/Replaces"
 msgstr "Liste des opérations pour un Rechercher/Remplacer rapide"
 
-#: config.py:901
+#: config.py:898
 msgid "List of Search/Replace operations for {:s}"
 msgstr "Liste des opérations de Rechercher/Remplacer pour {:s}"
 
-#: config.py:912
+#: config.py:909
 msgid "Select and configure the order of execution of the operations of Search/Replace operations:"
 msgstr "Sélectionner et configurer l'ordre d'exécution des opérations de Rechercher/Remplacer :"
 
-#: config.py:932
+#: config.py:929
 msgid "Move operation up"
 msgstr "Déplacer l'opération vers le haut"
 
-#: config.py:939
+#: config.py:936
 msgid "Add operation"
 msgstr "Ajouter une opération"
 
-#: config.py:946
+#: config.py:943
 msgid "Copy operation"
 msgstr "Copier l'opération de menu"
 
-#: config.py:953
+#: config.py:950
 msgid "Delete operation"
 msgstr "Supprimer l'opération"
 
-#: config.py:960
+#: config.py:957
 msgid "Move operation down"
 msgstr "Déplacer l'opération vers le bas"
 
-#: config.py:1019
+#: config.py:1016
 msgid "This is not a valid JSON file"
 msgstr "Ceci n'est pas fichier JSON valide"
 
-#: config.py:1032
+#: config.py:1029
 msgid "Select a JSON file to import..."
 msgstr "Sélectionnez un fichier JSON à importer..."
 
-#: config.py:1043
+#: config.py:1040
 msgid "No operations selected to export"
 msgstr "Aucune opérations sélectionné pour l'exportation"
 
-#: config.py:1058
+#: config.py:1055
 msgid ""
 "{:d} operations exported to\n"
 "{:s}"
@@ -657,46 +656,134 @@ msgstr ""
 "{:d} opérations\n"
 "{:s}"
 
-#: config.py:1067
+#: config.py:1064
 msgid "Save the operations as..."
 msgstr "Enregistrer les opérations sous..."
 
-#: config.py:1171
+#: config.py:1168
 msgid "Are you sure you want to delete this operation?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette opération ?"
 
-#: config.py:1173
+#: config.py:1170
 msgid "Are you sure you want to delete the selected {:d} operations?"
 msgstr "Êtes-vous sûr de vouloir supprimer les {:d} opérations ?"
 
-#: config.py:1339
+#: config.py:1334
 msgid "Error Strategy"
 msgstr "Stratégie d'erreur"
 
-#: config.py:1346
+#: config.py:1341
 msgid "Set the strategy when an invalid operation has detected:"
 msgstr "Définir la stratégie lorsqu'une opération non valide est détectée :"
 
-#: config.py:1357
+#: config.py:1352
 msgid "Define the strategy when a error occurs during the library update:"
 msgstr "Définir la stratégie lorsqu'une erreur se produit lors de la mise à jour de la bibliothèque :"
 
-#: templates.py:56 templates.py:85
+#: templates.py:57
 msgid "Unknown"
 msgstr "Inconnu(e)"
 
-#: templates.py:63
+#: templates.py:64
 msgid "Template Error"
 msgstr "Erreur de modèle"
 
-#: templates.py:64
+#: templates.py:65
 msgid "Running the template returned an error:"
 msgstr "L'exécution du modèle a renvoyé une erreur :"
 
-#: templates.py:89
+#: templates.py:78
 msgid "Enter a template to test using data from the selected book"
 msgstr "Saisissez un modèle à tester en utilisant les données du livre sélectionné"
 
-#: templates.py:96
+#: templates.py:85
 msgid "Template editor"
 msgstr "Éditeur de modèles"
+
+#~ msgid "Mass Search/Replace progress"
+#~ msgstr "Progression de Mass Search/Replace"
+
+#, fuzzy
+#~| msgid "Replace field"
+#~ msgid "Prepend to field"
+#~ msgstr "Remplacer le champ"
+
+#, fuzzy
+#~| msgid "&Quick Search/Replace..."
+#~ msgid "&Load search/replace:"
+#~ msgstr "&Rechercher/Remplacer rapide..."
+
+#, fuzzy
+#~| msgid "the current search"
+#~ msgid "Save current search/replace"
+#~ msgstr "la recherche actuelle"
+
+#, fuzzy
+#~| msgid "Replace field"
+#~ msgid "Search &field:"
+#~ msgstr "Remplacer le champ"
+
+#, fuzzy
+#~| msgid "Search mode"
+#~ msgid "Search &mode:"
+#~ msgstr "Type de recherche"
+
+#, fuzzy
+#~| msgid "Identifier type"
+#~ msgid "&Identifier type:"
+#~ msgstr "Type d'identifiant"
+
+#, fuzzy
+#~| msgid "Template"
+#~ msgid "&Template:"
+#~ msgstr "Modèle"
+
+#, fuzzy
+#~| msgid "Enter a template to test using data from the selected book"
+#~ msgid "Enter a template to be used as the source for the search/replace"
+#~ msgstr "Saisissez un modèle à tester en utilisant les données du livre sélectionné"
+
+#, fuzzy
+#~| msgid "Search mode"
+#~ msgid "&Search for:"
+#~ msgstr "Type de recherche"
+
+#, fuzzy
+#~| msgid "Replace field"
+#~ msgid "&Replace with:"
+#~ msgstr "Remplacer le champ"
+
+#, fuzzy
+#~| msgid "Identifier type"
+#~ msgid "Identifier type:"
+#~ msgstr "Type d'identifiant"
+
+#, fuzzy
+#~| msgid "Identifier type"
+#~ msgid "Enter an identifier type"
+#~ msgstr "Type d'identifiant"
+
+#, fuzzy
+#~| msgid "You must specify a source file."
+#~ msgid "You must specify a destination identifier type"
+#~ msgstr "Vous devez spécifier un fichier source."
+
+#, fuzzy
+#~| msgid "You must specify a \"Search field\""
+#~ msgid "You must specify a search expression in the \"Search for\" field"
+#~ msgstr "Vous devez spécifier un \"Champs de Recherche\""
+
+#, fuzzy
+#~| msgid "&Quick Search/Replace..."
+#~ msgid "Save search/replace"
+#~ msgstr "&Rechercher/Remplacer rapide..."
+
+#, fuzzy
+#~| msgid "Mass Search/Replace progress"
+#~ msgid "Search/replace name:"
+#~ msgstr "Progression de Mass Search/Replace"
+
+#, fuzzy
+#~| msgid "You must specify a filename to save as."
+#~ msgid "You must provide a name."
+#~ msgstr "Vous devez spécifier un nom de fichier pour l'enregistrer."
