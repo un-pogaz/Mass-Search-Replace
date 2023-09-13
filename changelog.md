@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.7.4] - 2023/09/31
+
+### Bug fixes
+- Don't update the config file when Calibre start
+
 ## [1.7.3] - 2023/05/31
 
 ### Bug fixes
