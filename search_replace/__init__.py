@@ -37,13 +37,9 @@ from calibre.gui2.widgets2 import Dialog
 
 from ..common_utils import debug_print, get_icon, GUI
 from ..common_utils.columns import get_possible_idents, get_possible_fields
-from .calibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
+from .calibre import MetadataBulkWidget, KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
 from . import text as CalibreText
 
-
-class KEY_OPERATION:
-    locals().update(vars(KEY_QUERY))
-    ACTIVE = '_MSR:Active'
 
 _default_operation = None
 _s_r = None
@@ -56,14 +52,14 @@ def get_default_operation():
         _s_r = SearchReplaceWidget_NoWindows([0])
     if not _default_operation:
         _default_operation = _s_r.save_settings()
-        _default_operation[KEY_OPERATION.ACTIVE] = True
+        _default_operation[KEY_QUERY.ACTIVE] = True
     
     return copy.copy(_default_operation)
 
 def operation_ConvertError(operation):
-    err = operation.get(KEY_OPERATION.S_R_ERROR, None)
+    err = operation.get(KEY_QUERY.S_R_ERROR, None)
     if err:
-        operation[KEY_OPERATION.S_R_ERROR] = str(err)
+        operation[KEY_QUERY.S_R_ERROR] = str(err)
     return operation
 
 def operation_list_ConvertError(operation_list):
@@ -78,7 +74,7 @@ def clean_empty_operation(operation_list):
     operation_list = operation_list_ConvertError(operation_list)
     rlst = []
     for operation in operation_list:
-        for key in KEY_OPERATION.ALL:
+        for key in KEY_QUERY.ALL:
             if operation[key] != default[key]:
                 rlst.append(operation)
                 break
@@ -86,7 +82,7 @@ def clean_empty_operation(operation_list):
     return rlst
 
 def operation_is_active(operation):
-    return operation.get(KEY_OPERATION.ACTIVE, True)
+    return operation.get(KEY_QUERY.ACTIVE, True)
 
 def operation_list_active(operation_list):
     rlst = []
@@ -104,28 +100,28 @@ def operation_testGetError(operation):
     if not operation:
         return TypeError
     
-    if KEY_OPERATION.S_R_ERROR in operation:
-        return OperationError(str(operation[KEY_OPERATION.S_R_ERROR]))
+    if KEY_QUERY.S_R_ERROR in operation:
+        return OperationError(str(operation[KEY_QUERY.S_R_ERROR]))
             
     
-    difference = set(KEY_OPERATION.ALL).difference(operation.keys())
+    difference = set(KEY_QUERY.ALL).difference(operation.keys())
     for key in difference:
         return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
     
-    if operation[KEY_OPERATION.REPLACE_FUNC] not in S_R_FUNCTIONS:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, operation[KEY_OPERATION.REPLACE_FUNC]))
+    if operation[KEY_QUERY.REPLACE_FUNC] not in S_R_FUNCTIONS:
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, operation[KEY_QUERY.REPLACE_FUNC]))
         
-    if operation[KEY_OPERATION.REPLACE_MODE] not in S_R_REPLACE_MODES:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, operation[KEY_OPERATION.REPLACE_MODE]))
+    if operation[KEY_QUERY.REPLACE_MODE] not in S_R_REPLACE_MODES:
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, operation[KEY_QUERY.REPLACE_MODE]))
         
-    if operation[KEY_OPERATION.SEARCH_MODE] not in S_R_MATCH_MODES:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_OPERATION.SEARCH_MODE]))
+    if operation[KEY_QUERY.SEARCH_MODE] not in S_R_MATCH_MODES:
+        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_QUERY.SEARCH_MODE]))
     
     #Field test
     all_fields, writable_fields = get_possible_fields()
     
-    search_field = operation[KEY_OPERATION.SEARCH_FIELD]
-    dest_field = operation[KEY_OPERATION.DESTINATION_FIELD]
+    search_field = operation[KEY_QUERY.SEARCH_FIELD]
+    dest_field = operation[KEY_QUERY.DESTINATION_FIELD]
     
     if search_field not in all_fields:
         return OperationError(_('Search field "{:s}" is not available for this library').format(search_field))
@@ -136,7 +132,7 @@ def operation_testGetError(operation):
     possible_idents = get_possible_idents()
     
     if search_field == 'identifiers':
-        src_ident = operation[KEY_OPERATION.S_R_SRC_IDENT]
+        src_ident = operation[KEY_QUERY.S_R_SRC_IDENT]
         if src_ident not in possible_idents:
             return OperationError(_('Identifier type "{:s}" is not available for this library').format(src_ident))
     
@@ -156,26 +152,26 @@ def operation_isFullValid(operation):
 
 
 def operation_para_list(operation):
-    name = operation.get(KEY_OPERATION.NAME, '')
-    column = operation.get(KEY_OPERATION.SEARCH_FIELD, '')
-    field = operation.get(KEY_OPERATION.DESTINATION_FIELD, '')
+    name = operation.get(KEY_QUERY.NAME, '')
+    column = operation.get(KEY_QUERY.SEARCH_FIELD, '')
+    field = operation.get(KEY_QUERY.DESTINATION_FIELD, '')
     if (field and field != column):
         column += ' => '+ field
     
-    search_mode = operation.get(KEY_OPERATION.SEARCH_MODE, '')
-    template = operation.get(KEY_OPERATION.S_R_TEMPLATE, '')
+    search_mode = operation.get(KEY_QUERY.SEARCH_MODE, '')
+    template = operation.get(KEY_QUERY.S_R_TEMPLATE, '')
     search_for = ''
     if search_mode == CalibreText.S_R_REPLACE:
         search_for = '*'
     else:
-        search_for = operation.get(KEY_OPERATION.SEARCH_FOR, '')
-    replace_with = operation.get(KEY_OPERATION.REPLACE_WITH, '')
+        search_for = operation.get(KEY_QUERY.SEARCH_FOR, '')
+    replace_with = operation.get(KEY_QUERY.REPLACE_WITH, '')
     
     if column == 'identifiers':
-        src_ident = operation.get(KEY_OPERATION.S_R_SRC_IDENT, '')
+        src_ident = operation.get(KEY_QUERY.S_R_SRC_IDENT, '')
         search_for = src_ident+':'+search_for
         
-        dst_ident = operation.get(KEY_OPERATION.S_R_DST_IDENT, src_ident)
+        dst_ident = operation.get(KEY_QUERY.S_R_DST_IDENT, src_ident)
         replace_with = dst_ident+':'+replace_with.strip()
     
     return [ name, column, template, search_mode, search_for, replace_with ]
@@ -250,8 +246,8 @@ class SearchReplaceDialog(Dialog):
                 return
         
         new_operation = self.widget.save_settings()
-        new_operation_name = new_operation.get(KEY_OPERATION.NAME, None)
-        if new_operation_name and new_operation_name == self.operation.get(KEY_OPERATION.NAME, None):
+        new_operation_name = new_operation.get(KEY_QUERY.NAME, None)
+        if new_operation_name and new_operation_name == self.operation.get(KEY_QUERY.NAME, None):
             different = False
             for k in new_operation:
                 if k in self.operation and new_operation[k] != self.operation[k]:
@@ -259,7 +255,7 @@ class SearchReplaceDialog(Dialog):
                     break
             
             if different:
-                new_operation[KEY_OPERATION.NAME] = ''
+                new_operation[KEY_QUERY.NAME] = ''
                 self.operation = new_operation
             
         else:

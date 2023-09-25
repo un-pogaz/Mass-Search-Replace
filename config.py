@@ -49,7 +49,7 @@ from .common_utils.dialogs import KeyboardConfigDialogButton
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, NoWheelComboBox, KeyValueComboBox
 from .templates import TEMPLATE_FIELD
-from .search_replace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
+from .search_replace import SearchReplaceDialog, KEY_QUERY, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
 
 
 class ICON:
@@ -724,7 +724,7 @@ class SettingsButton(QToolButton):
             if operation_is_active(op_lst[i]) != operation_is_active(initial_op_lst[i]):
                 return True
             
-            for key in KEY_OPERATION.ALL:
+            for key in KEY_QUERY.ALL:
                 if op_lst[i][key] != initial_op_lst[i][key]:
                     return True
         
@@ -1083,9 +1083,9 @@ class OperationListTableWidget(QTableWidget):
         
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
-            is_active = operation[KEY_OPERATION.ACTIVE]
-            operation = calibre_queries.get(unicode_type(operation.get(KEY_OPERATION.NAME, None)), operation)
-            operation[KEY_OPERATION.ACTIVE] = is_active
+            is_active = operation[KEY_QUERY.ACTIVE]
+            operation = calibre_queries.get(unicode_type(operation.get(KEY_QUERY.NAME, None)), operation)
+            operation[KEY_QUERY.ACTIVE] = is_active
             
             self.populate_table_row(row, operation)
         
@@ -1113,9 +1113,9 @@ class OperationListTableWidget(QTableWidget):
         for i_row in range(self.rowCount()):
             item = self.item(i_row, 0)
             operation = item.getOperation() if item else {}
-            if no_name and operation.get(KEY_OPERATION.NAME, ''):
+            if no_name and operation.get(KEY_QUERY.NAME, ''):
                 no_name = False
-            if no_template and operation.get(KEY_OPERATION.SEARCH_FIELD, '') == TEMPLATE_FIELD:
+            if no_template and operation.get(KEY_QUERY.SEARCH_FIELD, '') == TEMPLATE_FIELD:
                 no_template = False
         
         self.setColumnHidden(1, no_name)
@@ -1264,7 +1264,7 @@ class OperationListTableWidget(QTableWidget):
         src_operation = self.convert_row_to_operation(row)
         d = SearchReplaceDialog(src_operation, self.book_ids)
         if d.exec_() == d.Accepted:
-            d.operation[KEY_OPERATION.ACTIVE] = operation_is_active(src_operation)
+            d.operation[KEY_QUERY.ACTIVE] = operation_is_active(src_operation)
             self.populate_table_row(row, d.operation)
         
         self.test_column_hidden()
@@ -1292,7 +1292,7 @@ class OperationWidgetItem(QTableWidgetItem):
         self.hasError()
     
     def getOperation(self):
-        self._operation[KEY_OPERATION.ACTIVE] = Qt.Checked == self.checkState()
+        self._operation[KEY_QUERY.ACTIVE] = Qt.Checked == self.checkState()
         self._operation = operation_ConvertError(self._operation)
         return copy.copy(self._operation)
     

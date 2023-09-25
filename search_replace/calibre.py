@@ -69,7 +69,7 @@ S_R_REPLACE_MODES = [
         _('Append to field'),
                     ]
 
-class KEY:
+class KEY_QUERY:
     CASE_SENSITIVE      = 'case_sensitive'
     COMMA_SEPARATED     = 'comma_separated'
     DESTINATION_FIELD   = 'destination_field'
@@ -114,6 +114,7 @@ class KEY:
         SEARCH_MODE  : S_R_MATCH_MODES,
     }
     
+    ACTIVE = '_MSR:Active'
 
 
 #Calibre
@@ -1088,7 +1089,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             new = False
         
         query = self._get_query_without_error()
-        query[KEY.NAME] = name
+        query[KEY_QUERY.NAME] = name
         
         self.queries[name] = query
         self.queries.commit()
@@ -1139,7 +1140,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def load_query(self, query):
         if query:
             
-            item_name = query.get(KEY.NAME, None)
+            item_name = query.get(KEY_QUERY.NAME, None)
             if item_name and self.saved_search_name != item_name and unicode_type(item_name) in self.queries:
                 idx = self.query_field.findText(item_name)
                 if idx:
@@ -1170,55 +1171,55 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 except:
                     attr.setCurrentIndex(0)
             
-            set_index(self.search_mode, KEY.SEARCH_MODE)
-            set_index(self.search_field, KEY.SEARCH_FIELD)
-            set_text(self.s_r_template, KEY.S_R_TEMPLATE)
+            set_index(self.search_mode, KEY_QUERY.SEARCH_MODE)
+            set_index(self.search_field, KEY_QUERY.SEARCH_FIELD)
+            set_text(self.s_r_template, KEY_QUERY.S_R_TEMPLATE)
             
             self.s_r_template_changed()  # simulate gain/loss of focus
             
-            set_index(self.s_r_src_ident, KEY.S_R_SRC_IDENT)
-            set_text(self.s_r_dst_ident, KEY.S_R_DST_IDENT)
-            set_text(self.search_for, KEY.SEARCH_FOR)
-            set_checked(self.case_sensitive, KEY.CASE_SENSITIVE)
-            set_text(self.replace_with, KEY.REPLACE_WITH)
-            set_index(self.replace_func, KEY.REPLACE_FUNC)
-            set_index(self.destination_field, KEY.DESTINATION_FIELD)
-            set_index(self.replace_mode, KEY.REPLACE_MODE)
-            set_checked(self.comma_separated, KEY.COMMA_SEPARATED)
-            set_value(self.results_count, KEY.RESULTS_COUNT)
-            set_value(self.starting_from, KEY.STARTING_FROM)
-            set_text(self.multiple_separator, KEY.MULTIPLE_SEPARATOR)
+            set_index(self.s_r_src_ident, KEY_QUERY.S_R_SRC_IDENT)
+            set_text(self.s_r_dst_ident, KEY_QUERY.S_R_DST_IDENT)
+            set_text(self.search_for, KEY_QUERY.SEARCH_FOR)
+            set_checked(self.case_sensitive, KEY_QUERY.CASE_SENSITIVE)
+            set_text(self.replace_with, KEY_QUERY.REPLACE_WITH)
+            set_index(self.replace_func, KEY_QUERY.REPLACE_FUNC)
+            set_index(self.destination_field, KEY_QUERY.DESTINATION_FIELD)
+            set_index(self.replace_mode, KEY_QUERY.REPLACE_MODE)
+            set_checked(self.comma_separated, KEY_QUERY.COMMA_SEPARATED)
+            set_value(self.results_count, KEY_QUERY.RESULTS_COUNT)
+            set_value(self.starting_from, KEY_QUERY.STARTING_FROM)
+            set_text(self.multiple_separator, KEY_QUERY.MULTIPLE_SEPARATOR)
     
     def _get_query_without_error(self):
         query = {}
-        query[KEY.NAME] = unicode_type(self.query_field.currentText())
-        query[KEY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
-        query[KEY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
-        query[KEY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
-        query[KEY.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
-        query[KEY.SEARCH_FOR] = unicode_type(self.search_for.text())
-        query[KEY.CASE_SENSITIVE] = self.case_sensitive.isChecked()
-        query[KEY.REPLACE_WITH] = unicode_type(self.replace_with.text())
-        query[KEY.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
-        query[KEY.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
-        query[KEY.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
-        query[KEY.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
-        query[KEY.COMMA_SEPARATED] = self.comma_separated.isChecked()
-        query[KEY.RESULTS_COUNT] = self.results_count.value()
-        query[KEY.STARTING_FROM] = self.starting_from.value()
-        query[KEY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
+        query[KEY_QUERY.NAME] = unicode_type(self.query_field.currentText())
+        query[KEY_QUERY.SEARCH_FIELD] = unicode_type(self.search_field.currentText())
+        query[KEY_QUERY.SEARCH_MODE] = unicode_type(self.search_mode.currentText())
+        query[KEY_QUERY.S_R_TEMPLATE] = unicode_type(self.s_r_template.text())
+        query[KEY_QUERY.S_R_SRC_IDENT] = unicode_type(self.s_r_src_ident.currentText())
+        query[KEY_QUERY.SEARCH_FOR] = unicode_type(self.search_for.text())
+        query[KEY_QUERY.CASE_SENSITIVE] = self.case_sensitive.isChecked()
+        query[KEY_QUERY.REPLACE_WITH] = unicode_type(self.replace_with.text())
+        query[KEY_QUERY.REPLACE_FUNC] = unicode_type(self.replace_func.currentText())
+        query[KEY_QUERY.DESTINATION_FIELD] = unicode_type(self.destination_field.currentText())
+        query[KEY_QUERY.S_R_DST_IDENT] = unicode_type(self.s_r_dst_ident.text())
+        query[KEY_QUERY.REPLACE_MODE] = unicode_type(self.replace_mode.currentText())
+        query[KEY_QUERY.COMMA_SEPARATED] = self.comma_separated.isChecked()
+        query[KEY_QUERY.RESULTS_COUNT] = self.results_count.value()
+        query[KEY_QUERY.STARTING_FROM] = self.starting_from.value()
+        query[KEY_QUERY.MULTIPLE_SEPARATOR] = unicode_type(self.multiple_separator.text())
         
         return query
     
     def get_query(self):
         query = self._get_query_without_error()
         
-        if query[KEY.SEARCH_FIELD] != TEMPLATE_FIELD:
-            query[KEY.S_R_TEMPLATE] = ''
+        if query[KEY_QUERY.SEARCH_FIELD] != TEMPLATE_FIELD:
+            query[KEY_QUERY.S_R_TEMPLATE] = ''
         
         # to be used in validate method
         if self.s_r_error != None:
-            query[KEY.S_R_ERROR] = self.s_r_error
+            query[KEY_QUERY.S_R_ERROR] = self.s_r_error
         
         return query
     
