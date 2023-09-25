@@ -7,27 +7,22 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
-
-from datetime import datetime
-from collections import defaultdict, OrderedDict
-from functools import partial
 from polyglot.builtins import iteritems, itervalues
 
-from calibre import prints
-from calibre.constants import DEBUG
+from collections import defaultdict, OrderedDict
+from functools import partial
+
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
-from calibre.gui2.ui import get_gui
 
-from .common_utils import get_icon, current_db
+from .common_utils import get_icon, GUI
 
-GUI = get_gui()
 
 TEMPLATE_PREFIX = 'TEMPLATE: '
 TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
@@ -93,4 +88,3 @@ class TemplateBox(TemplateDialog):
     def accept(self):
         self.template = unicode(self.textbox.toPlainText()).rstrip()
         TemplateDialog.accept(self)
-

@@ -7,56 +7,50 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time, os, shutil
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
 from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy, time, os, shutil
 
 try:
-    from qt.core import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                            QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                            QPushButton, QSpacerItem, QSizePolicy)
+    from qt.core import (
+        Qt, QAbstractItemView, QAction, QCheckBox, QDialog, QDialogButtonBox,
+        QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+        QRadioButton, QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
+        QTextEdit, QToolButton, QVBoxLayout, QWidget,
+    )
 except ImportError:
-    from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                            QFormLayout, QAction, QFileDialog, QDialog, QTableWidget,
-                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                            QPushButton, QSpacerItem, QSizePolicy)
+    from PyQt5.Qt import (
+        Qt, QAbstractItemView, QAction, QCheckBox, QDialog, QDialogButtonBox,
+        QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+        QRadioButton, QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
+        QTextEdit, QToolButton, QVBoxLayout, QWidget,
+    )
 
-try:
-    from urllib.request import urlretrieve
-except ImportError:
-    from urllib import urlretrieve
-
-from calibre import prints
 from calibre.utils.config import config_dir, JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
-from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
-from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
 from .common_utils import debug_print, get_icon, PREFS_json, calibre_version, iswindows
-from .common_utils.dialogs import edit_keyboard_shortcuts
+from .common_utils.dialogs import KeyboardConfigDialogButton
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, NoWheelComboBox, KeyValueComboBox
-
 from .templates import TEMPLATE_FIELD
+from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
 
-GUI = get_gui()
 
 class ICON:
     PLUGIN    = 'images/plugin.png'
@@ -107,8 +101,8 @@ class ERROR_UPDATE:
     SAFELY_NAME = _('Carefully executed (slower)')
     SAFELY_DESC = safely_txt+'\n'+ _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.')
     
-    DONT_STOP = 'don\'t stop'
-    DONT_STOP_NAME = _('Don\'t stop (slower, not recomanded)')
+    DONT_STOP = "don't stop"
+    DONT_STOP_NAME = _("Don't stop (slower, not recomanded)")
     DONT_STOP_DESC = safely_txt+'\n'+_('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
     
     LIST = {
@@ -240,10 +234,7 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts')+'...', self)
-        keyboard_shortcuts_button.setToolTip(_('Edit the keyboard shortcuts associated with this plugin'))
-        keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
-        keyboard_layout.addWidget(keyboard_shortcuts_button)
+        keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
         keyboard_layout.insertStretch(-1)
         
         if calibre_version >= (5, 41,0):
@@ -260,16 +251,14 @@ class ConfigWidget(QWidget):
         error_button.clicked.connect(self.edit_error_strategy)
         keyboard_layout.addWidget(error_button)
     
-    def edit_shortcuts(self):
-        edit_keyboard_shortcuts(self.plugin_action)
     
     def save_settings(self):
         PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
         if calibre_version >= (5, 41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
-        debug_print('Save settings:\n{0}\n'.format(len(PREFS)))
-        #debug_print('Save settings:\n{0}\n'.format(PREFS))
+        debug_print('Save settings: operation count', len(PREFS), '\n')
+        #debug_print('Save settings:\n', PREFS, '\n')
     
     def edit_error_strategy(self):
         d = ErrorStrategyDialog(GUI)
@@ -279,7 +268,7 @@ class ConfigWidget(QWidget):
                 KEY_ERROR.UPDATE : d.error_update
             }
             
-            debug_print('Error Strategy settings: {0}\n'.format(PREFS[KEY_ERROR.ERROR]))
+            debug_print('Error Strategy settings:', PREFS[KEY_ERROR.ERROR], '\n')
     
     def create_context_menu(self, table):
         table.setContextMenuPolicy(Qt.ActionsContextMenu)

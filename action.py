@@ -7,42 +7,42 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
 from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy, time
 
 try:
-    from qt.core import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from qt.core import (
+        QMenu, QToolButton,
+    )
 except ImportError:
-    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from PyQt5.Qt import (
+        QMenu, QToolButton,
+    )
 
-from calibre import prints
-from calibre.ebooks.metadata.book.base import Metadata
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
-from calibre.gui2.ui import get_gui
-from calibre.library import current_library_name
 
-from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .common_utils import debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version
+from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, calibre_version
 from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
 from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
+from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
 from . import SearchReplaceCalibreText as CalibreText
 
-GUI = get_gui()
 
 class MassSearchReplaceAction(InterfaceAction):
     
@@ -351,7 +351,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                     err = self.s_r.testGetError()
                 
                 if err:
-                    debug_print('!! Invalide operation: {0}\n'.format(err))
+                    debug_print('!! Invalide operation:', err, '\n')
                     self.operationErrorList.append([self.op_num, str(err)])
                 
                 

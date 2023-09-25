@@ -7,38 +7,39 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
 from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy
 
 try:
-    from qt.core import QGridLayout, QHBoxLayout, QVBoxLayout, QSize
+    from qt.core import (
+        QSize, QVBoxLayout,
+    )
 except ImportError:
-    from PyQt5.Qt import QGridLayout, QHBoxLayout, QVBoxLayout, QSize
+    from PyQt5.Qt import (
+        QSize, QVBoxLayout,
+    )
 
-from calibre import prints
 from calibre.gui2 import error_dialog, question_dialog
-from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 
-from .common_utils import debug_print, get_icon, current_db
+from .common_utils import debug_print, get_icon, GUI
 from .common_utils.columns import get_possible_idents, get_possible_fields
 from .SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
-from .templates import TemplateBox, check_template
 from . import SearchReplaceCalibreText as CalibreText
 
-GUI = get_gui()
 
 class KEY_OPERATION:
     locals().update(vars(KEY_QUERY))
@@ -51,7 +52,7 @@ def get_default_operation():
     global _default_operation
     global _s_r
     
-    if not _s_r or _s_r.db != current_db():
+    if not _s_r or _s_r.db != GUI.current_db:
         _s_r = SearchReplaceWidget_NoWindows([0])
     if not _default_operation:
         _default_operation = _s_r.save_settings()
@@ -264,5 +265,6 @@ class SearchReplaceDialog(Dialog):
         else:
             self.operation = new_operation
         
-        debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
+        debug_print('Saved operation >', operation_string(self.operation))
+        debug_print(self.operation)
         Dialog.accept(self)

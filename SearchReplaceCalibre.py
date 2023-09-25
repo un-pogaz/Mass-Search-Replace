@@ -7,18 +7,25 @@ __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import regex, numbers
-from collections import defaultdict
 
 # python 3 compatibility
-from six import text_type as unicode
 from six.moves import range
+from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
+
+from collections import defaultdict, OrderedDict
+from functools import partial
+
+import regex, numbers
 
 try:
-    from qt.core import QtCore, QtGui, QtWidgets
+    from qt.core import (
+        QtCore, QtGui, QtWidgets,
+    )
 except:
-    from PyQt5 import QtCore, QtGui, QtWidgets
-
+    from PyQt5 import (
+        QtCore, QtGui, QtWidgets,
+    )
 
 from calibre import prints
 from calibre.constants import iswindows, isosx, numeric_version as calibre_version
@@ -26,13 +33,10 @@ from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
 from calibre.utils.config import JSONConfig, dynamic, prefs, tweaks
-from calibre.utils.date import now
 from calibre.utils.icu import sort_key, capitalize, lower as icu_lower, upper as icu_upper
 from calibre.utils.titlecase import titlecase
-from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
-from calibre.gui2.widgets2 import Dialog
-from polyglot.builtins import error_message, iteritems, itervalues, native_string_type, unicode_type
+from polyglot.builtins import error_message, native_string_type, unicode_type
 
 try:
     from calibre.utils.localization import ngettext
@@ -40,10 +44,10 @@ try:
 except:
     setup_status_actions, update_status_actions = None, None
 
+from .common_utils import GUI
 from .templates import TemplateBox, TEMPLATE_FIELD, check_template
 from . import SearchReplaceCalibreText as CalibreText
 
-GUI = get_gui()
 
 S_R_FUNCTIONS = {
         '' : lambda x: x,
@@ -1000,7 +1004,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                     except:
                         #import traceback
                         #ans = question_dialog(self, _('Invalid identifier string'),
-                        #       _('The identifier string for book "{0}" (id {1}) is '
+                        #       _('The identifier string for book "{:s}" (id {:s}) is '
                         #         'invalid. It must be a comma-separated list of '
                         #         'pairs of strings separated by a colon.\n\n'
                         #         'Do you want to continue processing books?').format(mi.title, mi.id),
