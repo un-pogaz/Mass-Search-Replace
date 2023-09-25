@@ -899,15 +899,15 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             
             smtxt = unicode_type(self.search_mode.currentText())
             if not smtxt:
-                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.SEARCH_MODE))
+                raise Exception(CalibreText.get_empty_field(CalibreText.FIELD_NAME.SEARCH_MODE))
             
             rmtxt = unicode_type(self.replace_mode.currentText())
             if not rmtxt:
-                raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.REPLACE_MODE))
+                raise Exception(CalibreText.get_empty_field(CalibreText.FIELD_NAME.REPLACE_MODE))
             
             if sftxt == 'identifiers':
                 if not unicode_type(self.s_r_src_ident.currentText()):
-                    raise Exception(CalibreText.getEmptyField(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
+                    raise Exception(CalibreText.get_empty_field(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
             
             if sftxt == TEMPLATE_FIELD:
                 error = check_template(self.s_r_template.text())

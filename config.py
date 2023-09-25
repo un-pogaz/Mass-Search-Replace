@@ -453,7 +453,7 @@ class MenuTableWidget(QTableWidget):
             # Make sure that the other columns in this row are enabled if not already.
             if not self.cellWidget(row, len(COL_NAMES)-1):
                 self.set_editable_cells_in_row(row)
-            self.cellWidget(row, 4).setMenu(self.convert_row_to_menu(row))
+            self.cellWidget(row, 4).set_menu(self.convert_row_to_menu(row))
         else:
             # Blank menu text so treat it as a separator row
             self.set_noneditable_cells_in_row(row)
@@ -647,7 +647,7 @@ class MenuTableWidget(QTableWidget):
         menu[KEY_MENU.SUBMENU] = unicode(self.item(row, 2).text()).strip()
         if menu[KEY_MENU.TEXT]:
             menu[KEY_MENU.IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
-            menu[KEY_MENU.OPERATIONS] = self.cellWidget(row, 4).getOperationList()
+            menu[KEY_MENU.OPERATIONS] = self.cellWidget(row, 4).get_operation_list()
         return menu
     
     def get_selected_menu(self):
@@ -673,20 +673,20 @@ class SettingsButton(QToolButton):
         
         self.table = table
         self._initial_menu = copy.deepcopy(menu)
-        self.setMenu(menu)
+        self.set_menu(menu)
     
-    def setMenu(self, menu):
+    def set_menu(self, menu):
         self._menu = menu
-        self.updateText()
-        self.hasError()
+        self.update_text()
+        self.has_error()
     
-    def getMenu(self):
+    def get_menu(self):
         return copy.copy(self._menu)
     
-    def updateText(self):
-        count = len(self.getOperationList())
+    def update_text(self):
+        count = len(self.get_operation_list())
         active = 0
-        for operation in self.getOperationList():
+        for operation in self.get_operation_list():
             if operation.get(KEY_QUERY.ACTIVE, True):
                 active += 1
         
@@ -696,29 +696,29 @@ class SettingsButton(QToolButton):
         else:
             txt = _('{:d} operations').format(count)
         
-        if self.getHasChanged():
+        if self.get_has_changed():
             txt+='*'
         self.setText(txt)
     
-    def hasError(self):
-        hasError = False
+    def has_error(self):
+        has_error = False
         
-        for operation in self.getOperationList():
+        for operation in self.get_operation_list():
             if operation.get_error():
-                hasError = True
+                has_error = True
                 break
         
-        if hasError:
+        if has_error:
             self.setIcon(get_icon(ICON.WARNING))
             self.setToolTip(_('This operations list contain a error'))
         else:
             self.setIcon(get_icon('gear.png'))
             self.setToolTip(_('Edit the operations list'))
         
-        return hasError
+        return has_error
     
-    def getHasChanged(self):
-        op_lst = self.getOperationList()
+    def get_has_changed(self):
+        op_lst = self.get_operation_list()
         initial_op_lst = self._initial_menu[KEY_MENU.OPERATIONS]
         if len(op_lst) != len(initial_op_lst):
             return True
@@ -733,17 +733,17 @@ class SettingsButton(QToolButton):
         
         return False
     
-    def setOperationList(self, operation_list):
+    def set_operation_list(self, operation_list):
         self._menu[KEY_MENU.OPERATIONS] = operation_list
         self.setMenu(self._menu)
     
-    def getOperationList(self):
+    def get_operationList(self):
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
-        d = ConfigOperationListDialog(self, self.getMenu())
+        d = ConfigOperationListDialog(self, self.get_menu())
         if d.exec_() == d.Accepted:
-            self.setOperationList(d.operation_list)
+            self.set_operation_list(d.operation_list)
 
 COMBO_IMAGE_ADD = _('Add New Image...')
 def get_image_names(image_map):
@@ -890,7 +890,7 @@ class ConfigOperationListDialog(Dialog):
             title = _('List of Search/Replace operations for {:s}').format(name)
         
         
-        Dialog.__init__(self, title, 'config_list_SearchReplace')
+        Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -1073,7 +1073,7 @@ class OperationListTableWidget(QTableWidget):
         
         self.populate_table(operation_list)
         
-        self.itemDoubleClicked.connect(self.settingsDoubleClicked)
+        self.itemDoubleClicked.connect(self.settings_doubleClick)
     
     def populate_table(self, operation_list=None):
         self.clear()
@@ -1117,7 +1117,7 @@ class OperationListTableWidget(QTableWidget):
         no_template = True
         for i_row in range(self.rowCount()):
             item = self.item(i_row, 0)
-            operation = item.getOperation() if item else {}
+            operation = item.get_operation() if item else {}
             if no_name and operation.get(KEY_QUERY.NAME, ''):
                 no_name = False
             if no_template and operation.get(KEY_QUERY.SEARCH_FIELD, '') == TEMPLATE_FIELD:
@@ -1245,7 +1245,7 @@ class OperationListTableWidget(QTableWidget):
         return clean_empty_operation(operation_list)
     
     def convert_row_to_operation(self, row):
-        return self.item(row, 0).getOperation()
+        return self.item(row, 0).get_operation()
     
     def get_selected_operation(self):
         operation_list = []
@@ -1262,7 +1262,7 @@ class OperationListTableWidget(QTableWidget):
         self.test_column_hidden()
     
     
-    def settingsDoubleClicked(self):
+    def settings_doubleClick(self):
         self.setFocus()
         row = self.currentRow()
         
@@ -1281,10 +1281,10 @@ class OperationWidgetItem(QTableWidgetItem):
         
         self.table = table
         self._operation = operation
-        self._hasError = False
-        self.setOperation(operation)
+        self._has_error = False
+        self.set_operation(operation)
     
-    def setOperation(self, operation):
+    def set_operation(self, operation):
         operation = operation or Operation()
         self._operation = operation
         
@@ -1294,13 +1294,13 @@ class OperationWidgetItem(QTableWidgetItem):
         else:
             self.setCheckState(Qt.Unchecked)
         
-        self.hasError()
+        self.has_error()
     
-    def getOperation(self):
+    def get_operation(self):
         self._operation[KEY_QUERY.ACTIVE] = Qt.Checked == self.checkState()
         return copy.copy(self._operation)
     
-    def hasError(self):
+    def has_error(self):
         err = self._operation.test_full_error()
         
         if err:
@@ -1335,7 +1335,7 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(operation_label)
         
         self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_OPERATION.LIST)}, self.error_operation)
-        self.operationStrategy.currentIndexChanged.connect(self.operationStrategyIndexChanged)
+        self.operationStrategy.currentIndexChanged.connect(self.operation_strategy_index_changed)
         layout.addWidget(self.operationStrategy)
         
         operation_label.setBuddy(self.operationStrategy)
@@ -1346,7 +1346,7 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(update_label)
         
         self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_UPDATE.LIST)}, self.error_update)
-        self.updateStrategy.currentIndexChanged.connect(self.updateStrategyIndexChanged)
+        self.updateStrategy.currentIndexChanged.connect(self.update_strategy_index_changed)
         layout.addWidget(self.updateStrategy)
         
         update_label.setBuddy(self.updateStrategy)
@@ -1361,11 +1361,11 @@ class ErrorStrategyDialog(Dialog):
         layout.addWidget(self.bb)
     
     
-    def operationStrategyIndexChanged(self, idx):
+    def operation_strategy_index_changed(self, idx):
         error_operation = self.operationStrategy.selected_key()
         self.desc.setText(ERROR_OPERATION.LIST[error_operation][1])
     
-    def updateStrategyIndexChanged(self, idx):
+    def update_strategy_index_changed(self, idx):
         error_update = self.updateStrategy.selected_key()
         self.desc.setText(ERROR_UPDATE.LIST[error_update][1])
     

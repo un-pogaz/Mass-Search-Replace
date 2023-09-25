@@ -73,13 +73,13 @@ class Operation(dict):
             return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
         
         if self[KEY_QUERY.REPLACE_FUNC] not in S_R_FUNCTIONS:
-            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, self[KEY_QUERY.REPLACE_FUNC]))
+            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.REPLACE_FUNC, self[KEY_QUERY.REPLACE_FUNC]))
             
         if self[KEY_QUERY.REPLACE_MODE] not in S_R_REPLACE_MODES:
-            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, self[KEY_QUERY.REPLACE_MODE]))
+            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.REPLACE_MODE, self[KEY_QUERY.REPLACE_MODE]))
             
         if self[KEY_QUERY.SEARCH_MODE] not in S_R_MATCH_MODES:
-            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, self[KEY_QUERY.SEARCH_MODE]))
+            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.SEARCH_MODE, self[KEY_QUERY.SEARCH_MODE]))
         
         #Field test
         all_fields, writable_fields = get_possible_fields()

@@ -156,22 +156,22 @@ class MassSearchReplaceAction(InterfaceAction):
     
     
     def quick_selected(self):
-        self.quickSearchReplace(get_BookIds_selected(), _('the selected books'))
+        self.quick_search_replace(get_BookIds_selected(), _('the selected books'))
     
     def quick_library(self):
-        self.quickSearchReplace(get_BookIds_all(), _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name()))
+        self.quick_search_replace(get_BookIds_all(), _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name()))
     
     def quick_virtual(self):
         vl = get_curent_virtual()
         if vl[0]:
-            self.quickSearchReplace(get_BookIds_virtual(), _('the virtual library {:s}').format(vl[0]))
+            self.quick_search_replace(get_BookIds_virtual(), _('the virtual library {:s}').format(vl[0]))
         else:
             self.quick_library()
     
     def quick_search(self):
-        self.quickSearchReplace(get_BookIds_search(), _('the current search'))
+        self.quick_search_replace(get_BookIds_search(), _('the current search'))
     
-    def quickSearchReplace(self, book_ids, text):
+    def quick_search_replace(self, book_ids, text):
         
         menu = get_default_menu()
         menu[KEY_MENU.TEXT] = text +' '+ _('({:d} books)').format(len(book_ids))
@@ -225,7 +225,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         self.book_num = 0
         
         # is a quick Search/Replace
-        self.quickSearchReplace = kvargs['menu'][KEY_MENU.TEXT] == None
+        self.quick_search_replace = kvargs['menu'][KEY_MENU.TEXT] == None
         
         
         # operation list of Search/Replace
