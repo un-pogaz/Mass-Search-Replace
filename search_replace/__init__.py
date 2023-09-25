@@ -41,159 +41,136 @@ from .calibre import MetadataBulkWidget, KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_M
 from . import text as CalibreText
 
 
-_default_operation = None
-_s_r = None
-
-def get_default_operation():
-    global _default_operation
-    global _s_r
+class Operation(dict):
     
-    if not _s_r or _s_r.db != GUI.current_db:
-        _s_r = SearchReplaceWidget_NoWindows([0])
-    if not _default_operation:
-        _default_operation = _s_r.save_settings()
-        _default_operation[KEY_QUERY.ACTIVE] = True
+    _default_operation = None
+    _s_r = None
     
-    return copy.copy(_default_operation)
-
-def operation_ConvertError(operation):
-    err = operation.get(KEY_QUERY.S_R_ERROR, None)
-    if err:
-        operation[KEY_QUERY.S_R_ERROR] = str(err)
-    return operation
-
-def operation_list_ConvertError(operation_list):
-    rlst = []
-    for operation in operation_list:
-        rlst.append(operation_ConvertError(operation))
-    return rlst
-
-def clean_empty_operation(operation_list):
-    operation_list = operation_list or []
-    default = get_default_operation()
-    operation_list = operation_list_ConvertError(operation_list)
-    rlst = []
-    for operation in operation_list:
-        for key in KEY_QUERY.ALL:
-            if operation[key] != default[key]:
-                rlst.append(operation)
-                break
+    def __init__(self, src=None):
+        dict.__init__(self)
+        if not src:
+            if not Operation._s_r or Operation._s_r.db != GUI.current_db:
+                _s_r = Operation._s_r = SearchReplaceWidget([0])
+            if not Operation._default_operation:
+                Operation._default_operation = _s_r.save_settings()
+                Operation._default_operation[KEY_QUERY.ACTIVE] = True
+            
+            src = copy.copy(Operation._default_operation)
+        
+        self.update(src)
     
-    return rlst
-
-def operation_is_active(operation):
-    return operation.get(KEY_QUERY.ACTIVE, True)
-
-def operation_list_active(operation_list):
-    rlst = []
-    for operation in operation_list:
-        if operation_is_active(operation):
-            rlst.append(operation)
     
-    return rlst
+    def get_error(self):
+        
+        if not self:
+            return TypeError
+        
+        if KEY_QUERY.S_R_ERROR in self:
+            return self[KEY_QUERY.S_R_ERROR]
+        
+        difference = set(KEY_QUERY.ALL).difference(self.keys())
+        for key in difference:
+            return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
+        
+        if self[KEY_QUERY.REPLACE_FUNC] not in S_R_FUNCTIONS:
+            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, self[KEY_QUERY.REPLACE_FUNC]))
+            
+        if self[KEY_QUERY.REPLACE_MODE] not in S_R_REPLACE_MODES:
+            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, self[KEY_QUERY.REPLACE_MODE]))
+            
+        if self[KEY_QUERY.SEARCH_MODE] not in S_R_MATCH_MODES:
+            return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, self[KEY_QUERY.SEARCH_MODE]))
+        
+        #Field test
+        all_fields, writable_fields = get_possible_fields()
+        
+        search_field = self[KEY_QUERY.SEARCH_FIELD]
+        dest_field = self[KEY_QUERY.DESTINATION_FIELD]
+        
+        if search_field not in all_fields:
+            return OperationError(_('Search field "{:s}" is not available for this library').format(search_field))
+            
+        if dest_field and (dest_field not in writable_fields):
+            return OperationError(_('Destination field "{:s}" is not available for this library').format(dest_field))
+        
+        possible_idents = get_possible_idents()
+        
+        if search_field == 'identifiers':
+            src_ident = self[KEY_QUERY.S_R_SRC_IDENT]
+            if src_ident not in possible_idents:
+                return OperationError(_('Identifier type "{:s}" is not available for this library').format(src_ident))
+        
+        return None
+    
+    def test_full_error(self):
+        err = self.get_error()
+        if err:
+            return err
+        Operation()
+        Operation._s_r.load_settings(self)
+        return Operation._s_r.get_error()
+        
+    def is_full_valid(self):
+        return self.test_full_error() == None
+        
+    def get_para_list(self):
+        name = self.get(KEY_QUERY.NAME, '')
+        column = self.get(KEY_QUERY.SEARCH_FIELD, '')
+        field = self.get(KEY_QUERY.DESTINATION_FIELD, '')
+        if (field and field != column):
+            column += ' => '+ field
+        
+        search_mode = self.get(KEY_QUERY.SEARCH_MODE, '')
+        template = self.get(KEY_QUERY.S_R_TEMPLATE, '')
+        search_for = ''
+        if search_mode == CalibreText.S_R_REPLACE:
+            search_for = '*'
+        else:
+            search_for = self.get(KEY_QUERY.SEARCH_FOR, '')
+        replace_with = self.get(KEY_QUERY.REPLACE_WITH, '')
+        
+        if column == 'identifiers':
+            src_ident = self.get(KEY_QUERY.S_R_SRC_IDENT, '')
+            search_for = src_ident+':'+search_for
+            
+            dst_ident = self.get(KEY_QUERY.S_R_DST_IDENT, src_ident)
+            replace_with = dst_ident+':'+replace_with.strip()
+        
+        return [ name, column, template, search_mode, search_for, replace_with ]
+        
+    def string_info(self):
+        tbl = self.get_para_list()
+        if not tbl[2]: del tbl[2]
+        
+        return ('name:"'+tbl[0]+'" => ' if tbl[0] else '') + '"'+ '" | "'.join(tbl[1:])+'"'
 
 class OperationError(ValueError):
     pass
 
-def operation_testGetError(operation):
-    
-    if not operation:
-        return TypeError
-    
-    if KEY_QUERY.S_R_ERROR in operation:
-        return OperationError(str(operation[KEY_QUERY.S_R_ERROR]))
-            
-    
-    difference = set(KEY_QUERY.ALL).difference(operation.keys())
-    for key in difference:
-        return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
-    
-    if operation[KEY_QUERY.REPLACE_FUNC] not in S_R_FUNCTIONS:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_FUNC, operation[KEY_QUERY.REPLACE_FUNC]))
-        
-    if operation[KEY_QUERY.REPLACE_MODE] not in S_R_REPLACE_MODES:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.REPLACE_MODE, operation[KEY_QUERY.REPLACE_MODE]))
-        
-    if operation[KEY_QUERY.SEARCH_MODE] not in S_R_MATCH_MODES:
-        return OperationError(CalibreText.getForLocalizedField(CalibreText.FIELD_NAME.SEARCH_MODE, operation[KEY_QUERY.SEARCH_MODE]))
-    
-    #Field test
-    all_fields, writable_fields = get_possible_fields()
-    
-    search_field = operation[KEY_QUERY.SEARCH_FIELD]
-    dest_field = operation[KEY_QUERY.DESTINATION_FIELD]
-    
-    if search_field not in all_fields:
-        return OperationError(_('Search field "{:s}" is not available for this library').format(search_field))
-        
-    if dest_field and (dest_field not in writable_fields):
-        return OperationError(_('Destination field "{:s}" is not available for this library').format(dest_field))
-    
-    possible_idents = get_possible_idents()
-    
-    if search_field == 'identifiers':
-        src_ident = operation[KEY_QUERY.S_R_SRC_IDENT]
-        if src_ident not in possible_idents:
-            return OperationError(_('Identifier type "{:s}" is not available for this library').format(src_ident))
-    
-    return None
 
-def operation_testFullError(operation):
-    err = operation_testGetError(operation)
-    if err:
-        return err
-    get_default_operation()
-    global _s_r
-    _s_r.load_settings(operation)
-    return _s_r.testGetError()
-
-def operation_isFullValid(operation):
-    return operation_testFullError(operation) == None
-
-
-def operation_para_list(operation):
-    name = operation.get(KEY_QUERY.NAME, '')
-    column = operation.get(KEY_QUERY.SEARCH_FIELD, '')
-    field = operation.get(KEY_QUERY.DESTINATION_FIELD, '')
-    if (field and field != column):
-        column += ' => '+ field
+def clean_empty_operation(operation_list):
+    operation_list = operation_list or []
+    default = Operation()
+    rlst = []
+    for operation in operation_list:
+        for key in KEY_QUERY.ALL:
+            if operation[key] != default[key]:
+                rlst.append(Operation(operation))
+                break
     
-    search_mode = operation.get(KEY_QUERY.SEARCH_MODE, '')
-    template = operation.get(KEY_QUERY.S_R_TEMPLATE, '')
-    search_for = ''
-    if search_mode == CalibreText.S_R_REPLACE:
-        search_for = '*'
-    else:
-        search_for = operation.get(KEY_QUERY.SEARCH_FOR, '')
-    replace_with = operation.get(KEY_QUERY.REPLACE_WITH, '')
-    
-    if column == 'identifiers':
-        src_ident = operation.get(KEY_QUERY.S_R_SRC_IDENT, '')
-        search_for = src_ident+':'+search_for
-        
-        dst_ident = operation.get(KEY_QUERY.S_R_DST_IDENT, src_ident)
-        replace_with = dst_ident+':'+replace_with.strip()
-    
-    return [ name, column, template, search_mode, search_for, replace_with ]
+    return rlst
 
-def operation_string(operation):
-    tbl = operation_para_list(operation)
-    if not tbl[2]: del tbl[2]
+def operation_list_active(operation_list):
+    rlst = []
+    for operation in clean_empty_operation(operation_list):
+        if operation.get(KEY_QUERY.ACTIVE, True):
+            rlst.append(operation)
     
-    return ('name:"'+tbl[0]+'" => ' if tbl[0] else '') + '"'+ '" | "'.join(tbl[1:])+'"'
+    return rlst
 
-
-def SearchReplaceWidget_NoWindows(book_ids=[]):
-    rslt = SearchReplaceWidget(book_ids)
-    rslt.resize(QSize(0, 0))
-    return rslt
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, book_ids=[], refresh_books=set([])):
-        
-        if not book_ids or len(book_ids) == 0:
-            book_ids = GUI.library_view.get_selected_ids()
-        
         MetadataBulkWidget.__init__(self, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
     
@@ -201,16 +178,16 @@ class SearchReplaceWidget(MetadataBulkWidget):
         self.load_query(operation)
     
     def save_settings(self):
-        return self.get_query()
+        return Operation(self.get_query())
     
-    def testGetError(self):
-        return operation_testGetError(self.get_query())
+    def get_error(self):
+        return Operation(self.get_query()).get_error()
     
     def search_replace(self, book_id, operation=None):
         if operation:
             self.load_settings(operation)
         
-        err = self.testGetError()
+        err = self.get_error()
         if not err:
            err = self.do_search_replace(book_id)
         return err
@@ -218,7 +195,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
 
 class SearchReplaceDialog(Dialog):
     def __init__(self, operation=None, book_ids=[]):
-        self.operation = operation or get_default_operation()
+        self.operation = operation or Operation()
         self.widget = SearchReplaceWidget(book_ids[:10])
         Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace')
     
@@ -233,7 +210,7 @@ class SearchReplaceDialog(Dialog):
     
     def accept(self):
         
-        err = self.widget.testGetError()
+        err = self.widget.get_error()
         
         if err:
             if question_dialog(self, _('Invalid operation'),
@@ -261,6 +238,6 @@ class SearchReplaceDialog(Dialog):
         else:
             self.operation = new_operation
         
-        debug_print('Saved operation >', operation_string(self.operation))
+        debug_print('Saved operation >', self.operation.string_info())
         debug_print(self.operation)
         Dialog.accept(self)

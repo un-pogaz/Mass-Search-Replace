@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.7.6] - date
+
+### Internal
+- update common_utils
+
 ## [1.7.5] - 2023/10/07
 
 ### Bug fixes

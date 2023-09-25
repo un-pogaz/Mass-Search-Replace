@@ -1219,7 +1219,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         
         # to be used in validate method
         if self.s_r_error != None:
-            query[KEY_QUERY.S_R_ERROR] = self.s_r_error
+            query[KEY_QUERY.S_R_ERROR] = str(self.s_r_error)
         
         return query
     

@@ -40,7 +40,7 @@ from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_Bo
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
 from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .search_replace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
+from .search_replace import Operation, SearchReplaceWidget, operation_list_active
 from .search_replace import text as CalibreText
 
 
@@ -89,7 +89,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         debug_print('Rebuilding menu')
         for menu in menu_list:
-            if not menu_testGetError(menu) and menu[KEY_MENU.ACTIVE]:
+            if not menu_get_error(menu) and menu[KEY_MENU.ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, menu)
         
         self.menu.addSeparator()
@@ -175,7 +175,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         menu = get_default_menu()
         menu[KEY_MENU.TEXT] = text +' '+ _('({:d} books)').format(len(book_ids))
-        menu[KEY_MENU.OPERATIONS] = PREFS[KEY_MENU.QUICK]
+        menu[KEY_MENU.OPERATIONS] = [Operation(o) for o in PREFS[KEY_MENU.QUICK]]
         
         d = ConfigOperationListDialog(self, menu=menu, book_ids=book_ids)
         
@@ -202,7 +202,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(GUI)
 
 
-def menu_testGetError(menu):
+def menu_get_error(menu):
     
     difference = set(KEY_MENU.ALL).difference(menu)
     for key in difference:
@@ -239,7 +239,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         self.total_operation_count = self.book_count*self.operation_count
         
         # Search/Replace Widget
-        self.s_r = SearchReplaceWidget_NoWindows(self.book_ids)
+        self.s_r = SearchReplaceWidget(self.book_ids)
         
         # operation error
         self.operationStrategy = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
@@ -343,12 +343,12 @@ class SearchReplacesProgressDialog(ProgressDialog):
             
             for self.op_num, operation in enumerate(self.operation_list, 1):
                 
-                debug_print('Operation {:d}/{:d} > {:s}'.format(self.op_num, self.operation_count, operation_string(operation)))
+                debug_print('Operation {:d}/{:d} > {:s}'.format(self.op_num, self.operation_count, operation.string_info()))
                 
-                err = operation_testGetError(operation)
+                err = operation.get_error()
                 if not err:
                     self.s_r.load_settings(operation)
-                    err = self.s_r.testGetError()
+                    err = self.s_r.get_error()
                 
                 if err:
                     debug_print('!! Invalide operation:', err, '\n')
