@@ -44,9 +44,9 @@ try:
 except:
     setup_status_actions, update_status_actions = None, None
 
-from .common_utils import GUI
-from .templates import TemplateBox, TEMPLATE_FIELD, check_template
-from . import SearchReplaceCalibreText as CalibreText
+from ..common_utils import GUI
+from ..templates import TemplateBox, TEMPLATE_FIELD, check_template
+from . import text as CalibreText
 
 
 S_R_FUNCTIONS = {

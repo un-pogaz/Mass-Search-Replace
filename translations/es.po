@@ -13,7 +13,7 @@ msgstr ""
 "X-Generator: Poedit 3.3.2\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: SearchReplaceCalibre.py\n"
+"X-Poedit-SearchPathExcluded-0: search_replace/calibre.py\n"
 
 #: SearchReplace.py:112
 msgid "Invalid operation, the \"{:s}\" key is missing."

@@ -40,8 +40,8 @@ from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_Bo
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
 from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
-from .SearchReplace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
-from . import SearchReplaceCalibreText as CalibreText
+from .search_replace import SearchReplaceWidget_NoWindows, operation_list_active, operation_string, operation_testGetError
+from .search_replace import text as CalibreText
 
 
 class MassSearchReplaceAction(InterfaceAction):

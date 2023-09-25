@@ -49,7 +49,7 @@ from .common_utils.dialogs import KeyboardConfigDialogButton
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, NoWheelComboBox, KeyValueComboBox
 from .templates import TEMPLATE_FIELD
-from .SearchReplace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
+from .search_replace import SearchReplaceDialog, KEY_OPERATION, operation_is_active, get_default_operation, operation_ConvertError, operation_string, operation_para_list, operation_isFullValid, operation_testFullError, operation_testGetError, clean_empty_operation
 
 
 class ICON:

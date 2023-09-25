@@ -35,10 +35,10 @@ except ImportError:
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog
 
-from .common_utils import debug_print, get_icon, GUI
-from .common_utils.columns import get_possible_idents, get_possible_fields
-from .SearchReplaceCalibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
-from . import SearchReplaceCalibreText as CalibreText
+from ..common_utils import debug_print, get_icon, GUI
+from ..common_utils.columns import get_possible_idents, get_possible_fields
+from .calibre import MetadataBulkWidget, KEY as KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
+from . import text as CalibreText
 
 
 class KEY_OPERATION:
