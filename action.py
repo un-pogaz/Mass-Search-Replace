@@ -38,7 +38,7 @@ from calibre.gui2.actions import InterfaceAction
 from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, calibre_version
 from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
-from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
+from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
 from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
 from .search_replace import Operation, SearchReplaceWidget, operation_list_active
 from .search_replace import text as CalibreText
@@ -267,7 +267,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         
         elif self.exception_unhandled:
             debug_print('Mass Search/Replace was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.exception)
+            custom_exception_dialog(self.exception)
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
             debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))
@@ -304,7 +304,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                     msg = _('The library a was restored to its original state.')
                 
                 id, book_info, field, e = self.exception[0]
-                CustomExceptionErrorDialog(e, custome_msg=msg, custome_title=_('Cannot update the library'))
+                custom_exception_dialog(e, additional_msg=msg, title=_('Cannot update the library'))
             
             elif self.exception_safely:
                 
