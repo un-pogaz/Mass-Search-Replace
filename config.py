@@ -21,33 +21,36 @@ except NameError:
 from collections import defaultdict, OrderedDict
 from functools import partial
 
-import copy, time, os, shutil
+import copy, json, os, shutil
 
 try:
     from qt.core import (
-        Qt, QAbstractItemView, QAction, QCheckBox, QDialog, QDialogButtonBox,
-        QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-        QRadioButton, QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
+        Qt, QAbstractItemView, QAction, QCheckBox, QDialog,
+        QFileDialog, QHBoxLayout, QLabel, QPushButton,
+        QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
         QTextEdit, QToolButton, QVBoxLayout, QWidget,
     )
 except ImportError:
     from PyQt5.Qt import (
-        Qt, QAbstractItemView, QAction, QCheckBox, QDialog, QDialogButtonBox,
-        QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-        QRadioButton, QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
+        Qt, QAbstractItemView, QAction, QCheckBox, QDialog,
+        QFileDialog, QHBoxLayout, QLabel, QPushButton,
+        QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
         QTextEdit, QToolButton, QVBoxLayout, QWidget,
     )
 
-from calibre.utils.config import config_dir, JSONConfig
+from calibre.utils.config import JSONConfig
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
-from .common_utils import debug_print, get_icon, PREFS_json, calibre_version, iswindows
-from .common_utils.dialogs import KeyboardConfigDialogButton
+from .common_utils import debug_print, get_icon, GUI, PREFS_json, calibre_version, iswindows, get_image_map, get_local_resource
+from .common_utils.dialogs import KeyboardConfigDialogButton, ImageDialog
 from .common_utils.librarys import get_BookIds_selected
-from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTextIconWidgetItem, ReadOnlyTableWidgetItem, NoWheelComboBox, KeyValueComboBox
+from .common_utils.widgets import (CheckableTableWidgetItem, TextIconWidgetItem,
+        ReadOnlyTableWidgetItem, ImageComboBox,
+        KeyValueComboBox,
+        )
 from .templates import TEMPLATE_FIELD
 from .search_replace import SearchReplaceDialog, KEY_QUERY, Operation, clean_empty_operation
 
@@ -184,9 +187,9 @@ class ConfigWidget(QWidget):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the menu list
-        self._table = MenuTableWidget(menu_list, self)
-        heading_label.setBuddy(self._table)
-        table_layout.addWidget(self._table)
+        self.table = MenuTableWidget(menu_list, self)
+        heading_label.setBuddy(self.table)
+        table_layout.addWidget(self.table)
         
         # Add a vertical layout containing the the buttons to move up/down etc.
         button_layout = QVBoxLayout()
@@ -224,15 +227,11 @@ class ConfigWidget(QWidget):
         move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)
         
-        move_up_button.clicked.connect(self._table.move_rows_up)
-        move_down_button.clicked.connect(self._table.move_rows_down)
-        add_button.clicked.connect(self._table.add_row)
-        delete_button.clicked.connect(self._table.delete_rows)
-        copy_button.clicked.connect(self._table.copy_row)
-        
-        # Define a context menu for the table widget
-        self.create_context_menu(self._table)
-        
+        move_up_button.clicked.connect(self.table.move_rows_up)
+        move_down_button.clicked.connect(self.table.move_rows_down)
+        add_button.clicked.connect(self.table.add_row)
+        delete_button.clicked.connect(self.table.delete_rows)
+        copy_button.clicked.connect(self.table.copy_row)
         
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
@@ -256,7 +255,7 @@ class ConfigWidget(QWidget):
     
     
     def save_settings(self):
-        PREFS[KEY_MENU.MENU] = self._table.get_menu_list()
+        PREFS[KEY_MENU.MENU] = self.table.get_menu_list()
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
         if calibre_version >= (5, 41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
@@ -272,67 +271,92 @@ class ConfigWidget(QWidget):
             }
             
             debug_print('Error Strategy settings:', PREFS[KEY_ERROR.ERROR], '\n')
+
+
+COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
+class MenuTableWidget(QTableWidget):
+    def __init__(self, menu_list=None, *args):
+        QTableWidget.__init__(self, *args)
+        
+        self.setAlternatingRowColors(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSortingEnabled(False)
+        self.setMinimumSize(600, 0)
+        
+        self.append_context_menu()
+        
+        self.image_map = get_image_map()
+        
+        self.populate_table(menu_list)
+        
+        self.cellChanged.connect(self.cell_changed)
     
-    def create_context_menu(self, table):
-        table.setContextMenuPolicy(Qt.ActionsContextMenu)
-        act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image...'), table)
-        act_add_image.triggered.connect(table.display_add_new_image_dialog)
-        table.addAction(act_add_image)
-        act_open = QAction(get_icon('document_open.png'), _('&Open images folder'), table)
-        act_open.triggered.connect(partial(self.open_images_folder, table.resources_dir))
-        table.addAction(act_open)
-        sep2 = QAction(table)
+    
+    def append_context_menu(self, parent=None):
+        parent = parent or self
+        parent.setContextMenuPolicy(Qt.ActionsContextMenu)
+        
+        act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image...'), parent)
+        act_add_image.triggered.connect(self.add_new_image_dialog)
+        parent.addAction(act_add_image)
+        
+        act_open = QAction(get_icon('document_open.png'), _('&Open images folder'), parent)
+        act_open.triggered.connect(self.open_images_folder)
+        parent.addAction(act_open)
+        
+        sep2 = QAction(parent)
         sep2.setSeparator(True)
-        table.addAction(sep2)
-        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), table)
+        parent.addAction(sep2)
+        
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), parent)
         act_import.triggered.connect(self.import_menus)
-        table.addAction(act_import)
-        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), table)
+        parent.addAction(act_import)
+        
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), parent)
         act_export.triggered.connect(self.export_menus)
-        table.addAction(act_export)
+        parent.addAction(act_export)
     
-    def open_images_folder(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path)
-        open_local_file(path)
+    def open_images_folder(self):
+        if not os.path.exists(get_local_resource.IMAGES):
+            os.makedirs(get_local_resource.IMAGES)
+        open_local_file(get_local_resource.IMAGES)
     
     def import_menus(self):
-        table = self._table
         archive_path = self.pick_archive_to_import()
         if not archive_path:
             return
         
-        json = os.path.join(table.resources_dir, OWIP)
-        json_path = os.path.join(table.resources_dir, OWIP+'.json')
+        json_name = OWIP+'.json'
         
         # Write the whole file contents into the resources\images directory
-        if not os.path.exists(table.resources_dir):
-            os.makedirs(table.resources_dir)
+        if not os.path.exists(get_local_resource.IMAGES):
+            os.makedirs(get_local_resource.IMAGES)
         with ZipFile(archive_path, 'r') as zf:
             contents = zf.namelist()
-            if  os.path.basename(json_path) not in contents:
+            if json_name not in contents:
                 return error_dialog(self, _('Import failed'), _('This is not a valid OWIP export archive'), show=True)
             for resource in contents:
-                fs = os.path.join(table.resources_dir,resource)
-                with open(fs,'wb') as f:
-                    f.write(zf.read(resource))
+                if resource == json_name:
+                    json_import = json.loads(zf.read(resource))
+                else:
+                    fs = os.path.join(get_local_resource.IMAGES, resource)
+                    with open(fs,'wb') as f:
+                        f.write(zf.read(resource))
         
         try:
             # Read the .JSON file to add to the menus then delete it.
-            import_config = JSONConfig(json)
-            menu_list = import_config[KEY_MENU.MENU]
+            menu_list = json_import[KEY_MENU.MENU]
+            for idx in range(len(menu_list)):
+                menu_list[idx][KEY_MENU.OPERATIONS] = [Operation(e) for e in menu_list[idx][KEY_MENU.OPERATIONS]]
             # Now insert the menus into the table
-            table.append_menu_list(menu_list)
+            self.append_menu_list(menu_list)
             info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(menu_list)),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Import failed'), e, show=True)
-        finally:
-            if os.path.exists(json_path):
-                os.remove(json_path)
     
     def pick_archive_to_import(self):
-        archives = choose_files(self, 'owp archive dialog', _('Select a menu file archive to import...'),
+        archives = choose_files(self, 'owip archive dialog', _('Select a menu file archive to import...'),
                              filters=[('OWIP Files', ['owip','owip.zip']),('ZIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
         if not archives:
             return
@@ -340,8 +364,7 @@ class ConfigWidget(QWidget):
         return f
     
     def export_menus(self):
-        table = self._table
-        menu_list = table.get_selected_menu()
+        menu_list = [m for m in self.get_selected_menu() if m['Text']]
         if len(menu_list) == 0:
             return error_dialog(self, _('Export failed'), _('No menu items selected to export'), show=True)
         archive_path = self.pick_archive_to_export()
@@ -353,63 +376,31 @@ class ConfigWidget(QWidget):
         for menu in menu_list:
             image_name = menu[KEY_MENU.IMAGE]
             if image_name and image_name not in image_names:
-                image_path = os.path.join(table.resources_dir, image_name)
+                image_path = os.path.join(get_local_resource.IMAGES, image_name)
                 if os.path.exists(image_path):
                     image_names[image_name] = image_path
-        
-        # Write our menu items out to a json file
-        if not os.path.exists(table.resources_dir):
-            os.makedirs(table.resources_dir)
-        
-        json = os.path.join(table.resources_dir, OWIP)
-        export_config = JSONConfig(json)
-        export_config[KEY_MENU.MENU] = menu_list
-        json_path = os.path.join(table.resources_dir, OWIP+'.json')
         
         try:
             # Create the zip file archive
             with ZipFile(archive_path, 'w') as archive_zip:
-                archive_zip.write(json_path, os.path.basename(json_path))
+                archive_zip.writestr(OWIP+'.json', json.dumps({KEY_MENU.MENU: menu_list}))
                 # Add any images referred to in those menu items that are local resources
                 for image_name, image_path in iteritems(image_names):
                     archive_zip.write(image_path, os.path.basename(image_path))
+            
             info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
                         show=True, show_copy_button=False)
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
-        finally:
-            if os.path.exists(json_path):
-                os.remove(json_path)
     
     def pick_archive_to_export(self):
-        fd = FileDialog(name='owp archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
+        fd = FileDialog(name='owip archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
                         parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
             return None
         return fd.get_files()[0]
-
-
-
-
-COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
-class MenuTableWidget(QTableWidget):
-    def __init__(self, menu_list=None, *args):
-        QTableWidget.__init__(self, *args)
-        
-        self.resources_dir = os.path.join(config_dir, 'resources/images')
-        if iswindows:
-            self.resources_dir = os.path.normpath(self.resources_dir)
-        self.image_map = self.get_image_map()
-        
-        self.setAlternatingRowColors(True)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setSortingEnabled(False)
-        self.setMinimumSize(600, 0)
-        
-        self.populate_table(menu_list)
-        
-        self.cellChanged.connect(self.cell_changed)
+    
     
     def populate_table(self, menu_list=None):
         self.clear()
@@ -433,7 +424,7 @@ class MenuTableWidget(QTableWidget):
         self.setItem(row, 1, TextIconWidgetItem(menu_text, get_icon(icon_name)))
         self.setItem(row, 2, QTableWidgetItem(menu[KEY_MENU.SUBMENU]))
         if menu_text:
-            self.set_editable_cells_in_row(row, image=icon_name, menu=menu)
+            self.set_editable_cells_in_row(row, icon_name=icon_name, menu=menu)
         else:
             # Make all the later column cells non-editable
             self.set_noneditable_cells_in_row(row)
@@ -448,7 +439,6 @@ class MenuTableWidget(QTableWidget):
             menu_text = unicode(self.item(row, col).text()).strip()
             self.item(row, col).setText(menu_text)
         
-        
         if unicode(self.item(row, 1).text()):
             # Make sure that the other columns in this row are enabled if not already.
             if not self.cellWidget(row, len(COL_NAMES)-1):
@@ -462,19 +452,19 @@ class MenuTableWidget(QTableWidget):
         self.blockSignals(False)
     
     def image_combo_index_changed(self, combo, row):
-        if combo.currentText() == COMBO_IMAGE_ADD:
-            # Special item in the combo for choosing a new image to add to Calibre
-            self.display_add_new_image_dialog(select_in_combo=True, combo=combo)
-        # Regardless of new or existing item, update image on the title column
+        # Update image on the title column
         title_item = self.item(row, 1)
         title_item.setIcon(combo.itemIcon(combo.currentIndex()))
-        # Store the current index as item data in index 0 in case user cancels dialog in future
-        combo.setItemData(0, combo.currentIndex())
     
-    def set_editable_cells_in_row(self, row, image='', menu=None):
-        image_combo = ImageComboBox(self, self.image_map, image)
-        image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, row))
-        self.setCellWidget(row, 3, image_combo)
+    def create_image_combo_box(self, row, icon_name=None):
+        rslt = ImageComboBox(self.image_map, icon_name)
+        rslt.currentIndexChanged.connect(partial(self.image_combo_index_changed, rslt, row))
+        rslt.new_image_added.connect(self.update_all_image_combo_box)
+        self.append_context_menu(rslt)
+        return rslt
+    
+    def set_editable_cells_in_row(self, row, icon_name=None, menu=None):
+        self.setCellWidget(row, 3, self.create_image_combo_box(row, icon_name))
         menu = menu or self.create_blank_row_menu()
         self.setCellWidget(row, 4, SettingsButton(self, menu))
     
@@ -487,31 +477,21 @@ class MenuTableWidget(QTableWidget):
             self.setItem(row, col, item)
         self.item(row, 1).setIcon(get_icon(None))
     
-    def display_add_new_image_dialog(self, select_in_combo=False, combo=None):
-        add_image_dialog = ImageDialog(self, self.resources_dir, get_image_names(self.image_map))
+    def add_new_image_dialog(self):
+        add_image_dialog = ImageDialog(image_names=self.image_map.keys())
         add_image_dialog.exec_()
-        if add_image_dialog.result() == QDialog.Rejected:
-            # User cancelled the add operation or an error - set to previous value
-            if select_in_combo and combo:
-                prevIndex = combo.itemData(0)
-                combo.blockSignals(True)
-                combo.setCurrentIndex(prevIndex)
-                combo.blockSignals(False)
-            return
-        # User has added a new image so we need to repopulate every combo with new sorted list
-        self.image_map[add_image_dialog.image_name] = get_icon(add_image_dialog.image_name)
+        if add_image_dialog.result() == QDialog.Accepted:
+            self.update_all_image_combo_box(add_image_dialog.image_name)
+    
+    def update_all_image_combo_box(self, new_image):
+        self.image_map[new_image] = get_icon(new_image)
+        self.image_map = {k:self.image_map[k] for k in sorted(self.image_map.keys())}
         for update_row in range(self.rowCount()):
             cellCombo = self.cellWidget(update_row, 3)
             if cellCombo:
                 cellCombo.blockSignals(True)
                 cellCombo.populate_combo(self.image_map, cellCombo.currentText())
                 cellCombo.blockSignals(False)
-        # Now select the newly added item in this row if required
-        if select_in_combo and combo:
-            idx = combo.findText(add_image_dialog.image_name)
-            combo.blockSignals(True)
-            combo.setCurrentIndex(idx)
-            combo.blockSignals(False)
     
     def add_row(self):
         self.setFocus()
@@ -596,9 +576,7 @@ class MenuTableWidget(QTableWidget):
                 if col == 3:
                     # Image column has a combobox we have to recreate as cannot move widget (Qt crap)
                     icon_name = self.cellWidget(src_row, col).currentText()
-                    image_combo = ImageComboBox(self, self.image_map, icon_name)
-                    image_combo.currentIndexChanged.connect(partial(self.image_combo_index_changed, image_combo, dest_row))
-                    self.setCellWidget(dest_row, col, image_combo)
+                    self.setCellWidget(dest_row, col, self.create_image_combo_box(dest_row, icon_name))
                 elif col == 4:
                     self.setCellWidget(dest_row, col, self.cellWidget(src_row, col))
         else:
@@ -611,19 +589,6 @@ class MenuTableWidget(QTableWidget):
     def select_and_scroll_to_row(self, row):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
-    
-    def get_image_map(self):
-        image_map = {}
-        
-        if os.path.exists(self.resources_dir):
-            # Get the names of any .png images in this directory
-            for f in os.listdir(self.resources_dir):
-                if f.lower().endswith('.png'):
-                    image_name = os.path.basename(f)
-                    image_map[image_name] = get_icon(image_name)
-        
-        return image_map
-    
     
     def create_blank_row_menu(self):
         return get_default_menu()
@@ -745,131 +710,6 @@ class SettingsButton(QToolButton):
         if d.exec_() == d.Accepted:
             self.set_operation_list(d.operation_list)
 
-COMBO_IMAGE_ADD = _('Add New Image...')
-def get_image_names(image_map):
-    image_names = sorted(image_map.keys())
-    # Add a blank item at the beginning of the list, and a blank then special 'Add" item at end
-    image_names.insert(0, '')
-    image_names.append('')
-    image_names.append(COMBO_IMAGE_ADD)
-    return image_names
-
-class ImageComboBox(NoWheelComboBox):
-    def __init__(self, parent, image_map, selected_text):
-        NoWheelComboBox.__init__(self, parent)
-        self.populate_combo(image_map, selected_text)
-    
-    def populate_combo(self, image_map, selected_text):
-        self.clear()
-        for i, image in enumerate(get_image_names(image_map), 0):
-            self.insertItem(i, image_map.get(image, image), image)
-        idx = self.findText(selected_text)
-        self.setCurrentIndex(idx)
-        self.setItemData(0, idx)
-
-class ImageDialog(QDialog):
-    def __init__(self, parent=None, resources_dir='', image_names=[]):
-        QDialog.__init__(self, parent)
-        self.resources_dir = resources_dir
-        self.image_names = image_names
-        self.setWindowTitle(_('Add New Image'))
-        v = QVBoxLayout(self)
-        
-        group_box = QGroupBox(_('&Select image source'), self)
-        v.addWidget(group_box)
-        grid = QGridLayout()
-        self._radio_web = QRadioButton(_('From &web domain favicon'), self)
-        self._radio_web.setChecked(True)
-        self._web_domain_edit = QLineEdit(self)
-        self._radio_web.setFocusProxy(self._web_domain_edit)
-        grid.addWidget(self._radio_web, 0, 0)
-        grid.addWidget(self._web_domain_edit, 0, 1)
-        grid.addWidget(QLabel('e.g. www.amazon.com'), 0, 2)
-        self._radio_file = QRadioButton(_('From .png &file'), self)
-        self._input_file_edit = QLineEdit(self)
-        self._input_file_edit.setMinimumSize(200, 0)
-        self._radio_file.setFocusProxy(self._input_file_edit)
-        pick_button = QPushButton('...', self)
-        pick_button.setMaximumSize(24, 20)
-        pick_button.clicked.connect(self.pick_file_to_import)
-        grid.addWidget(self._radio_file, 1, 0)
-        grid.addWidget(self._input_file_edit, 1, 1)
-        grid.addWidget(pick_button, 1, 2)
-        group_box.setLayout(grid)
-        
-        save_layout = QHBoxLayout()
-        lbl_filename = QLabel(_('&Save as filename:'), self)
-        lbl_filename.setMinimumSize(155, 0)
-        self._save_as_edit = QLineEdit('', self)
-        self._save_as_edit.setMinimumSize(200, 0)
-        lbl_filename.setBuddy(self._save_as_edit)
-        lbl_ext = QLabel('.png', self)
-        save_layout.addWidget(lbl_filename, 0, Qt.AlignLeft)
-        save_layout.addWidget(self._save_as_edit, 0, Qt.AlignLeft)
-        save_layout.addWidget(lbl_ext, 1, Qt.AlignLeft)
-        v.addLayout(save_layout)
-        
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        button_box.accepted.connect(self.ok_clicked)
-        button_box.rejected.connect(self.reject)
-        v.addWidget(button_box)
-        self.resize(self.sizeHint())
-        self._web_domain_edit.setFocus()
-        self.new_image_name = None
-    
-    @property
-    def image_name(self):
-        return self.new_image_name
-    
-    def pick_file_to_import(self):
-        images = choose_files(None, _('menu icon dialog'), _('Select a .png file for the menu icon'),
-                             filters=[('PNG Image Files', ['png'])], all_files=False, select_only_single_file=True)
-        if not images:
-            return
-        f = images[0]
-        if not f.lower().endswith('.png'):
-            return error_dialog(self, _('Cannot import image'), _('Source image must be a .png file.'), show=True)
-        self._input_file_edit.setText(f)
-        self._save_as_edit.setText(os.path.splitext(os.path.basename(f))[0])
-    
-    def ok_clicked(self):
-        # Validate all the inputs
-        save_name = unicode(self._save_as_edit.text()).strip()
-        if not save_name:
-            return error_dialog(self, _('Cannot import image'), _('You must specify a filename to save as.'), show=True)
-        self.new_image_name = os.path.splitext(save_name)[0] + '.png'
-        if save_name.find('\\') > -1 or save_name.find('/') > -1:
-            return error_dialog(self, _('Cannot import image'), _('The save as filename should consist of a filename only.'), show=True)
-        if not os.path.exists(self.resources_dir):
-            os.makedirs(self.resources_dir)
-        dest_path = os.path.join(self.resources_dir, self.new_image_name)
-        if save_name in self.image_names or os.path.exists(dest_path):
-            if not question_dialog(self, _('Are you sure?'), _('An image with this name already exists - overwrite it?'), show_copy_button=False):
-                return
-        
-        if self._radio_web.isChecked():
-            try:
-                from urllib.request import urlretrieve
-            except ImportError:
-                from urllib import urlretrieve
-            domain = unicode(self._web_domain_edit.text()).strip()
-            if not domain:
-                return error_dialog(self, _('Cannot import image'), _('You must specify a web domain url'), show=True)
-            url = 'http://www.google.com/s2/favicons?domain=' + domain
-            urlretrieve(url, dest_path)
-            return self.accept()
-        else:
-            source_file_path = unicode(self._input_file_edit.text()).strip()
-            if not source_file_path:
-                return error_dialog(self, _('Cannot import image'), _('You must specify a source file.'), show=True)
-            if not source_file_path.lower().endswith('.png'):
-                return error_dialog(self, _('Cannot import image'), _('Source image must be a .png file.'), show=True)
-            if not os.path.exists(source_file_path):
-                return error_dialog(self, _('Cannot import image'), _('Source image does not exist!'), show=True)
-            shutil.copyfile(source_file_path, dest_path)
-            return self.accept()
-
-
 
 COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 class ConfigOperationListDialog(Dialog):
@@ -910,9 +750,9 @@ class ConfigOperationListDialog(Dialog):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the operation list
-        self._table = OperationListTableWidget(self.operation_list, self.book_ids, self)
-        heading_label.setBuddy(self._table)
-        table_layout.addWidget(self._table)
+        self.table = OperationListTableWidget(self.operation_list, self.book_ids, self)
+        heading_label.setBuddy(self.table)
+        table_layout.addWidget(self.table)
         
         # Add a vertical layout containing the the buttons to move up/down etc.
         button_layout = QVBoxLayout()
@@ -950,20 +790,17 @@ class ConfigOperationListDialog(Dialog):
         move_down_button.setIcon(get_icon('arrow-down.png'))
         button_layout.addWidget(move_down_button)
         
-        move_up_button.clicked.connect(self._table.move_rows_up)
-        move_down_button.clicked.connect(self._table.move_rows_down)
-        add_button.clicked.connect(self._table.add_row)
-        delete_button.clicked.connect(self._table.delete_rows)
-        copy_button.clicked.connect(self._table.copy_row)
-        
-        # Define a context menu for the table widget
-        self.create_context_menu(self._table)
+        move_up_button.clicked.connect(self.table.move_rows_up)
+        move_down_button.clicked.connect(self.table.move_rows_down)
+        add_button.clicked.connect(self.table.add_row)
+        delete_button.clicked.connect(self.table.delete_rows)
+        copy_button.clicked.connect(self.table.copy_row)
         
         # -- Accept/Reject buttons --
         layout.addWidget(self.bb)
     
     def accept(self):
-        self.operation_list = self._table.get_operation_list()
+        self.operation_list = self.table.get_operation_list()
         
         if len(self.operation_list)==0:
             debug_print('Saving a empty list')
@@ -977,88 +814,7 @@ class ConfigOperationListDialog(Dialog):
         Dialog.accept(self)
     
     def add_empty_operation(self):
-        self._table.add_row()
-    
-    def create_context_menu(self, table):
-        table.setContextMenuPolicy(Qt.ActionsContextMenu)
-        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), table)
-        act_import.triggered.connect(self.import_operations)
-        table.addAction(act_import)
-        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), table)
-        act_export.triggered.connect(self.export_operations)
-        table.addAction(act_export)
-    
-    def import_operations(self):
-        table = self._table
-        json_path = self.pick_json_to_import()
-        if not json_path:
-            return
-        
-        json_name = 'zz_import_temp'
-        json_temp = os.path.join(config_dir, json_name+'.json')
-        if iswindows:
-            json_temp = os.path.normpath(json_temp)
-        
-        try:
-            
-            shutil.copyfile(json_path, json_temp)
-            import_config = JSONConfig(json_name)
-            
-            if KEY_MENU.OPERATIONS not in import_config:
-                return error_dialog(self, _('Import failed'), _('This is not a valid JSON file'), show=True)
-            operation_list = import_config[KEY_MENU.OPERATIONS]
-            table.append_operation_list(operation_list)
-            
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(operation_list), json_path),
-                        show=True, show_copy_button=False)
-        except Exception as e:
-            return error_dialog(self, _('Export failed'), e, show=True)
-        finally:
-            if os.path.exists(json_temp):
-                os.remove(json_temp)
-    
-    def pick_json_to_import(self):
-        archives = choose_files(self, 'json dialog', _('Select a JSON file to import...'),
-                             filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])], all_files=False, select_only_single_file=True)
-        if not archives:
-            return
-        f = archives[0]
-        return f
-    
-    def export_operations(self):
-        table = self._table
-        operation_list = table.get_selected_operation()
-        if len(operation_list) == 0:
-            return error_dialog(self, _('Export failed'), _('No operations selected to export'), show=True)
-        json_path = self.pick_json_to_export()
-        if not json_path:
-            return
-        
-        json_name = 'zz_export_temp'
-        json_temp = os.path.join(config_dir, json_name+'.json')
-        if iswindows:
-            json_temp = os.path.normpath(json_temp)
-        
-        try:
-            
-            export_config = JSONConfig(json_name)
-            export_config[KEY_MENU.OPERATIONS] = operation_list
-            shutil.copyfile(json_temp, json_path)
-            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
-                        show=True, show_copy_button=False)
-        except Exception as e:
-            return error_dialog(self, _('Export failed'), e, show=True)
-        finally:
-            if os.path.exists(json_temp):
-                os.remove(json_temp)
-    
-    def pick_json_to_export(self):
-        fd = FileDialog(name='json dialog', title=_('Save the operations as...'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
-                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
-        fd.setParent(None)
-        if not fd.accepted:
-            return None
-        return fd.get_files()[0]
+        self.table.add_row()
 
 class OperationListTableWidget(QTableWidget):
     def __init__(self, operation_list=None, book_ids=None, *args):
@@ -1071,9 +827,74 @@ class OperationListTableWidget(QTableWidget):
         self.setSortingEnabled(False)
         self.setMinimumSize(800, 0)
         
+        self.append_context_menu()
+        
         self.populate_table(operation_list)
         
         self.itemDoubleClicked.connect(self.settings_doubleClick)
+    
+    
+    def append_context_menu(self):
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), self)
+        act_import.triggered.connect(self.import_operations)
+        self.addAction(act_import)
+        
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), self)
+        act_export.triggered.connect(self.export_operations)
+        self.addAction(act_export)
+    
+    def import_operations(self):
+        json_path = self.pick_json_to_import()
+        if not json_path:
+            return
+        
+        try:
+            with open(json_path, 'r') as fr:
+                json_import = json.load(fr)
+            
+            if KEY_MENU.OPERATIONS not in json_import:
+                return error_dialog(self, _('Import failed'), _('This is not a valid JSON file'), show=True)
+            operation_list = [Operation(e) for e in json_import[KEY_MENU.OPERATIONS]]
+            self.append_operation_list(operation_list)
+            
+            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(operation_list), json_path),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Export failed'), e, show=True)
+    
+    def pick_json_to_import(self):
+        archives = choose_files(self, 'json dialog', _('Select a JSON file to import...'),
+                             filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])], all_files=False, select_only_single_file=True)
+        if not archives:
+            return
+        f = archives[0]
+        return f
+    
+    def export_operations(self):
+        operation_list = self.get_selected_operation()
+        if len(operation_list) == 0:
+            return error_dialog(self, _('Export failed'), _('No operations selected to export'), show=True)
+        json_path = self.pick_json_to_export()
+        if not json_path:
+            return
+        
+        try:
+            with open(json_path, 'w') as fw:
+                json.dump({KEY_MENU.OPERATIONS: operation_list}, fw)
+            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
+                        show=True, show_copy_button=False)
+        except Exception as e:
+            return error_dialog(self, _('Export failed'), e, show=True)
+    
+    def pick_json_to_export(self):
+        fd = FileDialog(name='json dialog', title=_('Save the operations as...'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
+                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
+        fd.setParent(None)
+        if not fd.accepted:
+            return None
+        return fd.get_files()[0]
+    
     
     def populate_table(self, operation_list=None):
         self.clear()

@@ -35,7 +35,7 @@ except ImportError:
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 
-from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, calibre_version
+from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, calibre_version
 from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
 from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
@@ -57,9 +57,6 @@ class MassSearchReplaceAction(InterfaceAction):
     def genesis(self):
         self.is_library_selected = True
         self.menu = QMenu(GUI)
-        
-        load_plugin_resources(self.plugin_path)
-        
         error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         if error_operation not in ERROR_OPERATION.LIST.keys():
             PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION] = ERROR_OPERATION.DEFAULT
