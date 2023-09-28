@@ -737,7 +737,7 @@ class SettingsButton(QToolButton):
         self._menu[KEY_MENU.OPERATIONS] = operation_list
         self.setMenu(self._menu)
     
-    def get_operationList(self):
+    def get_operation_list(self):
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
