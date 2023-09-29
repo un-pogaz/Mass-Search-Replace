@@ -39,7 +39,6 @@ class ActionMassSearchReplace(InterfaceActionBase):
     #: The specified class must be defined in the specified module.
     actual_plugin           = __name__+'.action:MassSearchReplaceAction'
     
-    DEBUG_PRE = 'MassSearchReplace'
     
     def is_customizable(self):
         '''
@@ -73,7 +72,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
         # from the command line
         if self.actual_plugin_:
             from .config import ConfigWidget
-            return ConfigWidget(self.actual_plugin_)
+            return ConfigWidget()
     
     def save_settings(self, config_widget):
         '''

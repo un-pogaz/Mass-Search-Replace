@@ -165,10 +165,9 @@ def get_default_menu():
     return menu
 
 class ConfigWidget(QWidget):
-    def __init__(self, plugin_action):
+    def __init__(self):
         QWidget.__init__(self)
         
-        self.plugin_action = plugin_action
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
@@ -264,7 +263,7 @@ class ConfigWidget(QWidget):
     
     def edit_error_strategy(self):
         d = ErrorStrategyDialog(GUI)
-        if d.exec_() == d.Accepted:
+        if d.exec():
             PREFS[KEY_ERROR.ERROR] = {
                 KEY_ERROR.OPERATION : d.error_operation,
                 KEY_ERROR.UPDATE : d.error_update
@@ -372,20 +371,20 @@ class MenuTableWidget(QTableWidget):
             return
         
         # Build our unique list of images that need to be exported
-        image_names = {}
+        image_map = {}
         for menu in menu_list:
             image_name = menu[KEY_MENU.IMAGE]
-            if image_name and image_name not in image_names:
+            if image_name and image_name not in image_map:
                 image_path = os.path.join(get_local_resource.IMAGES, image_name)
                 if os.path.exists(image_path):
-                    image_names[image_name] = image_path
+                    image_map[image_name] = image_path
         
         try:
             # Create the zip file archive
             with ZipFile(archive_path, 'w') as archive_zip:
                 archive_zip.writestr(OWIP+'.json', json.dumps({KEY_MENU.MENU: menu_list}))
                 # Add any images referred to in those menu items that are local resources
-                for image_name, image_path in iteritems(image_names):
+                for image_name, image_path in iteritems(image_map):
                     archive_zip.write(image_path, os.path.basename(image_path))
             
             info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
@@ -478,10 +477,9 @@ class MenuTableWidget(QTableWidget):
         self.item(row, 1).setIcon(get_icon(None))
     
     def add_new_image_dialog(self):
-        add_image_dialog = ImageDialog(image_names=self.image_map.keys())
-        add_image_dialog.exec_()
-        if add_image_dialog.result() == QDialog.Accepted:
-            self.update_all_image_combo_box(add_image_dialog.image_name)
+        d = ImageDialog(existing_images=self.image_map.keys())
+        if d.exec():
+            self.update_all_image_combo_box(d.image_name)
     
     def update_all_image_combo_box(self, new_image):
         self.image_map[new_image] = get_icon(new_image)
@@ -706,14 +704,14 @@ class SettingsButton(QToolButton):
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
-        d = ConfigOperationListDialog(self, self.get_menu())
-        if d.exec_() == d.Accepted:
+        d = ConfigOperationListDialog(self.get_menu())
+        if d.exec():
             self.set_operation_list(d.operation_list)
 
 
 COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
 class ConfigOperationListDialog(Dialog):
-    def __init__(self, parent, menu, book_ids=None):
+    def __init__(self, menu, book_ids=None):
         menu = menu or get_default_menu()
         name = menu[KEY_MENU.TEXT]
         sub_menu = menu[KEY_MENU.SUBMENU]
@@ -730,7 +728,7 @@ class ConfigOperationListDialog(Dialog):
             title = _('List of Search/Replace operations for {:s}').format(name)
         
         
-        Dialog.__init__(self, title, 'config_list_SearchReplace', parent)
+        Dialog.__init__(self, title, 'config_list_SearchReplace', GUI)
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -1089,7 +1087,7 @@ class OperationListTableWidget(QTableWidget):
         
         src_operation = self.convert_row_to_operation(row)
         d = SearchReplaceDialog(src_operation, self.book_ids)
-        if d.exec_() == d.Accepted:
+        if d.exec():
             d.operation[KEY_QUERY.ACTIVE] = src_operation.get(KEY_QUERY.ACTIVE, True)
             self.populate_table_row(row, d.operation)
         

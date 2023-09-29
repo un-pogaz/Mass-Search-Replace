@@ -1254,9 +1254,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def openTemplateBox(self):
         
-        temp = TemplateBox(self, mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()))
-        temp.exec_()
-        if temp.template:
-            self.s_r_template.setText(temp.template)
+        d = TemplateBox(self, mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()))
+        d.exec()
+        if d.template:
+            self.s_r_template.setText(d.template)
         
         self.s_r_template_changed()  # simulate gain/loss of focus

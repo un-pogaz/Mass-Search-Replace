@@ -84,7 +84,6 @@ class MassSearchReplaceAction(InterfaceAction):
         
         unregister_menu_actions()
         
-        debug_print('Rebuilding menu')
         for menu in menu_list:
             if not menu_get_error(menu) and menu[KEY_MENU.ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, menu)
@@ -174,13 +173,12 @@ class MassSearchReplaceAction(InterfaceAction):
         menu[KEY_MENU.TEXT] = text +' '+ _('({:d} books)').format(len(book_ids))
         menu[KEY_MENU.OPERATIONS] = [Operation(o) for o in PREFS[KEY_MENU.QUICK]]
         
-        d = ConfigOperationListDialog(self, menu=menu, book_ids=book_ids)
+        d = ConfigOperationListDialog(menu=menu, book_ids=book_ids)
         
         if len(d.operation_list)==0:
             d.add_empty_operation()
         
-        if d.exec_() == d.Accepted:
-            
+        if d.exec():
             if len(d.operation_list)>0:
                 menu[KEY_MENU.OPERATIONS] = d.operation_list
                 
