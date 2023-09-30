@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
@@ -90,7 +83,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         self.menu.addSeparator()
         
-        ac = create_menu_item(self, self.menu, _('&Quick Search/Replace...'), ICON.PLUGIN)
+        ac = create_menu_item(self, self.menu, _('&Quick Search/Replace…'), ICON.PLUGIN)
         mn_books = QMenu()
         ac.setMenu(mn_books)
         
@@ -112,7 +105,7 @@ class MassSearchReplaceAction(InterfaceAction):
         
         self.menu.addSeparator()
         
-        create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
+        create_menu_action_unique(self, self.menu, _('&Customize plugin…'), 'config.png',
                                         triggered=self.show_configuration,
                                         unique_name='&Customize plugin')
         GUI.keyboard.finalize()
@@ -138,9 +131,9 @@ class MassSearchReplaceAction(InterfaceAction):
             parent_menu.addSeparator()
         elif len(menu[KEY_MENU.OPERATIONS])>0:
             if sub_menu_text:
-                name = '{:s} > {:s}'.format(sub_menu_text, menu_text)
+                name = f'{sub_menu_text} > {menu_text}'
             else:
-                name = '{:s}'.format(menu_text)
+                name = f'{menu_text}'
             
             name = name.replace('&','')
             debug_print('Rebuilding menu for:', name)
@@ -208,7 +201,7 @@ def menu_get_error(menu):
 
 class SearchReplacesProgressDialog(ProgressDialog):
     
-    title = _('{} progress').format(MassSearchReplaceAction.name)
+    title = _('{PLUGIN_NAME} progress').format(PLUGIN_NAME=MassSearchReplaceAction.name)
     
     def progress_text(self):
         return _('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(self.op_num, self.operation_count, self.book_num, self.book_count)
@@ -274,7 +267,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         else:
             
             #info debug
-            debug_print('Search/Replace launched for {:d} books with {:d} operation.'.format(self.book_count, self.operation_count))
+            debug_print(f'Search/Replace launched for {self.book_count} books with {self.operation_count} operation.')
             
             if self.operationErrorList:
                 debug_print('!! {:d} invalid operation was detected.'.format(len(self.operationErrorList)))
@@ -288,8 +281,8 @@ class SearchReplacesProgressDialog(ProgressDialog):
             if self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE:
                 debug_print('The library a was restored to its original state.')
             else:
-                debug_print('Search/Replace performed for {:d} books with a total of {:d} fields modify.'.format(self.books_update, self.fields_update))
-            debug_print('Search/Replace execute in {:0.3f} seconds.\n'.format(self.time_execut))
+                debug_print(f'Search/Replace performed for {self.books_update} books with a total of {self.fields_update} fields modify.')
+            debug_print(f'Search/Replace execute in {self.time_execut:0.3f} seconds.\n')
             
             #info dialog
             if self.exception_update:
@@ -303,22 +296,23 @@ class SearchReplacesProgressDialog(ProgressDialog):
             
             elif self.exception_safely:
                 
-                det_msg= '\n'.join('Book {:s} | {:s} > {:}'.format(book_info, field, e.__class__.__name__ +': '+ str(e)) for id, book_info, field, e in self.exception)
+                det_msg= '\n'.join( (f'Book {book_info} | {field} > ' + e.__class__.__name__ +': '+ str(e)) for id, book_info, field, e in self.exception)
                 
                 warning_dialog(GUI, _('Exceptions during the library update'),
                             _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
                               det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
             
             if self.operationErrorList:
-                det_msg= '\n'.join( 'Operation {:d}/{:d} > {:s}'.format(n, self.operation_count, err) for n, err in self.operationErrorList)
+                det_msg= '\n'.join(f'Operation {n}/{self.operation_count} > {err}' for n, err in self.operationErrorList)
                 
                 warning_dialog(GUI, _('Invalid operation'),
                             _('{:d} invalid operations has detected and have been ignored.').format(len(self.operationErrorList)),
                             det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
             
             if self.showUpdateReport and not (self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE):
+                books_update, fields_update = self.books_update, self.fields_update
                 info_dialog(GUI, _('Update Report'),
-                        _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(self.books_update, self.fields_update)
+                        _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(books_update, fields_update)
                         , show=True, show_copy_button=False)
             
         
@@ -327,7 +321,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
     
     def job_progress(self):
         
-        debug_print('Launch Search/Replace for {:d} books with {:d} operation.\n'.format(self.book_count, self.operation_count))
+        debug_print(f'Launch Search/Replace for {self.book_count} books with {self.operation_count} operation.\n')
         
         lst_id = []
         book_id_update = defaultdict(dict)
@@ -338,7 +332,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
             
             for self.op_num, operation in enumerate(self.operation_list, 1):
                 
-                debug_print('Operation {:d}/{:d} > {:s}'.format(self.op_num, self.operation_count, operation.string_info()))
+                debug_print(f'Operation {self.op_num}/{self.operation_count} >', operation.string_info())
                 
                 err = operation.get_error()
                 if not err:
@@ -404,7 +398,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         else:
             
             lst_id = []
-            for field, book_id_val_map in iteritems(self.s_r.updated_fields):
+            for field, book_id_val_map in self.s_r.updated_fields.items():
                 lst_id += book_id_val_map.keys()
             
             self.fields_update = len(lst_id)
@@ -414,9 +408,9 @@ class SearchReplacesProgressDialog(ProgressDialog):
             book_id_update = defaultdict(dict)
             
             if self.books_update > 0:
-                
-                debug_print('Update the database for {:d} books with a total of {:d} fields...\n'.format(self.books_update, self.fields_update))
-                self.set_value(-1, text=_('Update the library for {:d} books with a total of {:d} fields...').format(self.books_update, self.fields_update))
+                books_update, fields_update = self.books_update, self.fields_update
+                debug_print(f'Update the database for {books_update} books with a total of {fields_update} fields…\n')
+                self.set_value(-1, text=_('Update the library for {:d} books with a total of {:d} fields…').format(books_update, fields_update))
                 
                 if self.exceptionStrategy == ERROR_UPDATE.SAFELY or self.exceptionStrategy == ERROR_UPDATE.DONT_STOP:
                     
@@ -428,7 +422,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                     for id in iter(lst_id):
                         if self.exception and not dont_stop:
                             break
-                        for field, book_id_val_map in iteritems(self.s_r.updated_fields):
+                        for field, book_id_val_map in self.s_r.updated_fields.items():
                             if self.exception and not dont_stop:
                                 break
                             if id in book_id_val_map:
@@ -455,7 +449,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                         if self.exception:
                             raise Exception('raise')
                         
-                        for field, book_id_val_map in iteritems(self.s_r.updated_fields):
+                        for field, book_id_val_map in self.s_r.updated_fields.items():
                             if is_restore:
                                 src_field = self.dbAPI.all_field_for(field, book_id_val_map.keys())
                                 backup_fields[field] = src_field
@@ -468,7 +462,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                         self.exception.append( (None, None, None, e) )
                         
                         if is_restore:
-                            for field, book_id_val_map in iteritems(backup_fields):
+                            for field, book_id_val_map in backup_fields.items():
                                self.dbAPI.set_field(field, book_id_val_map)
                             book_id_update = {}
                 
@@ -477,12 +471,12 @@ class SearchReplacesProgressDialog(ProgressDialog):
         finally:
             
             lst_id = []
-            for field, book_id_map in iteritems(book_id_update):
+            for field, book_id_map in book_id_update.items():
                 lst_id += book_id_map.keys()
             self.fields_update = len(lst_id)
             
             lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
             
-            if calibre_version >= (5, 41,0) and self.useMark and self.fields_update:
+            if calibre_version >= (5,41,0) and self.useMark and self.fields_update:
                 set_marked('mass_search_replace_updated', lst_id)

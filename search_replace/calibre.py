@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # ~*~ coding: utf-8 ~*~
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
@@ -9,9 +7,6 @@ __docformat__ = 'restructuredtext en'
 
 
 # python 3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 from collections import defaultdict, OrderedDict
 from functools import partial
@@ -119,10 +114,10 @@ class KEY_QUERY:
 
 #Calibre
 def ThemedIcon(icon_name):
-    if calibre_version < (5, 90):
-        return QtGui.QIcon(I(icon_name))
-    else:
+    if calibre_version >= (6,0,0):
         return QtGui.QIcon.ic(icon_name)
+    else:
+        return QtGui.QIcon(I(icon_name))
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QtWidgets.QWidget):
@@ -613,7 +608,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 if id_type:
                     val = [val.get(id_type, '')]
                 else:
-                    val = ['%s:%s'%(t[0], t[1]) for t in iteritems(val)]
+                    val = ['%s:%s'%(t[0], t[1]) for t in val.items()]
             if val is None:
                 val = [] if fm['is_multiple'] else ['']
             elif not fm['is_multiple']:
@@ -859,7 +854,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                     dest_val = [dest_val.get(dst_id_type, '')]
                 else:
                     # convert the csp dict into a list
-                    dest_val = ['%s:%s'%(t[0], t[1]) for t in iteritems(dest_val)]
+                    dest_val = ['%s:%s'%(t[0], t[1]) for t in dest_val.items()]
             if dest_val is None:
                 dest_val = []
             elif not isinstance(dest_val, list):
@@ -1245,7 +1240,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             for book_id in self.ids:
                 self.do_search_replace(book_id)
             if self.set_field_calls:
-                for field, book_id_val_map in iteritems(self.set_field_calls):
+                for field, book_id_val_map in self.set_field_calls.items():
                     self.refresh_books.update(self.db.new_api.set_field(field, book_id_val_map))
         
         self.db.clean()

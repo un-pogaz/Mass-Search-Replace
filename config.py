@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
@@ -238,7 +231,7 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
         keyboard_layout.insertStretch(-1)
         
-        if calibre_version >= (5, 41,0):
+        if calibre_version >= (5,41,0):
             self.useMark = QCheckBox(_('Mark the updated books'), self)
             self.useMark.setChecked(PREFS[KEY_MENU.USE_MARK])
             keyboard_layout.addWidget(self.useMark)
@@ -247,7 +240,7 @@ class ConfigWidget(QWidget):
         self.updateReport.setChecked(PREFS[KEY_MENU.UPDATE_REPORT])
         keyboard_layout.addWidget(self.updateReport)
         
-        error_button = QPushButton(_('Error strategy')+'...', self)
+        error_button = QPushButton(_('Error strategy')+'…', self)
         error_button.setToolTip(_('Define the strategy when a error occurs during the library update'))
         error_button.clicked.connect(self.edit_error_strategy)
         keyboard_layout.addWidget(error_button)
@@ -256,7 +249,7 @@ class ConfigWidget(QWidget):
     def save_settings(self):
         PREFS[KEY_MENU.MENU] = self.table.get_menu_list()
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
-        if calibre_version >= (5, 41,0):
+        if calibre_version >= (5,41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
         debug_print('Save settings: operation count', len(PREFS), '\n')
         #debug_print('Save settings:\n', PREFS, '\n')
@@ -295,7 +288,7 @@ class MenuTableWidget(QTableWidget):
         parent = parent or self
         parent.setContextMenuPolicy(Qt.ActionsContextMenu)
         
-        act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image...'), parent)
+        act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image…'), parent)
         act_add_image.triggered.connect(self.add_new_image_dialog)
         parent.addAction(act_add_image)
         
@@ -307,11 +300,11 @@ class MenuTableWidget(QTableWidget):
         sep2.setSeparator(True)
         parent.addAction(sep2)
         
-        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), parent)
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import…'), parent)
         act_import.triggered.connect(self.import_menus)
         parent.addAction(act_import)
         
-        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), parent)
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export…'), parent)
         act_export.triggered.connect(self.export_menus)
         parent.addAction(act_export)
     
@@ -355,7 +348,7 @@ class MenuTableWidget(QTableWidget):
             return error_dialog(self, _('Import failed'), e, show=True)
     
     def pick_archive_to_import(self):
-        archives = choose_files(self, 'owip archive dialog', _('Select a menu file archive to import...'),
+        archives = choose_files(self, 'owip archive dialog', _('Select a menu file archive to import…'),
                              filters=[('OWIP Files', ['owip','owip.zip']),('ZIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
         if not archives:
             return
@@ -384,7 +377,7 @@ class MenuTableWidget(QTableWidget):
             with ZipFile(archive_path, 'w') as archive_zip:
                 archive_zip.writestr(OWIP+'.json', json.dumps({KEY_MENU.MENU: menu_list}))
                 # Add any images referred to in those menu items that are local resources
-                for image_name, image_path in iteritems(image_map):
+                for image_name, image_path in image_map.items():
                     archive_zip.write(image_path, os.path.basename(image_path))
             
             info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
@@ -393,7 +386,7 @@ class MenuTableWidget(QTableWidget):
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_archive_to_export(self):
-        fd = FileDialog(name='owip archive dialog', title=_('Save menu archive as...'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
+        fd = FileDialog(name='owip archive dialog', title=_('Save menu archive as…'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
                         parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
@@ -435,10 +428,10 @@ class MenuTableWidget(QTableWidget):
         self.blockSignals(True)
         
         if col == 1 or col == 2:
-            menu_text = unicode(self.item(row, col).text()).strip()
+            menu_text = self.item(row, col).text().strip()
             self.item(row, col).setText(menu_text)
         
-        if unicode(self.item(row, 1).text()):
+        if self.item(row, 1).text():
             # Make sure that the other columns in this row are enabled if not already.
             if not self.cellWidget(row, len(COL_NAMES)-1):
                 self.set_editable_cells_in_row(row)
@@ -568,7 +561,7 @@ class MenuTableWidget(QTableWidget):
         for col in range(0,3):
             self.setItem(dest_row, col, self.takeItem(src_row, col))
         
-        menu_text = unicode(self.item(dest_row, 1).text()).strip()
+        menu_text = self.item(dest_row, 1).text().strip()
         if menu_text:
             for col in range(3, len(COL_NAMES)):
                 if col == 3:
@@ -606,10 +599,10 @@ class MenuTableWidget(QTableWidget):
     def convert_row_to_menu(self, row):
         menu = self.create_blank_row_menu()
         menu[KEY_MENU.ACTIVE] = self.item(row, 0).checkState() == Qt.Checked
-        menu[KEY_MENU.TEXT] = unicode(self.item(row, 1).text()).strip()
-        menu[KEY_MENU.SUBMENU] = unicode(self.item(row, 2).text()).strip()
+        menu[KEY_MENU.TEXT] = self.item(row, 1).text().strip()
+        menu[KEY_MENU.SUBMENU] = self.item(row, 2).text().strip()
         if menu[KEY_MENU.TEXT]:
-            menu[KEY_MENU.IMAGE] = unicode(self.cellWidget(row, 3).currentText()).strip()
+            menu[KEY_MENU.IMAGE] = self.cellWidget(row, 3).currentText().strip()
             menu[KEY_MENU.OPERATIONS] = self.cellWidget(row, 4).get_operation_list()
         return menu
     
@@ -723,7 +716,7 @@ class ConfigOperationListDialog(Dialog):
             title = _('List of operations for a quick Search/Replaces')
         else:
             if sub_menu:
-                name = '{:s} > {:s}'.format(sub_menu, name)
+                name = f'{sub_menu} > {name}'
             
             title = _('List of Search/Replace operations for {:s}').format(name)
         
@@ -804,7 +797,7 @@ class ConfigOperationListDialog(Dialog):
             debug_print('Saving a empty list')
         else:
             txt = 'Saved operation list:\n' + '\n'.join(
-                'Operation {:d} > {:s}'.format(i, operation.string_info()) for i, operation in enumerate(self.operation_list, 1)
+                (f'Operation {i} > '+ operation.string_info()) for i, operation in enumerate(self.operation_list, 1)
             )
             #txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
             debug_print(txt)
@@ -834,11 +827,11 @@ class OperationListTableWidget(QTableWidget):
     
     def append_context_menu(self):
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
-        act_import = QAction(get_icon(ICON.IMPORT), _('&Import...'), self)
+        act_import = QAction(get_icon(ICON.IMPORT), _('&Import…'), self)
         act_import.triggered.connect(self.import_operations)
         self.addAction(act_import)
         
-        act_export = QAction(get_icon(ICON.EXPORT), _('&Export...'), self)
+        act_export = QAction(get_icon(ICON.EXPORT), _('&Export…'), self)
         act_export.triggered.connect(self.export_operations)
         self.addAction(act_export)
     
@@ -862,7 +855,7 @@ class OperationListTableWidget(QTableWidget):
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_json_to_import(self):
-        archives = choose_files(self, 'json dialog', _('Select a JSON file to import...'),
+        archives = choose_files(self, 'json dialog', _('Select a JSON file to import…'),
                              filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])], all_files=False, select_only_single_file=True)
         if not archives:
             return
@@ -886,7 +879,7 @@ class OperationListTableWidget(QTableWidget):
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_json_to_export(self):
-        fd = FileDialog(name='json dialog', title=_('Save the operations as...'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
+        fd = FileDialog(name='json dialog', title=_('Save the operations as…'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
                         parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
         fd.setParent(None)
         if not fd.accepted:
@@ -1153,7 +1146,7 @@ class ErrorStrategyDialog(Dialog):
         operation_label = QLabel(_('Set the strategy when an invalid operation has detected:'), self)
         layout.addWidget(operation_label)
         
-        self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_OPERATION.LIST)}, self.error_operation)
+        self.operationStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_OPERATION.LIST.items()}, self.error_operation)
         self.operationStrategy.currentIndexChanged.connect(self.operation_strategy_index_changed)
         layout.addWidget(self.operationStrategy)
         
@@ -1164,7 +1157,7 @@ class ErrorStrategyDialog(Dialog):
         update_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
         layout.addWidget(update_label)
         
-        self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in iteritems(ERROR_UPDATE.LIST)}, self.error_update)
+        self.updateStrategy = KeyValueComboBox(self, {key:value[0] for key, value in ERROR_UPDATE.LIST.items()}, self.error_update)
         self.updateStrategy.currentIndexChanged.connect(self.update_strategy_index_changed)
         layout.addWidget(self.updateStrategy)
         

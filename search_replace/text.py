@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
@@ -38,7 +36,7 @@ def get_empty_field(field):
     return _('The field "{:s}" is not defined').format(field)
 
 def get_for_invalid_value(field, value):
-    return _('The operation field "{:s}" contains a invalid value ({:s}).').format(field, str(value))
+    return _('The operation field "{:s}" contains a invalid value ({:s}).').format(field, value)
 
 def get_for_localized_field(field, value):
     return get_for_invalid_value(field, value)+'\n'+_('The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language.')

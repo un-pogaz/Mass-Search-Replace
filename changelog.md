@@ -2,8 +2,8 @@
 
 ## [1.7.6] - date
 
-### Internal
-- update common_utils
+### Changed
+- Drop Python 2 / Calibre 4 comatibility, only 5 and above
 
 ## [1.7.5] - 2023/10/07
 

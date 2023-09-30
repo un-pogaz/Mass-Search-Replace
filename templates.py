@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # ~*~ coding: utf-8 ~*~
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 from collections import defaultdict, OrderedDict
 from functools import partial
@@ -27,6 +21,7 @@ from .common_utils import get_icon, GUI
 TEMPLATE_PREFIX = 'TEMPLATE: '
 TEMPLATE_ERROR = 'TEMPLATE_ERROR: '
 TEMPLATE_FIELD = '{template}'
+
 
 try:
     load_translations()
@@ -86,5 +81,5 @@ class TemplateBox(TemplateDialog):
         return check_template(self.template) is True
     
     def accept(self):
-        self.template = unicode(self.textbox.toPlainText()).rstrip()
+        self.template = self.textbox.toPlainText().rstrip()
         TemplateDialog.accept(self)
