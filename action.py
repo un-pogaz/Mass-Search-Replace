@@ -13,8 +13,9 @@ except NameError:
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any, Union
 
-import copy, time
+import time
 
 try:
     from qt.core import (
@@ -28,7 +29,7 @@ except ImportError:
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 
-from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, calibre_version
+from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, CALIBRE_VERSION
 from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
 from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
 from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
@@ -64,16 +65,12 @@ class MassSearchReplaceAction(InterfaceAction):
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
     
     def initialization_complete(self):
-        # we implement here to have access to current_db
-        # if we try this in genesis() we get the error:
-        # AttributeError: 'Main' object has no attribute 'current_db'
         self.rebuild_menus()
     
     def rebuild_menus(self):
         menu_list = PREFS[KEY_MENU.MENU]
         self.menu.clear()
         sub_menus = {}
-        
         
         unregister_menu_actions()
         
@@ -107,7 +104,8 @@ class MassSearchReplaceAction(InterfaceAction):
         
         create_menu_action_unique(self, self.menu, _('&Customize plugin…'), 'config.png',
                                         triggered=self.show_configuration,
-                                        unique_name='&Customize plugin')
+                                        unique_name='&Customize plugin',
+                                        shortcut=False)
         GUI.keyboard.finalize()
     
     def append_menu_item_ex(self, parent_menu, sub_menus, menu):
@@ -131,17 +129,17 @@ class MassSearchReplaceAction(InterfaceAction):
             parent_menu.addSeparator()
         elif len(menu[KEY_MENU.OPERATIONS])>0:
             if sub_menu_text:
-                name = f'{sub_menu_text} > {menu_text}'
+                unique_name = f'{sub_menu_text} > {menu_text}'
             else:
-                name = f'{menu_text}'
+                unique_name = f'{menu_text}'
             
-            name = name.replace('&','')
-            debug_print('Rebuilding menu for:', name)
+            unique_name = unique_name.replace('&','')
+            debug_print('Rebuilding menu for:', unique_name)
             
             create_menu_action_unique(self, parent_menu, menu_text, image_name,
-                      triggered=partial(self.run_SearchReplace, menu, None),
-                      unique_name=name, shortcut_name=name)
-        
+                        triggered=partial(self.run_SearchReplace, menu, None),
+                        unique_name=unique_name,
+                        )
     
     
     def quick_selected(self):
@@ -190,7 +188,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.interface_action_base_plugin.do_user_config(GUI)
 
 
-def menu_get_error(menu):
+def menu_get_error(menu: QMenu) -> Union[Exception, None]:
     
     difference = set(KEY_MENU.ALL).difference(menu)
     for key in difference:
@@ -478,5 +476,5 @@ class SearchReplacesProgressDialog(ProgressDialog):
             lst_id = list(dict.fromkeys(lst_id))
             self.books_update = len(lst_id)
             
-            if calibre_version >= (5,41,0) and self.useMark and self.fields_update:
+            if CALIBRE_VERSION >= (5,41,0) and self.useMark and self.fields_update:
                 set_marked('mass_search_replace_updated', lst_id)

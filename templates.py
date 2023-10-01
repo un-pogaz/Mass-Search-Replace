@@ -9,13 +9,14 @@ __docformat__ = 'restructuredtext en'
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any
 
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_dialog import TemplateDialog
 
-from .common_utils import get_icon, GUI
+from .common_utils import get_icon, GUI, current_db
 
 
 TEMPLATE_PREFIX = 'TEMPLATE: '
@@ -28,8 +29,8 @@ try:
 except NameError:
     pass
 
-def check_template(template, show_error=False):
-    db = GUI.current_db
+def check_template(template, show_error=False) -> bool:
+    db = current_db()
     error_msgs = [
         TEMPLATE_ERROR,
         'unknown function',
@@ -60,7 +61,7 @@ def check_template(template, show_error=False):
 
 class TemplateBox(TemplateDialog):
     def __init__(self, parent=None, mi=None, fm=None, template_text=''):
-        self.db = GUI.current_db
+        self.db = current_db()
         self.template = template_text
         parent = parent or GUI
         

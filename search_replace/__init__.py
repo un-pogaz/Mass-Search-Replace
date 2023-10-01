@@ -13,23 +13,24 @@ except NameError:
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any, List
 
 import copy
 
 try:
     from qt.core import (
-        QSize, QVBoxLayout,
+        QVBoxLayout,
     )
 except ImportError:
     from PyQt5.Qt import (
-        QSize, QVBoxLayout,
+        QVBoxLayout,
     )
 
 from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.widgets2 import Dialog
 
-from ..common_utils import debug_print, get_icon, GUI
-from ..common_utils.columns import get_possible_idents, get_possible_fields
+from ..common_utils import debug_print, get_icon, GUI, current_db
+from ..common_utils.columns import get_all_identifiers, get_possible_fields
 from .calibre import MetadataBulkWidget, KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
 from . import text as CalibreText
 
@@ -42,7 +43,7 @@ class Operation(dict):
     def __init__(self, src=None):
         dict.__init__(self)
         if not src:
-            if not Operation._s_r or Operation._s_r.db != GUI.current_db:
+            if not Operation._s_r or Operation._s_r.db != current_db():
                 _s_r = Operation._s_r = SearchReplaceWidget([0])
             if not Operation._default_operation:
                 Operation._default_operation = _s_r.save_settings()
@@ -52,8 +53,7 @@ class Operation(dict):
         
         self.update(src)
     
-    
-    def get_error(self):
+    def get_error(self) -> Any:
         
         if not self:
             return TypeError
@@ -86,7 +86,7 @@ class Operation(dict):
         if dest_field and (dest_field not in writable_fields):
             return OperationError(_('Destination field "{:s}" is not available for this library').format(dest_field))
         
-        possible_idents = get_possible_idents()
+        possible_idents = get_all_identifiers()
         
         if search_field == 'identifiers':
             src_ident = self[KEY_QUERY.S_R_SRC_IDENT]
@@ -95,7 +95,7 @@ class Operation(dict):
         
         return None
     
-    def test_full_error(self):
+    def test_full_error(self) -> Any:
         err = self.get_error()
         if err:
             return err
@@ -103,10 +103,10 @@ class Operation(dict):
         Operation._s_r.load_settings(self)
         return Operation._s_r.get_error()
         
-    def is_full_valid(self):
+    def is_full_valid(self) -> bool:
         return self.test_full_error() == None
         
-    def get_para_list(self):
+    def get_para_list(self) -> List[str]:
         name = self.get(KEY_QUERY.NAME, '')
         column = self.get(KEY_QUERY.SEARCH_FIELD, '')
         field = self.get(KEY_QUERY.DESTINATION_FIELD, '')
@@ -131,7 +131,7 @@ class Operation(dict):
         
         return [ name, column, template, search_mode, search_for, replace_with ]
         
-    def string_info(self):
+    def string_info(self) -> str:
         tbl = self.get_para_list()
         if not tbl[2]: del tbl[2]
         
@@ -141,7 +141,7 @@ class OperationError(ValueError):
     pass
 
 
-def clean_empty_operation(operation_list):
+def clean_empty_operation(operation_list) -> List[Operation]:
     operation_list = operation_list or []
     default = Operation()
     rlst = []
@@ -153,7 +153,7 @@ def clean_empty_operation(operation_list):
     
     return rlst
 
-def operation_list_active(operation_list):
+def operation_list_active(operation_list) -> List[Operation]:
     rlst = []
     for operation in clean_empty_operation(operation_list):
         if operation.get(KEY_QUERY.ACTIVE, True):
@@ -170,13 +170,13 @@ class SearchReplaceWidget(MetadataBulkWidget):
     def load_settings(self, operation):
         self.load_query(operation)
     
-    def save_settings(self):
+    def save_settings(self) -> Operation:
         return Operation(self.get_query())
     
-    def get_error(self):
+    def get_error(self) -> Any:
         return Operation(self.get_query()).get_error()
     
-    def search_replace(self, book_id, operation=None):
+    def search_replace(self, book_id, operation=None) -> Any:
         if operation:
             self.load_settings(operation)
         
@@ -190,7 +190,11 @@ class SearchReplaceDialog(Dialog):
     def __init__(self, operation=None, book_ids=[]):
         self.operation = operation or Operation()
         self.widget = SearchReplaceWidget(book_ids[:10])
-        Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace')
+        Dialog.__init__(self,
+            title=_('Configuration of a Search/Replace operation'),
+            name='plugin.MassSearchReplace:config_query_SearchReplace',
+            parent=GUI,
+        )
     
     def setup_ui(self):
         l = QVBoxLayout()
@@ -202,7 +206,6 @@ class SearchReplaceDialog(Dialog):
             self.widget.load_settings(self.operation)
     
     def accept(self):
-        
         err = self.widget.get_error()
         
         if err:

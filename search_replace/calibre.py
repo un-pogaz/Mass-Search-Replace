@@ -10,8 +10,10 @@ __docformat__ = 'restructuredtext en'
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any
 
-import regex, numbers
+import regex
+import numbers
 
 try:
     from qt.core import (
@@ -23,7 +25,7 @@ except:
     )
 
 from calibre import prints
-from calibre.constants import iswindows, isosx, numeric_version as calibre_version
+from calibre.constants import iswindows, isosx, numeric_version as CALIBRE_VERSION
 from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
 from calibre.ebooks.metadata.book.formatter import SafeFormat
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
@@ -39,7 +41,7 @@ try:
 except:
     setup_status_actions, update_status_actions = None, None
 
-from ..common_utils import GUI
+from ..common_utils import GUI, current_db
 from ..templates import TemplateBox, TEMPLATE_FIELD, check_template
 from . import text as CalibreText
 
@@ -114,7 +116,7 @@ class KEY_QUERY:
 
 #Calibre
 def ThemedIcon(icon_name):
-    if calibre_version >= (6,0,0):
+    if CALIBRE_VERSION >= (6,0,0):
         return QtGui.QIcon.ic(icon_name)
     else:
         return QtGui.QIcon(I(icon_name))
@@ -123,14 +125,14 @@ def ThemedIcon(icon_name):
 class MetadataBulkWidget(QtWidgets.QWidget):
     def __init__(self, book_ids=[], refresh_books=set([])):
         QtWidgets.QWidget.__init__(self)
-        self.db = GUI.current_db
+        self.db = current_db()
         self.ids = book_ids
         self.refresh_books = refresh_books
         self.set_field_calls = defaultdict(dict)
         self.changed = False
         self._init_controls()
         
-        if calibre_version >= (6,12,0):
+        if CALIBRE_VERSION >= (6,12,0):
             setup_status_actions(self.test_result)
         self.prepare_search_and_replace()
     
@@ -773,9 +775,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             tt = ''
             col = 'rgba(0, 255, 0, 20%)'
         
-        if calibre_version >= (6,12,0):
+        if CALIBRE_VERSION >= (6,12,0):
             update_status_actions(self.test_result, self.s_r_error is None, tt)
-        elif calibre_version >= (5,0,0):
+        elif CALIBRE_VERSION >= (5,0,0):
             self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
         else:
             self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
