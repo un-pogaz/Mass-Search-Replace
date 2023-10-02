@@ -334,7 +334,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 
                 err = operation.get_error()
                 if not err:
-                    self.s_r.load_settings(operation)
+                    self.s_r.load_operation(operation)
                     err = self.s_r.get_error()
                 
                 if err:

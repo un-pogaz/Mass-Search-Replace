@@ -42,7 +42,7 @@ except:
     setup_status_actions, update_status_actions = None, None
 
 from ..common_utils import GUI, current_db
-from ..templates import TemplateBox, TEMPLATE_FIELD, check_template
+from ..common_utils.templates import TemplateEditorDialogButton, TEMPLATE_FIELD, check_template, open_template_dialog
 from . import text as CalibreText
 
 
@@ -113,13 +113,6 @@ class KEY_QUERY:
     
     ACTIVE = '_MSR:Active'
 
-
-#Calibre
-def ThemedIcon(icon_name):
-    if CALIBRE_VERSION >= (6,0,0):
-        return QtGui.QIcon.ic(icon_name)
-    else:
-        return QtGui.QIcon(I(icon_name))
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QtWidgets.QWidget):
@@ -372,12 +365,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.label_31.setBuddy(self.test_text)
         
         ##un_pogaz template_button
-        self.template_button = QtWidgets.QPushButton(self.tabWidgetPage3)
+        self.template_button = TemplateEditorDialogButton(show_icon=True, show_text=False, parent=self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
-        self.template_button.setIcon(ThemedIcon('template_funcs.png'))
         self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
-        self.template_button.setToolTip(CalibreText.TEMPLATE_BUTTON_ToolTip)
-        self.template_button.clicked.connect(self.openTemplateBox)
+        self.template_button.clicked.connect(self.open_template_dialog)
         self.vargrid.addWidget(self.template_button, 5, 2, 1, 1)
         ##
         
@@ -1248,12 +1239,11 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.db.clean()
         return
     
-    
-    def openTemplateBox(self):
+    def open_template_dialog(self):
         
-        d = TemplateBox(self, mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()))
-        d.exec()
-        if d.template:
-            self.s_r_template.setText(d.template)
+        code, template = open_template_dialog(mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()), parent=self)
+        
+        if template:
+            self.s_r_template.setText(template)
         
         self.s_r_template_changed()  # simulate gain/loss of focus

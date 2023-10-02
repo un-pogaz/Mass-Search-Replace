@@ -40,11 +40,11 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
-from .common_utils import debug_print, get_icon, GUI, PREFS_json, CALIBRE_VERSION, get_image_map, get_local_resource
+from .common_utils import debug_print, get_icon, GUI, PREFS_json, CALIBRE_VERSION, get_image_map, local_resource
 from .common_utils.dialogs import KeyboardConfigDialogButton, ImageDialog
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTableWidgetItem, ImageComboBox, KeyValueComboBox
-from .templates import TEMPLATE_FIELD
+from .common_utils.templates import TEMPLATE_FIELD
 from .search_replace import SearchReplaceDialog, KEY_QUERY, Operation, clean_empty_operation
 
 
@@ -228,7 +228,7 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
+        keyboard_layout.addWidget(KeyboardConfigDialogButton(parent=self))
         keyboard_layout.insertStretch(-1)
         
         if CALIBRE_VERSION >= (5,41,0):
@@ -274,7 +274,7 @@ class MenuTableWidget(QTableWidget):
         self.setSortingEnabled(False)
         self.setMinimumSize(600, 0)
         
-        self.append_context_menu()
+        self.append_context_menu(self)
         
         self.image_map = get_image_map()
         
@@ -282,7 +282,7 @@ class MenuTableWidget(QTableWidget):
         
         self.cellChanged.connect(self.cell_changed)
     
-    def append_context_menu(self, parent=None):
+    def append_context_menu(self, parent):
         parent.setContextMenuPolicy(Qt.ActionsContextMenu)
         
         act_add_image = QAction(get_icon(ICON.ADD_IMAGE), _('&Add image…'), parent)
@@ -307,9 +307,9 @@ class MenuTableWidget(QTableWidget):
     
     
     def open_images_folder(self):
-        if not os.path.exists(get_local_resource.IMAGES):
-            os.makedirs(get_local_resource.IMAGES)
-        open_local_file(get_local_resource.IMAGES)
+        if not os.path.exists(local_resource.IMAGES):
+            os.makedirs(local_resource.IMAGES)
+        open_local_file(local_resource.IMAGES)
     
     def import_menus(self):
         archive_path = self.pick_archive_to_import()
@@ -319,8 +319,8 @@ class MenuTableWidget(QTableWidget):
         json_name = OWIP+'.json'
         
         # Write the whole file contents into the resources\images directory
-        if not os.path.exists(get_local_resource.IMAGES):
-            os.makedirs(get_local_resource.IMAGES)
+        if not os.path.exists(local_resource.IMAGES):
+            os.makedirs(local_resource.IMAGES)
         with ZipFile(archive_path, 'r') as zf:
             contents = zf.namelist()
             if json_name not in contents:
@@ -329,7 +329,7 @@ class MenuTableWidget(QTableWidget):
                 if resource == json_name:
                     json_import = json.loads(zf.read(resource))
                 else:
-                    fs = os.path.join(get_local_resource.IMAGES, resource)
+                    fs = os.path.join(local_resource.IMAGES, resource)
                     with open(fs,'wb') as f:
                         f.write(zf.read(resource))
         
@@ -366,7 +366,7 @@ class MenuTableWidget(QTableWidget):
         for menu in menu_list:
             image_name = menu[KEY_MENU.IMAGE]
             if image_name and image_name not in image_map:
-                image_path = os.path.join(get_local_resource.IMAGES, image_name)
+                image_path = I(image_name)
                 if os.path.exists(image_path):
                     image_map[image_name] = image_path
         
@@ -686,7 +686,7 @@ class SettingsButton(QToolButton):
     
     def set_operation_list(self, operation_list):
         self._menu[KEY_MENU.OPERATIONS] = operation_list
-        self.setMenu(self._menu)
+        self.set_menu(self._menu)
     
     def get_operation_list(self) -> List[Operation]:
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])

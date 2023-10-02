@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# ~*~ coding: utf-8 ~*~
+# -*- coding: utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
@@ -46,7 +46,7 @@ class Operation(dict):
             if not Operation._s_r or Operation._s_r.db != current_db():
                 _s_r = Operation._s_r = SearchReplaceWidget([0])
             if not Operation._default_operation:
-                Operation._default_operation = _s_r.save_settings()
+                Operation._default_operation = _s_r.get_operation()
                 Operation._default_operation[KEY_QUERY.ACTIVE] = True
             
             src = copy.copy(Operation._default_operation)
@@ -100,7 +100,7 @@ class Operation(dict):
         if err:
             return err
         Operation()
-        Operation._s_r.load_settings(self)
+        Operation._s_r.load_operation(self)
         return Operation._s_r.get_error()
         
     def is_full_valid(self) -> bool:
@@ -164,13 +164,16 @@ def operation_list_active(operation_list) -> List[Operation]:
 
 class SearchReplaceWidget(MetadataBulkWidget):
     def __init__(self, book_ids=[], refresh_books=set([])):
+        self.original_operation = None
         MetadataBulkWidget.__init__(self, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
+        self.load_query = self.load_operation
     
-    def load_settings(self, operation):
-        self.load_query(operation)
+    def load_operation(self, operation):
+        self.original_operation = Operation(operation)
+        MetadataBulkWidget.load_query(self, operation)
     
-    def save_settings(self) -> Operation:
+    def get_operation(self) -> Operation:
         return Operation(self.get_query())
     
     def get_error(self) -> Any:
@@ -178,7 +181,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
     
     def search_replace(self, book_id, operation=None) -> Any:
         if operation:
-            self.load_settings(operation)
+            self.load_operation(operation)
         
         err = self.get_error()
         if not err:
@@ -203,36 +206,49 @@ class SearchReplaceDialog(Dialog):
         l.addWidget(self.bb)
         
         if self.operation:
-            self.widget.load_settings(self.operation)
+            self.widget.load_operation(self.operation)
     
     def accept(self):
         err = self.widget.get_error()
         
         if err:
             if question_dialog(self, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
-                             default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
+                             _('The registering of Find/Replace operation has failed.\n{:s}\n'
+                               'Do you want discard the changes?').format(str(err)),
+                               default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
                 
                 Dialog.reject(self)
                 return
             else:
                 return
         
-        new_operation = self.widget.save_settings()
+        new_operation = self.widget.get_operation()
+        original_operation = self.widget.original_operation
         new_operation_name = new_operation.get(KEY_QUERY.NAME, None)
-        if new_operation_name and new_operation_name == self.operation.get(KEY_QUERY.NAME, None):
+        original_operation_name = original_operation.get(KEY_QUERY.NAME, None)
+        if new_operation_name and new_operation_name == original_operation_name:
             different = False
             for k in new_operation:
-                if k in self.operation and new_operation[k] != self.operation[k]:
+                if k in original_operation and new_operation[k] != original_operation[k]:
+                    if k == KEY_QUERY.S_R_SRC_IDENT and not KEY_QUERY.SEARCH_FIELD == 'identifiers':
+                        continue
+                    if k == KEY_QUERY.S_R_DST_IDENT and not KEY_QUERY.DESTINATION_FIELD == 'identifiers':
+                        continue
                     different = True
                     break
             
             if different:
-                new_operation[KEY_QUERY.NAME] = ''
-                self.operation = new_operation
-            
-        else:
-            self.operation = new_operation
+                if question_dialog(self, _('Changed operation'),
+                                 _('The content of the Find/Replace operation "{:s}" was edited after being loaded into the editor.\n'
+                                   'The operation will be saved has it and not as a shared named operation!\n'
+                                   'Do you want continue?').format(new_operation_name),
+                                   default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
+                    
+                    new_operation[KEY_QUERY.NAME] = ''
+                else:
+                    return
+        
+        self.operation = new_operation
         
         debug_print('Saved operation >', self.operation.string_info())
         debug_print(self.operation)
