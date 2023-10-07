@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.7.5] - 2023/10/07
+
+### Bug fixes
+- Fix NotImplementedError: set() cannot be used in this context. ProxyMetadata is read only
+
 ## [1.7.4] - 2023/09/31
 
 ### Bug fixes

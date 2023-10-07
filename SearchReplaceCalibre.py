@@ -972,7 +972,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             dest = source
         
         dfm = self.db.field_metadata[dest]
-        mi = self.db.new_api.get_proxy_metadata(book_id)
+        mi = self.db.new_api.get_metadata(book_id)
         
         #edit the metadata object with the stored edited field
         if dest in self.set_field_calls:
@@ -1030,7 +1030,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     # }}}
     
     def hasValue(self, v):
-        if v == None: return False
+        if v is None: return False
         elif v is True or v is False: return True
         elif v is int() or v is float(): return True
         else:
@@ -1233,7 +1233,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                     show=True)
             return False
         self.changed = bool(self.ids)
-                
+        
         self.set_field_calls = defaultdict(dict)
         
         if do_sr:
