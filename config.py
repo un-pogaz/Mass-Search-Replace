@@ -549,7 +549,7 @@ class MenuTableWidget(QTableWidget):
             self.swap_row_widgets(selrow.row() + 2, selrow.row())
         scroll_to_row = last_sel_row + 1
         if scroll_to_row < self.rowCount() - 1:
-            scroll_to_row = scroll_to_row + 1
+            scroll_to_row += 1
         self.scrollToItem(self.item(scroll_to_row, 0))
     
     def swap_row_widgets(self, src_row, dest_row):
@@ -1028,7 +1028,7 @@ class OperationListTableWidget(QTableWidget):
             self.swap_row_widgets(selrow + 2, selrow)
         scroll_to_row = last_sel_row + 1
         if scroll_to_row < self.rowCount() - 1:
-            scroll_to_row = scroll_to_row + 1
+            scroll_to_row += 1
         self.scrollToItem(self.item(scroll_to_row, 0))
     
     def swap_row_widgets(self, src_row, dest_row):

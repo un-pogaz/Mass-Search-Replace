@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2023-10-02 17:11+0200\n"
+"POT-Creation-Date: 2023-10-08 13:51+0200\n"
 "PO-Revision-Date: 2023-08-08 19:22+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: search_replace/calibre.py\n"
@@ -136,7 +136,7 @@ msgstr ""
 msgid "Update the library for {:d} books with a total of {:d} fields…"
 msgstr ""
 
-#: common_utils/__init__.py:368
+#: common_utils/__init__.py:407
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr ""
 
@@ -341,7 +341,7 @@ msgstr ""
 msgid "No notes"
 msgstr ""
 
-#: common_utils/widgets.py:441
+#: common_utils/widgets.py:442
 msgid "Add New Image…"
 msgstr ""
 

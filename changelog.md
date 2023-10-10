@@ -3,7 +3,7 @@
 ## [1.8.0] - date
 
 ### Changed
-- Drop Python 2 / Calibre 4 comatibility, only 5 and above
+- Drop Python 2 / Calibre 4 compatibility, only Calibre 5 and above
 
 ## [1.7.5] - 2023/10/07
 

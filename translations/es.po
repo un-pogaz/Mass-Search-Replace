@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2023-10-02 17:11+0200\n"
-"PO-Revision-Date: 2023-10-02 17:11+0200\n"
+"POT-Creation-Date: 2023-10-08 13:51+0200\n"
+"PO-Revision-Date: 2023-10-08 13:51+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: search_replace/calibre.py\n"
@@ -146,7 +146,7 @@ msgstr ""
 msgid "Update the library for {:d} books with a total of {:d} fields…"
 msgstr "Actualizar la biblioteca para {:d} libros con un total de {:d} campos…"
 
-#: common_utils/__init__.py:368
+#: common_utils/__init__.py:407
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr "No puede configurar este complemento antes de reiniciar calibre."
 
@@ -351,7 +351,7 @@ msgstr ""
 msgid "No notes"
 msgstr ""
 
-#: common_utils/widgets.py:441
+#: common_utils/widgets.py:442
 msgid "Add New Image…"
 msgstr "Agregar nueva imagen…"
 
@@ -737,6 +737,3 @@ msgstr "El campo de operación \"{:s}\" contiene un valor no válido ({:s})."
 #: search_replace/text.py:42
 msgid "The value of this field is localized (translated). This can cause problems when using settings shared on internet or when changing the user interface language."
 msgstr "El valor de este campo está localizado (traducido). Esto puede causar problemas al usar configuraciones compartidas en Internet o al cambiar el idioma de la interfaz de usuario."
-
-#~ msgid "Clear"
-#~ msgstr "Borrar"
