@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2023-10-08 13:51+0200\n"
-"PO-Revision-Date: 2023-10-08 13:51+0200\n"
+"POT-Creation-Date: 2023-10-21 21:56+0200\n"
+"PO-Revision-Date: 2023-10-21 21:56+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -184,11 +184,11 @@ msgstr "¿Está seguro de que desea borrar su configuración en esta biblioteca 
 
 #: common_utils/dialogs.py:201
 msgid "View library preferences"
-msgstr ""
+msgstr "Ver preferencias de biblioteca"
 
 #: common_utils/dialogs.py:202
 msgid "View data stored in the library database for this plugin"
-msgstr ""
+msgstr "Ver datos almacenados en la base de datos de la biblioteca para este complemento"
 
 #: common_utils/dialogs.py:232
 msgid "Cancel"
@@ -333,25 +333,25 @@ msgstr "Indefinido"
 
 #: common_utils/widgets.py:270
 msgid "Subset of values associate to the books"
-msgstr ""
+msgstr "Subconjunto de valores asociados a los libros"
 
 #: common_utils/widgets.py:271
 msgid "No books"
-msgstr ""
+msgstr "Sin libros"
 
 #: common_utils/widgets.py:272
 msgid "{:d} books (no values)"
-msgstr ""
+msgstr "{:d} libros (sin valores)"
 
 #: common_utils/widgets.py:273
 msgid "{:d} books"
-msgstr ""
+msgstr "Sin notas"
 
 #: common_utils/widgets.py:396
 msgid "No notes"
-msgstr ""
+msgstr "Agregar nueva imagen…"
 
-#: common_utils/widgets.py:442
+#: common_utils/widgets.py:447
 msgid "Add New Image…"
 msgstr "Agregar nueva imagen…"
 
@@ -686,10 +686,8 @@ msgstr ""
 "¿Quieres descartar los cambios?"
 
 #: search_replace/__init__.py:241
-#, fuzzy
-#| msgid "Add operation"
 msgid "Changed operation"
-msgstr "Agregar operación"
+msgstr ""
 
 #: search_replace/__init__.py:242
 msgid ""
