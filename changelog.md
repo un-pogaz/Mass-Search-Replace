@@ -1,6 +1,6 @@
 # Changelog - Mass Search/Replace
 
-## [1.8.0] - date
+## [1.8.0] - 2023/11/17
 
 ### Changed
 - Drop Python 2 / Calibre 4 compatibility, only Calibre 5 and above
