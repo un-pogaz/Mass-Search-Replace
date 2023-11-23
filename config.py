@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
-__docformat__ = 'restructuredtext en'
 
 
 try:
@@ -843,7 +841,7 @@ class OperationListTableWidget(QTableWidget):
             return
         
         try:
-            with open(json_path, 'r') as fr:
+            with open(json_path) as fr:
                 json_import = json.load(fr)
             
             if KEY_MENU.OPERATIONS not in json_import:

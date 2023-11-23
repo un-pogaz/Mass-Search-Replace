@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
-__docformat__ = 'restructuredtext en'
 
 
 try:
@@ -268,13 +266,13 @@ class SearchReplacesProgressDialog(ProgressDialog):
             debug_print(f'Search/Replace launched for {self.book_count} books with {self.operation_count} operation.')
             
             if self.operationErrorList:
-                debug_print('!! {:d} invalid operation was detected.'.format(len(self.operationErrorList)))
+                debug_print(f'!! {len(self.operationErrorList):d} invalid operation was detected.')
             
             if self.exception_update:
                 id, book_info, field, e = self.exception[0]
                 debug_print('!! Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(e))
             elif self.exception_safely:
-                debug_print('!! {:d} exceptions have occurred during the library update.'.format(len(self.exception)))
+                debug_print(f'!! {len(self.exception):d} exceptions have occurred during the library update.')
             
             if self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE:
                 debug_print('The library a was restored to its original state.')

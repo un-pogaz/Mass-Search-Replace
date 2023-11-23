@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# ~*~ coding: utf-8 ~*~
 
 __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
-__docformat__ = 'restructuredtext en'
 
 
 # python 3 compatibility
@@ -116,7 +114,7 @@ class KEY_QUERY:
 
 # class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
 class MetadataBulkWidget(QtWidgets.QWidget):
-    def __init__(self, book_ids=[], refresh_books=set([])):
+    def __init__(self, book_ids=[], refresh_books=set()):
         QtWidgets.QWidget.__init__(self)
         self.db = current_db()
         self.ids = book_ids

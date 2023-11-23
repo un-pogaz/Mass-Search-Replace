@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
-__docformat__ = 'restructuredtext en'
 
 
 try:
@@ -163,7 +161,7 @@ def operation_list_active(operation_list) -> List[Operation]:
 
 
 class SearchReplaceWidget(MetadataBulkWidget):
-    def __init__(self, book_ids=[], refresh_books=set([])):
+    def __init__(self, book_ids=[], refresh_books=set()):
         self.original_operation = None
         MetadataBulkWidget.__init__(self, book_ids, refresh_books)
         self.updated_fields = self.set_field_calls
