@@ -47,8 +47,10 @@ class MassSearchReplaceAction(InterfaceAction):
     dont_add_to = frozenset(['context-menu-device'])
     
     def genesis(self):
-        self.is_library_selected = True
         self.menu = QMenu(GUI)
+        self.qaction.setMenu(self.menu)
+        self.qaction.setIcon(get_icon(ICON.PLUGIN))
+        
         error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         if error_operation not in ERROR_OPERATION.LIST.keys():
             PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION] = ERROR_OPERATION.DEFAULT
@@ -56,11 +58,6 @@ class MassSearchReplaceAction(InterfaceAction):
         error_update = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
         if error_update not in ERROR_UPDATE.LIST.keys():
             PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE] = ERROR_UPDATE.DEFAULT
-        
-        
-        # Assign our menu to this action and an icon
-        self.qaction.setMenu(self.menu)
-        self.qaction.setIcon(get_icon(ICON.PLUGIN))
     
     def initialization_complete(self):
         self.rebuild_menus()
