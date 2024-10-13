@@ -248,7 +248,7 @@ class ConfigWidget(QWidget):
         PREFS[KEY_MENU.UPDATE_REPORT] = self.updateReport.checkState() == Qt.Checked
         if CALIBRE_VERSION >= (5,41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
-        debug_print('Save settings: operation count', len(PREFS), '\n')
+        debug_print('Save settings: menu operation count:', len(PREFS[KEY_MENU.MENU]), '\n')
         #debug_print('Save settings:\n', PREFS, '\n')
     
     def edit_error_strategy(self):
