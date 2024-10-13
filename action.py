@@ -63,13 +63,12 @@ class MassSearchReplaceAction(InterfaceAction):
         self.rebuild_menus()
     
     def rebuild_menus(self):
-        menu_list = PREFS[KEY_MENU.MENU]
         self.menu.clear()
         sub_menus = {}
         
         unregister_menu_actions()
         
-        for menu in menu_list:
+        for menu in PREFS[KEY_MENU.MENU]:
             if not menu_get_error(menu) and menu[KEY_MENU.ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, menu)
         
