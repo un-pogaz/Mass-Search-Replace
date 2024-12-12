@@ -6,43 +6,36 @@ __copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki 
 
 # python 3 compatibility
 
-from collections import defaultdict, OrderedDict
-from functools import partial
-from typing import Any
+import numbers
+from collections import defaultdict
 
 import regex
-import numbers
 
 try:
-    from qt.core import (
-        QtCore, QtGui, QtWidgets,
-    )
+    from qt.core import QtCore, QtWidgets
 except:
-    from PyQt5 import (
-        QtCore, QtGui, QtWidgets,
-    )
+    from PyQt5 import QtCore, QtWidgets
 
-from calibre import prints
-from calibre.constants import iswindows, isosx, numeric_version as CALIBRE_VERSION
-from calibre.gui2 import error_dialog, FunctionDispatcher, question_dialog
+from calibre.constants import numeric_version as CALIBRE_VERSION
 from calibre.ebooks.metadata.book.formatter import SafeFormat
+from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.dialogs.template_line_editor import TemplateLineEditor
-from calibre.utils.config import JSONConfig, dynamic, prefs, tweaks
-from calibre.utils.icu import sort_key, capitalize, lower as icu_lower, upper as icu_upper
+from calibre.gui2.widgets import HistoryLineEdit
+from calibre.utils.config import JSONConfig, dynamic
+from calibre.utils.icu import capitalize, sort_key
+from calibre.utils.icu import lower as icu_lower
+from calibre.utils.icu import upper as icu_upper
 from calibre.utils.titlecase import titlecase
-from calibre.gui2.widgets import LineEditECM, HistoryLineEdit
-from polyglot.builtins import error_message, native_string_type, unicode_type
+from polyglot.builtins import error_message, unicode_type
 
 try:
-    from calibre.utils.localization import ngettext
     from calibre.gui2.widgets import setup_status_actions, update_status_actions
 except:
     setup_status_actions, update_status_actions = None, None
 
-from ..common_utils import GUI, current_db
-from ..common_utils.templates import TemplateEditorDialogButton, TEMPLATE_FIELD, check_template, open_template_dialog
 from . import text as CalibreText
-
+from ..common_utils import current_db
+from ..common_utils.templates import TEMPLATE_FIELD, TemplateEditorDialogButton, check_template, open_template_dialog
 
 S_R_FUNCTIONS = {
         '' : lambda x: x,

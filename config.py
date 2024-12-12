@@ -9,41 +9,69 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
-from typing import Any, Dict, List, Optional
-
 import copy
 import json
 import os
+from functools import partial
+from typing import Any, Dict, List
 
 try:
     from qt.core import (
-        Qt, QAbstractItemView, QAction, QCheckBox,
-        QFileDialog, QHBoxLayout, QLabel, QPushButton,
-        QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
-        QTextEdit, QToolButton, QVBoxLayout, QWidget,
+        QAbstractItemView,
+        QAction,
+        QCheckBox,
+        QFileDialog,
+        QHBoxLayout,
+        QLabel,
+        QPushButton,
+        QSizePolicy,
+        QSpacerItem,
+        Qt,
+        QTableWidget,
+        QTableWidgetItem,
+        QTextEdit,
+        QToolButton,
+        QVBoxLayout,
+        QWidget,
     )
 except ImportError:
     from PyQt5.Qt import (
-        Qt, QAbstractItemView, QAction, QCheckBox,
-        QFileDialog, QHBoxLayout, QLabel, QPushButton,
-        QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
-        QTextEdit, QToolButton, QVBoxLayout, QWidget,
+        QAbstractItemView,
+        QAction,
+        QCheckBox,
+        QFileDialog,
+        QHBoxLayout,
+        QLabel,
+        QPushButton,
+        QSizePolicy,
+        QSpacerItem,
+        Qt,
+        QTableWidget,
+        QTableWidgetItem,
+        QTextEdit,
+        QToolButton,
+        QVBoxLayout,
+        QWidget,
     )
 
-from calibre.utils.config import JSONConfig
-from calibre.gui2 import error_dialog, question_dialog, info_dialog, choose_files, open_local_file, FileDialog
+from calibre.gui2 import FileDialog, choose_files, error_dialog, info_dialog, open_local_file, question_dialog
 from calibre.gui2.widgets2 import Dialog
+from calibre.utils.config import JSONConfig
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
-from .common_utils import debug_print, get_icon, GUI, PREFS_json, CALIBRE_VERSION, get_image_map, local_resource
-from .common_utils.dialogs import KeyboardConfigDialogButton, ImageDialog
+from .common_utils import CALIBRE_VERSION, GUI, PREFS_json, debug_print, get_icon, get_image_map, local_resource
+from .common_utils.dialogs import ImageDialog, KeyboardConfigDialogButton
 from .common_utils.librarys import get_BookIds_selected
-from .common_utils.widgets import CheckableTableWidgetItem, TextIconWidgetItem, ReadOnlyTableWidgetItem, ImageComboBox, KeyValueComboBox
 from .common_utils.templates import TEMPLATE_FIELD
-from .search_replace import SearchReplaceDialog, KEY_QUERY, Operation, clean_empty_operation
+from .common_utils.widgets import (
+    CheckableTableWidgetItem,
+    ImageComboBox,
+    KeyValueComboBox,
+    ReadOnlyTableWidgetItem,
+    TextIconWidgetItem,
+)
+from .search_replace import KEY_QUERY, Operation, SearchReplaceDialog, clean_empty_operation
 
 
 class ICON:

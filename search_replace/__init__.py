@@ -9,28 +9,21 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
+import copy
 from typing import Any, List
 
-import copy
-
 try:
-    from qt.core import (
-        QVBoxLayout,
-    )
+    from qt.core import QVBoxLayout
 except ImportError:
-    from PyQt5.Qt import (
-        QVBoxLayout,
-    )
+    from PyQt5.Qt import QVBoxLayout
 
-from calibre.gui2 import error_dialog, question_dialog
+from calibre.gui2 import question_dialog
 from calibre.gui2.widgets2 import Dialog
 
-from ..common_utils import debug_print, get_icon, GUI, current_db
-from ..common_utils.columns import get_all_identifiers, get_possible_fields
-from .calibre import MetadataBulkWidget, KEY_QUERY, S_R_FUNCTIONS, S_R_REPLACE_MODES, S_R_MATCH_MODES
 from . import text as CalibreText
+from .calibre import KEY_QUERY, S_R_FUNCTIONS, S_R_MATCH_MODES, S_R_REPLACE_MODES, MetadataBulkWidget
+from ..common_utils import GUI, current_db, debug_print, get_icon
+from ..common_utils.columns import get_all_identifiers, get_possible_fields
 
 
 class Operation(dict):

@@ -9,29 +9,40 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
-from typing import Any, Union
-
 import time
+from collections import defaultdict
+from functools import partial
+from typing import Union
 
 try:
-    from qt.core import (
-        QMenu, QToolButton,
-    )
+    from qt.core import QMenu, QToolButton
 except ImportError:
-    from PyQt5.Qt import (
-        QMenu, QToolButton,
-    )
+    from PyQt5.Qt import QMenu, QToolButton
 
-from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
+from calibre.gui2 import info_dialog, question_dialog, warning_dialog
 from calibre.gui2.actions import InterfaceAction
 
-from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, CALIBRE_VERSION
-from .common_utils.librarys import get_BookIds_selected, get_BookIds_all, get_BookIds_virtual, get_BookIds_search, get_curent_virtual, set_marked
-from .common_utils.menus import unregister_menu_actions, create_menu_item, create_menu_action_unique
-from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
-from .config import ICON, PREFS, KEY_MENU, KEY_ERROR, ERROR_UPDATE, ERROR_OPERATION, ConfigOperationListDialog, get_default_menu
+from .common_utils import CALIBRE_VERSION, GUI, debug_print, get_icon
+from .common_utils.dialogs import ProgressDialog, custom_exception_dialog
+from .common_utils.librarys import (
+    get_BookIds_all,
+    get_BookIds_search,
+    get_BookIds_selected,
+    get_BookIds_virtual,
+    get_curent_virtual,
+    set_marked,
+)
+from .common_utils.menus import create_menu_action_unique, create_menu_item, unregister_menu_actions
+from .config import (
+    ERROR_OPERATION,
+    ERROR_UPDATE,
+    ICON,
+    KEY_ERROR,
+    KEY_MENU,
+    PREFS,
+    ConfigOperationListDialog,
+    get_default_menu,
+)
 from .search_replace import Operation, SearchReplaceWidget, operation_list_active
 from .search_replace import text as CalibreText
 
