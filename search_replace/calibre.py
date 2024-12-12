@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 __license__   = 'GPL v3'
-__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
+__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; '
+'adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 
 
 # python 3 compatibility
@@ -48,7 +49,7 @@ S_R_FUNCTIONS = {
 S_R_MATCH_MODES = [
         _('Character match'),
         _('Regular expression'),
-        CalibreText.S_R_REPLACE, ##un_pogaz Replace Field
+        CalibreText.S_R_REPLACE,  ##un_pogaz Replace Field
                   ]
 
 S_R_REPLACE_MODES = [
@@ -105,7 +106,7 @@ class KEY_QUERY:
     ACTIVE = '_MSR:Active'
 
 
-# class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py 
+# class borrowed from src/calibre/gui2/dialogs/metadata_bulk_ui.py & src/calibre/gui2/dialogs/metadata_bulk.py
 class MetadataBulkWidget(QtWidgets.QWidget):
     def __init__(self, book_ids=[], refresh_books=set()):
         QtWidgets.QWidget.__init__(self)
@@ -375,19 +376,28 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.source_field_label.setText(_("Search &field:"))
         self.search_field.setToolTip(_("The name of the field that you want to search"))
         self.xlabel_24.setText(_("Search &mode:"))
-        self.search_mode.setToolTip(_("Choose whether to use basic text matching or advanced regular expression matching"))
+        self.search_mode.setToolTip(
+            _("Choose whether to use basic text matching or advanced regular expression matching")
+        )
         self.s_r_src_ident_label.setText(_("&Identifier type:"))
         self.s_r_src_ident.setToolTip(_("Choose which identifier type to operate upon"))
         self.template_label.setText(_("&Template:"))
         self.s_r_template.setToolTip(_("Enter a template to be used as the source for the search/replace"))
         self.search_for_label.setText(_("&Search for:"))
-        self.search_for.setToolTip(_("Enter what you are looking for, either plain text or a regular expression, depending on the mode"))
-        self.case_sensitive.setToolTip(_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored"))
+        self.search_for.setToolTip(
+            _("Enter what you are looking for, either plain text or a regular expression, depending on the mode")
+        )
+        self.case_sensitive.setToolTip(
+_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored")
+        )
         self.case_sensitive.setText(_("Cas&e sensitive"))
         self.xlabel_4.setText(_("&Replace with:"))
-        self.replace_with.setToolTip(_("The replacement text. The matched search text will be replaced with this string"))
+        self.replace_with.setToolTip(
+            _("The replacement text. The matched search text will be replaced with this string")
+        )
         self.replace_func_label.setText(_("&Apply function after replace:"))
-        self.replace_func.setToolTip(_("Specify how the text is to be processed after matching and replacement. In character mode, the entire\n"
+        self.replace_func.setToolTip(
+_("Specify how the text is to be processed after matching and replacement. In character mode, the entire\n"
 "field is processed. In regular expression mode, only the matched text is processed"))
         self.destination_field_label.setText(_("&Destination field:"))
         self.destination_field.setToolTip(_("The field that the text will be put into after all replacements.\n"
@@ -406,7 +416,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.xlabel_412.setText(_("For multiple-valued fields, sho&w"))
         self.xlabel_413.setText(_("val&ues starting at"))
         self.xlabel_41.setText(_("with values separated b&y"))
-        self.multiple_separator.setToolTip(_("Used when displaying test results to separate values in multiple-valued fields"))
+        self.multiple_separator.setToolTip(
+            _("Used when displaying test results to separate values in multiple-valued fields")
+        )
         self.xlabel_3.setText(_("Test text"))
         self.xlabel_5.setText(_("Test result"))
         self.label_31.setText(_("Your &test:"))
@@ -533,7 +545,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.s_r_src_ident.currentIndexChanged.connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        self.s_r_template.editTextChanged.connect(self.s_r_template_changed) ##un_pogaz template_button
+        self.s_r_template.editTextChanged.connect(self.s_r_template_changed)  ##un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
@@ -629,7 +641,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
         
-        if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
             self.s_r_dst_ident.setText(self.s_r_src_ident.currentText())
         
         self.s_r_paint_results(None)
@@ -637,13 +649,13 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
         self.template_label.setVisible(False)
-        self.template_button.setVisible(False) ##un_pogaz template_button
+        self.template_button.setVisible(False)  ##un_pogaz template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
-        if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD: ## idx == 1 # Template 
+        if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD:  ## idx == 1 => Template
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
-            self.template_button.setVisible(True) ##un_pogaz template_button
+            self.template_button.setVisible(True)  ##un_pogaz template_button
         elif self.s_r_sf_itemdata(idx) == 'identifiers':
             self.s_r_src_ident_label.setVisible(True)
             self.s_r_src_ident.setVisible(True)
@@ -671,7 +683,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if not txt:
             txt = self.s_r_sf_itemdata(None)
         if txt and txt in self.writable_fields:
-            if txt == 'identifiers' and self.search_mode.currentIndex() != 2: ##un_pogaz Replace Field
+            if txt == 'identifiers' and self.search_mode.currentIndex() != 2:  ##un_pogaz Replace Field
                 self.s_r_dst_ident_label.setVisible(True)
                 self.s_r_dst_ident.setVisible(True)
             
@@ -696,7 +708,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.search_field.clear()
         self.destination_field.clear()
         
-        if val == 2: ##un_pogaz Replace Field
+        if val == 2:  ##un_pogaz Replace Field
             self.s_r_visible_groupe(False, False)
             
             self.source_field_label.setText(self.destination_field_label_text)
@@ -716,7 +728,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.replace_mode.setCurrentIndex(0)
             self.s_r_heading.setText('<p>'+self.main_heading + self.character_heading)
             
-        elif val == 2: ##un_pogaz Replace Field
+        elif val == 2:  ##un_pogaz Replace Field
             self.search_field.blockSignals(True)
             self.destination_field.blockSignals(True)
             for f in self.writable_fields:
@@ -760,7 +772,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if CALIBRE_VERSION >= (6,12,0):
             update_status_actions(self.test_result, self.s_r_error is None, tt)
         elif CALIBRE_VERSION >= (5,0,0):
-            self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
+            self.test_result.setStyleSheet(
+                QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None)
+            )
         else:
             self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
         
@@ -779,7 +793,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         result = []
         rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
         
-        if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
             result.append(self.replace_with.text())
         else:
             for s in src:
@@ -865,7 +879,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if not self.case_sensitive.isChecked():
             flags |= regex.IGNORECASE
         
-        if self.search_mode.currentIndex() == 2: ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
             flags |= regex.DOTALL
         
         
@@ -975,7 +989,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 dst_id_type = unicode_type(self.s_r_dst_ident.text())
                 if dst_id_type and dst_id_type != '*':
                     v = ''.join(val)
-                    ids = mi.get(dest).copy() ##un_pogaz fix ghost identifier with empty value
+                    ids = mi.get(dest).copy()  ##un_pogaz fix ghost identifier with empty value
                     ids[dst_id_type] = v
                     val = ids
                 else:
@@ -1014,12 +1028,17 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     # }}}
     
     def hasValue(self, v):
-        if v is None: return False
-        elif v is True or v is False: return True
-        elif v is int() or v is float(): return True
+        if v is None:
+            return False
+        elif v is True or v is False:
+            return True
+        elif v is int() or v is float():
+            return True
         else:
-            try: return len(v) > 0
-            except: return True
+            try:
+                return len(v) > 0
+            except:
+                return True
     
     def s_r_remove_query(self, *args):
         if self.query_field.currentIndex() == 0:
@@ -1197,7 +1216,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             query[KEY_QUERY.S_R_TEMPLATE] = ''
         
         # to be used in validate method
-        if self.s_r_error != None:
+        if self.s_r_error is not None:
             query[KEY_QUERY.S_R_ERROR] = str(self.s_r_error)
         
         return query
@@ -1232,7 +1251,11 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     
     def open_template_dialog(self):
         
-        code, template = open_template_dialog(mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids], template_text=unicode_type(self.s_r_template.text()), parent=self)
+        code, template = open_template_dialog(
+            mi=[self.db.new_api.get_proxy_metadata(book_id) for book_id in self.ids],
+            template_text=unicode_type(self.s_r_template.text()),
+            parent=self,
+        )
         
         if template:
             self.s_r_template.setText(template)

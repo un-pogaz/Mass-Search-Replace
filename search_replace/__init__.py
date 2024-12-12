@@ -7,7 +7,7 @@ __copyright__ = '2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import copy
 from typing import Any, List
@@ -57,13 +57,19 @@ class Operation(dict):
             return OperationError(_('Invalid operation, the "{:s}" key is missing.').format(key))
         
         if self[KEY_QUERY.REPLACE_FUNC] not in S_R_FUNCTIONS:
-            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.REPLACE_FUNC, self[KEY_QUERY.REPLACE_FUNC]))
+            return OperationError(CalibreText.get_for_localized_field(
+                CalibreText.FIELD_NAME.REPLACE_FUNC, self[KEY_QUERY.REPLACE_FUNC]
+            ))
             
         if self[KEY_QUERY.REPLACE_MODE] not in S_R_REPLACE_MODES:
-            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.REPLACE_MODE, self[KEY_QUERY.REPLACE_MODE]))
+            return OperationError(CalibreText.get_for_localized_field(
+                CalibreText.FIELD_NAME.REPLACE_MODE, self[KEY_QUERY.REPLACE_MODE]
+            ))
             
         if self[KEY_QUERY.SEARCH_MODE] not in S_R_MATCH_MODES:
-            return OperationError(CalibreText.get_for_localized_field(CalibreText.FIELD_NAME.SEARCH_MODE, self[KEY_QUERY.SEARCH_MODE]))
+            return OperationError(CalibreText.get_for_localized_field(
+                CalibreText.FIELD_NAME.SEARCH_MODE, self[KEY_QUERY.SEARCH_MODE]
+            ))
         
         #Field test
         all_fields, writable_fields = get_possible_fields()
@@ -95,7 +101,7 @@ class Operation(dict):
         return Operation._s_r.get_error()
         
     def is_full_valid(self) -> bool:
-        return self.test_full_error() == None
+        return self.test_full_error() is None
         
     def get_para_list(self) -> List[str]:
         name = self.get(KEY_QUERY.NAME, '')
@@ -124,7 +130,8 @@ class Operation(dict):
         
     def string_info(self) -> str:
         tbl = self.get_para_list()
-        if not tbl[2]: del tbl[2]
+        if not tbl[2]:
+            del tbl[2]
         
         return ('name:"'+tbl[0]+'" => ' if tbl[0] else '') + '"'+ '" | "'.join(tbl[1:])+'"'
 
@@ -230,10 +237,10 @@ class SearchReplaceDialog(Dialog):
             
             if different:
                 if question_dialog(self, _('Changed operation'),
-                                 _('The content of the Find/Replace operation "{:s}" was edited after being loaded into the editor.\n'
-                                   'The operation will be saved has it and not as a shared named operation!\n'
-                                   'Do you want continue?').format(new_operation_name),
-                                   default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
+                _('The content of the Find/Replace operation "{:s}" was edited after being loaded into the editor.\n'
+                    'The operation will be saved has it and not as a shared named operation!\n'
+                    'Do you want continue?').format(new_operation_name),
+                    default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
                     
                     new_operation[KEY_QUERY.NAME] = ''
                 else:

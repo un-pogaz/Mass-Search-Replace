@@ -7,7 +7,7 @@ __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import time
 from collections import defaultdict
@@ -151,7 +151,10 @@ class MassSearchReplaceAction(InterfaceAction):
         self.quick_search_replace(get_BookIds_selected(), _('the selected books'))
     
     def quick_library(self):
-        self.quick_search_replace(get_BookIds_all(), _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name()))
+        self.quick_search_replace(
+            get_BookIds_all(),
+            _('all books in the library {:s}').format(GUI.iactions['Choose Library'].library_name())
+        )
     
     def quick_virtual(self):
         vl = get_curent_virtual()
@@ -184,7 +187,7 @@ class MassSearchReplaceAction(InterfaceAction):
     
     
     def run_SearchReplace(self, menu, book_ids):
-        if book_ids == None:
+        if book_ids is None:
             book_ids = get_BookIds_selected(show_error=True)
         
         SearchReplacesProgressDialog(book_ids, menu=menu)
@@ -207,7 +210,9 @@ class SearchReplacesProgressDialog(ProgressDialog):
     title = _('{PLUGIN_NAME} progress').format(PLUGIN_NAME=MassSearchReplaceAction.name)
     
     def progress_text(self):
-        return _('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(self.op_num, self.operation_count, self.book_num, self.book_count)
+        return _('Search/Replace {:d} of {:d}. Book {:d} of {:d}.').format(
+            self.op_num, self.operation_count, self.book_num, self.book_count
+        )
     
     def setup_progress(self, **kvargs):
         # Count update
@@ -216,7 +221,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         self.book_num = 0
         
         # is a quick Search/Replace
-        self.quick_search_replace = kvargs['menu'][KEY_MENU.TEXT] == None
+        self.quick_search_replace = kvargs['menu'][KEY_MENU.TEXT] is None
         
         
         # operation list of Search/Replace
@@ -261,7 +266,11 @@ class SearchReplacesProgressDialog(ProgressDialog):
             custom_exception_dialog(self.exception)
         
         elif self.operationErrorList and self.operationStrategy == ERROR_OPERATION.ABORT:
-            debug_print('Mass Search/Replace was interupted. An invalid operation has detected:\n'+str(self.operationErrorList[0][1]))
+            debug_print(
+                'Mass Search/Replace was interupted. An invalid operation has detected:',
+                str(self.operationErrorList[0][1]),
+                sep='\n',
+            )
             warning_dialog(GUI, _('Invalid operation'),
                         _('A invalid operations has detected:\n{:s}\n\n'
                           'Mass Search/Replace was canceled.').format(str(self.operationErrorList[0][1])),
@@ -277,14 +286,21 @@ class SearchReplacesProgressDialog(ProgressDialog):
             
             if self.exception_update:
                 id, book_info, field, e = self.exception[0]
-                debug_print('!! Mass Search/Replace was interupted. An exception has occurred during the library update:\n'+str(e))
+                debug_print(
+                    '!! Mass Search/Replace was interupted. An exception has occurred during the library update:',
+                    str(e),
+                    sep='\n',
+                )
             elif self.exception_safely:
                 debug_print(f'!! {len(self.exception):d} exceptions have occurred during the library update.')
             
             if self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE:
                 debug_print('The library a was restored to its original state.')
             else:
-                debug_print(f'Search/Replace performed for {self.books_update} books with a total of {self.fields_update} fields modify.')
+                debug_print(
+                    f'Search/Replace performed for {self.books_update} books'
+                    f'with a total of {self.fields_update} fields modify.'
+                )
             debug_print(f'Search/Replace execute in {self.time_execut:0.3f} seconds.\n')
             
             #info dialog
@@ -298,25 +314,41 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 custom_exception_dialog(e, additional_msg=msg, title=_('Cannot update the library'))
             
             elif self.exception_safely:
-                
-                det_msg= '\n'.join( (f'Book {book_info} | {field} > ' + e.__class__.__name__ +': '+ str(e)) for id, book_info, field, e in self.exception)
+                lst = []
+                for id, book_info, field, e in self.exception:
+                    lst.append(f'Book {book_info} | {field} > ' + e.__class__.__name__ +': '+ str(e))
+                det_msg= '\n'.join(lst)
                 
                 warning_dialog(GUI, _('Exceptions during the library update'),
-                            _('{:d} exceptions have occurred during the library update.\nSome fields may not have been updated.').format(len(self.exception)),
-                              det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
+                    _('{:d} exceptions have occurred during the library update.\n'
+                    'Some fields may not have been updated.').format(len(self.exception)),
+                    det_msg='-- Mass Search/Replace: Library update exceptions --\n\n'+det_msg,
+                    show=True, show_copy_button=True,
+                )
             
             if self.operationErrorList:
-                det_msg= '\n'.join(f'Operation {n}/{self.operation_count} > {err}' for n, err in self.operationErrorList)
+                lst = []
+                for n, err in self.operationErrorList:
+                    lst.append(f'Operation {n}/{self.operation_count} > {err}')
+                det_msg= '\n'.join(lst)
                 
                 warning_dialog(GUI, _('Invalid operation'),
-                            _('{:d} invalid operations has detected and have been ignored.').format(len(self.operationErrorList)),
-                            det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg, show=True, show_copy_button=True)
+                    _('{:d} invalid operations has detected and have been ignored.').format(
+                        len(self.operationErrorList)
+                    ),
+                    det_msg='-- Mass Search/Replace: Invalid operations --\n\n'+det_msg,
+                    show=True, show_copy_button=True,
+                )
             
             if self.showUpdateReport and not (self.exception_update and self.exceptionStrategy == ERROR_UPDATE.RESTORE):
                 books_update, fields_update = self.books_update, self.fields_update
                 info_dialog(GUI, _('Update Report'),
-                        _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(books_update, fields_update)
-                        , show=True, show_copy_button=False)
+                    _('Mass Search/Replace performed for {:d} books with a total of {:d} fields modify.').format(
+                        books_update,
+                        fields_update,
+                    ),
+                    show=True, show_copy_button=False,
+                )
             
         
         self.s_r.close()
@@ -349,7 +381,10 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 
                 if len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ABORT:
                     return
-                elif not alreadyOperationError and len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ASK:
+                elif (not alreadyOperationError
+                    and len(self.operationErrorList) == 1
+                    and self.operationStrategy == ERROR_OPERATION.ASK
+                ):
                     alreadyOperationError = True
                     start_dialog =  time.time()
                     rslt = question_dialog(self, _('Invalid operation'),
@@ -372,10 +407,18 @@ class SearchReplacesProgressDialog(ProgressDialog):
                         miA = self.dbAPI.get_proxy_metadata(book_id)
                         
                         #Book book_num/book_count > "title" (author & author) {id: book_id}
-                        book_info = 'Book '+str(self.book_num)+'/'+str(self.book_count)+ ' > "'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') {id: '+str(book_id)+'}'
+                        book_info = 'Book {book_num}/{book_count} > "{title}" ({authors}) {{id: {book_id}}}'.format(
+                            book_num=self.book_num,
+                            book_count=self.book_count,
+                            title=miA.get('title'),
+                            authors=' & '.join(miA.get('authors')),
+                            book_id=book_id,
+                        )
                         
-                        if self.book_num == self.book_count: nl = '\n'
-                        else: nl = ''
+                        if self.book_num == self.book_count:
+                            nl = '\n'
+                        else:
+                            nl = ''
                         
                         debug_print(book_info+nl)
                         
@@ -413,7 +456,10 @@ class SearchReplacesProgressDialog(ProgressDialog):
             if self.books_update > 0:
                 books_update, fields_update = self.books_update, self.fields_update
                 debug_print(f'Update the database for {books_update} books with a total of {fields_update} fields…\n')
-                self.set_value(-1, text=_('Update the library for {:d} books with a total of {:d} fields…').format(books_update, fields_update))
+                self.set_value(-1,
+                    text=_('Update the library for {:d} books with a total of {:d} fields…').format(
+                        books_update, fields_update,
+                    ))
                 
                 if self.exceptionStrategy == ERROR_UPDATE.SAFELY or self.exceptionStrategy == ERROR_UPDATE.DONT_STOP:
                     

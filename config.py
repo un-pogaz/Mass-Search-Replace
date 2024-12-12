@@ -7,7 +7,7 @@ __copyright__ = '2020, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import copy
 import json
@@ -121,11 +121,13 @@ class ERROR_UPDATE:
     
     SAFELY = 'safely stop'
     SAFELY_NAME = _('Carefully executed (slower)')
-    SAFELY_DESC = safely_txt+'\n'+ _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.')
+    SAFELY_DESC = (safely_txt+'\n'+
+    _('When a error occurs, stop Mass Search/Replace and display the error normally without further action.'))
     
     DONT_STOP = "don't stop"
     DONT_STOP_NAME = _("Don't stop (slower, not recomanded)")
-    DONT_STOP_DESC = safely_txt+'\n'+_('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.')
+    DONT_STOP_DESC = (safely_txt+'\n'+
+    _('Update the library, no matter how many errors are encountered. The problematics fields will not be updated.'))
     
     LIST = {
             INTERRUPT: [INTERRUPT_NAME, INTERRUPT_DESC],
@@ -372,8 +374,12 @@ class MenuTableWidget(QTableWidget):
             return error_dialog(self, _('Import failed'), e, show=True)
     
     def pick_archive_to_import(self) -> str:
-        archives = choose_files(self, 'owip archive dialog', _('Select a menu file archive to import…'),
-                             filters=[('OWIP Files', ['owip','owip.zip']),('ZIP Files', ['owip','zip'])], all_files=False, select_only_single_file=True)
+        archives = choose_files(self,
+            name='owip archive dialog',
+            title=_('Select a menu file archive to import…'),
+            filters=[('OWIP Files', ['owip','owip.zip']), ('ZIP Files', ['owip','zip'])],
+            all_files=False, select_only_single_file=True,
+        )
         if not archives:
             return
         f = archives[0]
@@ -404,14 +410,21 @@ class MenuTableWidget(QTableWidget):
                 for image_name, image_path in image_map.items():
                     archive_zip.write(image_path, os.path.basename(image_path))
             
-            info_dialog(self, _('Export completed'), _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
-                        show=True, show_copy_button=False)
+            info_dialog(self,
+                _('Export completed'),
+                _('{:d} menu items exported to\n{:s}').format(len(menu_list), archive_path),
+                show=True, show_copy_button=False,
+            )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_archive_to_export(self) -> str:
-        fd = FileDialog(name='owip archive dialog', title=_('Save menu archive as…'), filters=[('OWIP Files', ['owip.zip']),('ZIP Files', ['zip'])],
-                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
+        fd = FileDialog(parent=self,
+            name='owip archive dialog',
+            title=_('Save menu archive as…'),
+            filters=[('OWIP Files', ['owip.zip']), ('ZIP Files', ['zip'])],
+            add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile,
+        )
         fd.setParent(None)
         if not fd.accepted:
             return None
@@ -753,7 +766,10 @@ class ConfigOperationListDialog(Dialog):
         
         heading_layout = QHBoxLayout()
         layout.addLayout(heading_layout)
-        heading_label = QLabel(_('Select and configure the order of execution of the operations of Search/Replace operations:'), self)
+        heading_label = QLabel(
+            _('Select and configure the order of execution of the operations of Search/Replace operations:'),
+            self,
+        )
         heading_layout.addWidget(heading_label)
         #help_label = QLabel(' ', self)
         #help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
@@ -877,14 +893,21 @@ class OperationListTableWidget(QTableWidget):
             operation_list = [Operation(e) for e in json_import[KEY_MENU.OPERATIONS]]
             self.append_operation_list(operation_list)
             
-            info_dialog(self, _('Import completed'), _('{:d} menu items imported').format(len(operation_list), json_path),
-                        show=True, show_copy_button=False)
+            info_dialog(self,
+                _('Import completed'),
+                _('{:d} menu items imported').format(len(operation_list), json_path),
+                show=True, show_copy_button=False,
+            )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_json_to_import(self) -> str:
-        archives = choose_files(self, 'json dialog', _('Select a JSON file to import…'),
-                             filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])], all_files=False, select_only_single_file=True)
+        archives = choose_files(self,
+            name='json dialog',
+            title=_('Select a JSON file to import…'),
+            filters=[('JSON List Files', ['list.json']), ('JSON Files', ['json'])],
+            all_files=False, select_only_single_file=True,
+        )
         if not archives:
             return
         f = archives[0]
@@ -901,14 +924,21 @@ class OperationListTableWidget(QTableWidget):
         try:
             with open(json_path, 'w') as fw:
                 json.dump({KEY_MENU.OPERATIONS: operation_list}, fw)
-            info_dialog(self, _('Export completed'), _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
-                        show=True, show_copy_button=False)
+            info_dialog(self,
+                _('Export completed'),
+                _('{:d} operations exported to\n{:s}').format(len(operation_list), json_path),
+                show=True, show_copy_button=False,
+            )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
     
     def pick_json_to_export(self) -> str:
-        fd = FileDialog(name='json dialog', title=_('Save the operations as…'), filters=[('JSON List Files', ['list.json']),('JSON Files', ['json'])],
-                        parent=self, add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile)
+        fd = FileDialog(parent=self,
+            name='json dialog',
+            title=_('Save the operations as…'),
+            filters=[('JSON List Files', ['list.json']), ('JSON Files', ['json'])],
+            add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile,
+        )
         fd.setParent(None)
         if not fd.accepted:
             return None
@@ -1176,7 +1206,11 @@ class ErrorStrategyDialog(Dialog):
         operation_label = QLabel(_('Set the strategy when an invalid operation has detected:'), self)
         layout.addWidget(operation_label)
         
-        self.operationStrategy = KeyValueComboBox({key:value[0] for key, value in ERROR_OPERATION.LIST.items()}, self.error_operation, parent=self)
+        self.operationStrategy = KeyValueComboBox(
+            {key:value[0] for key, value in ERROR_OPERATION.LIST.items()},
+            self.error_operation,
+            parent=self,
+        )
         self.operationStrategy.currentIndexChanged.connect(self.operation_strategy_index_changed)
         layout.addWidget(self.operationStrategy)
         
@@ -1187,7 +1221,11 @@ class ErrorStrategyDialog(Dialog):
         update_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
         layout.addWidget(update_label)
         
-        self.updateStrategy = KeyValueComboBox({key:value[0] for key, value in ERROR_UPDATE.LIST.items()}, self.error_update, parent=self)
+        self.updateStrategy = KeyValueComboBox(
+            {key:value[0] for key, value in ERROR_UPDATE.LIST.items()},
+            self.error_update,
+            parent=self,
+        )
         self.updateStrategy.currentIndexChanged.connect(self.update_strategy_index_changed)
         layout.addWidget(self.updateStrategy)
         
