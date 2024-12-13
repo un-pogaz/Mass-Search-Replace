@@ -278,7 +278,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
         
         else:
             
-            #info debug
+            # info debug
             debug_print(f'Search/Replace launched for {self.book_count} books with {self.operation_count} operation.')
             
             if self.operationErrorList:
@@ -303,7 +303,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 )
             debug_print(f'Search/Replace execute in {self.time_execut:0.3f} seconds.\n')
             
-            #info dialog
+            # info dialog
             if self.exception_update:
                 
                 msg = None
@@ -401,12 +401,12 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 if not err:
                     for self.book_num, book_id in enumerate(self.book_ids, 1):
                         
-                        #update Progress
+                        # update Progress
                         self.increment()
                         
                         miA = self.dbAPI.get_proxy_metadata(book_id)
                         
-                        #Book book_num/book_count > "title" (author & author) {id: book_id}
+                        # Book book_num/book_count > "title" (author & author) {id: book_id}
                         book_info = 'Book {book_num}/{book_count} > "{title}" ({authors}) {{id: {book_id}}}'.format(
                             book_num=self.book_num,
                             book_count=self.book_count,
@@ -429,7 +429,10 @@ class SearchReplacesProgressDialog(ProgressDialog):
                         if err:
                             if type(err) is Exception:
                                 if str(err) == CalibreText.EXCEPTION_Invalid_identifier:
-                                    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                                    # title (author & author)
+                                    book_info = '"{title}" ({authors})'.format(
+                                        title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                                    )
                                     self.exception.append( (book_id, book_info, 'identifier', err) )
                                 else:
                                     raise err
@@ -483,8 +486,10 @@ class SearchReplacesProgressDialog(ProgressDialog):
                                     self.exception_safely = True
                                     
                                     miA = self.dbAPI.get_proxy_metadata(id)
-                                    #title (author & author)
-                                    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                                    # title (author & author)
+                                    book_info = '"{title}" ({authors})'.format(
+                                        title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                                    )
                                     self.exception.append( (id, book_info, field, e) )
                 
                 else:

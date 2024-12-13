@@ -31,9 +31,9 @@ class ActionMassSearchReplace(InterfaceActionBase):
     version                 = (1, 8, 2)
     minimum_calibre_version = (5, 0, 0)
     
-    #: This field defines the GUI plugin class that contains all the code
-    #: that actually does something. Its format is module_path:class_name
-    #: The specified class must be defined in the specified module.
+    # This field defines the GUI plugin class that contains all the code
+    # that actually does something. Its format is module_path:class_name
+    # The specified class must be defined in the specified module.
     actual_plugin           = __name__+'.action:MassSearchReplaceAction'
     
     

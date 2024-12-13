@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
 __license__   = 'GPL v3'
-__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; '
-'adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
+__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net> ; 2020, Ahmed Zaki <azaki00.dev@gmail.com> ; adjustment 2020, un_pogaz <un.pogaz@gmail.com>'
 
-
-# python 3 compatibility
 
 import numbers
 from collections import defaultdict
@@ -49,7 +46,7 @@ S_R_FUNCTIONS = {
 S_R_MATCH_MODES = [
         _('Character match'),
         _('Regular expression'),
-        CalibreText.S_R_REPLACE,  ##un_pogaz Replace Field
+        CalibreText.S_R_REPLACE,  ## un_pogaz Replace Field
                   ]
 
 S_R_REPLACE_MODES = [
@@ -225,7 +222,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.xlabel_4.setObjectName("xlabel_4")
         self.vargrid.addWidget(self.xlabel_4, 7, 0, 1, 1)
         self.replace_with = HistoryLineEdit(self.tabWidgetPage3)
-        ##un_pogaz sizePolicy for replace_with
+        ## un_pogaz sizePolicy for replace_with
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
@@ -356,7 +353,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.xlabel_41.setBuddy(self.multiple_separator)
         self.label_31.setBuddy(self.test_text)
         
-        ##un_pogaz template_button
+        ## un_pogaz template_button
         self.template_button = TemplateEditorDialogButton(show_icon=True, show_text=False, parent=self.tabWidgetPage3)
         self.template_button.setObjectName("template_button")
         self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
@@ -376,28 +373,19 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.source_field_label.setText(_("Search &field:"))
         self.search_field.setToolTip(_("The name of the field that you want to search"))
         self.xlabel_24.setText(_("Search &mode:"))
-        self.search_mode.setToolTip(
-            _("Choose whether to use basic text matching or advanced regular expression matching")
-        )
+        self.search_mode.setToolTip(_("Choose whether to use basic text matching or advanced regular expression matching"))
         self.s_r_src_ident_label.setText(_("&Identifier type:"))
         self.s_r_src_ident.setToolTip(_("Choose which identifier type to operate upon"))
         self.template_label.setText(_("&Template:"))
         self.s_r_template.setToolTip(_("Enter a template to be used as the source for the search/replace"))
         self.search_for_label.setText(_("&Search for:"))
-        self.search_for.setToolTip(
-            _("Enter what you are looking for, either plain text or a regular expression, depending on the mode")
-        )
-        self.case_sensitive.setToolTip(
-_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored")
-        )
+        self.search_for.setToolTip(_("Enter what you are looking for, either plain text or a regular expression, depending on the mode"))
+        self.case_sensitive.setToolTip(_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored"))
         self.case_sensitive.setText(_("Cas&e sensitive"))
         self.xlabel_4.setText(_("&Replace with:"))
-        self.replace_with.setToolTip(
-            _("The replacement text. The matched search text will be replaced with this string")
-        )
+        self.replace_with.setToolTip(_("The replacement text. The matched search text will be replaced with this string"))
         self.replace_func_label.setText(_("&Apply function after replace:"))
-        self.replace_func.setToolTip(
-_("Specify how the text is to be processed after matching and replacement. In character mode, the entire\n"
+        self.replace_func.setToolTip(_("Specify how the text is to be processed after matching and replacement. In character mode, the entire\n"
 "field is processed. In regular expression mode, only the matched text is processed"))
         self.destination_field_label.setText(_("&Destination field:"))
         self.destination_field.setToolTip(_("The field that the text will be put into after all replacements.\n"
@@ -416,15 +404,13 @@ _("Specify how the text is to be processed after matching and replacement. In ch
         self.xlabel_412.setText(_("For multiple-valued fields, sho&w"))
         self.xlabel_413.setText(_("val&ues starting at"))
         self.xlabel_41.setText(_("with values separated b&y"))
-        self.multiple_separator.setToolTip(
-            _("Used when displaying test results to separate values in multiple-valued fields")
-        )
+        self.multiple_separator.setToolTip(_("Used when displaying test results to separate values in multiple-valued fields"))
         self.xlabel_3.setText(_("Test text"))
         self.xlabel_5.setText(_("Test result"))
         self.label_31.setText(_("Your &test:"))
         #self.central_widget.setTabText(self.central_widget.indexOf(self.scrollArea3), _("&Search and replace"))
         
-        ##un_pogaz Search and destination field label swap
+        ## un_pogaz Search and destination field label swap
         self.source_field_label_text = self.source_field_label.text()
         self.destination_field_label_text = self.destination_field_label.text()
     
@@ -491,7 +477,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
                  'Search and replace in text fields using character matching '
                  'or regular expressions. ')
         
-        ##un_pogaz main_heading_short
+        ## un_pogaz main_heading_short
         self.main_heading_short = self.main_heading[:self.main_heading.find('<p>')] + '<p>'
         
         self.character_heading = _(
@@ -545,7 +531,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
         self.s_r_src_ident.currentIndexChanged.connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        self.s_r_template.editTextChanged.connect(self.s_r_template_changed)  ##un_pogaz template_button
+        self.s_r_template.editTextChanged.connect(self.s_r_template_changed)  ## un_pogaz template_button
         #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
         #self.central_widget.setCurrentIndex(0)
         
@@ -625,7 +611,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
     def s_r_template_changed(self, *args):
         #self.s_r_search_field_changed(self.search_field.currentIndex())
         
-        ##un_pogaz
+        ## un_pogaz
         for i in range(0, self.s_r_number_of_books):
             w = getattr(self, 'book_%d_text'%(i+1))
             mi = self.db.get_metadata(self.ids[i], index_is_id=True)
@@ -641,7 +627,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
         
-        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  ## un_pogaz Replace Field
             self.s_r_dst_ident.setText(self.s_r_src_ident.currentText())
         
         self.s_r_paint_results(None)
@@ -649,13 +635,13 @@ _("Specify how the text is to be processed after matching and replacement. In ch
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
         self.template_label.setVisible(False)
-        self.template_button.setVisible(False)  ##un_pogaz template_button
+        self.template_button.setVisible(False)  ## un_pogaz template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
         if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD:  ## idx == 1 => Template
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
-            self.template_button.setVisible(True)  ##un_pogaz template_button
+            self.template_button.setVisible(True)  ## un_pogaz template_button
         elif self.s_r_sf_itemdata(idx) == 'identifiers':
             self.s_r_src_ident_label.setVisible(True)
             self.s_r_src_ident.setVisible(True)
@@ -708,7 +694,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
         self.search_field.clear()
         self.destination_field.clear()
         
-        if val == 2:  ##un_pogaz Replace Field
+        if val == 2:  ## un_pogaz Replace Field
             self.s_r_visible_groupe(False, False)
             
             self.source_field_label.setText(self.destination_field_label_text)
@@ -728,7 +714,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
             self.replace_mode.setCurrentIndex(0)
             self.s_r_heading.setText('<p>'+self.main_heading + self.character_heading)
             
-        elif val == 2:  ##un_pogaz Replace Field
+        elif val == 2:  ## un_pogaz Replace Field
             self.search_field.blockSignals(True)
             self.destination_field.blockSignals(True)
             for f in self.writable_fields:
@@ -772,9 +758,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
         if CALIBRE_VERSION >= (6,12,0):
             update_status_actions(self.test_result, self.s_r_error is None, tt)
         elif CALIBRE_VERSION >= (5,0,0):
-            self.test_result.setStyleSheet(
-                QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None)
-            )
+            self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
         else:
             self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
         
@@ -879,11 +863,11 @@ _("Specify how the text is to be processed after matching and replacement. In ch
         if not self.case_sensitive.isChecked():
             flags |= regex.IGNORECASE
         
-        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  ## un_pogaz Replace Field
             flags |= regex.DOTALL
         
         
-        ##un_pogaz extend try catch
+        ## un_pogaz extend try catch
         try:
             
             sftxt = unicode_type(self.search_field.currentText())
@@ -989,7 +973,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
                 dst_id_type = unicode_type(self.s_r_dst_ident.text())
                 if dst_id_type and dst_id_type != '*':
                     v = ''.join(val)
-                    ids = mi.get(dest).copy()  ##un_pogaz fix ghost identifier with empty value
+                    ids = mi.get(dest).copy()  # un_pogaz fix ghost identifier with empty value
                     ids[dst_id_type] = v
                     val = ids
                 else:
@@ -1006,7 +990,7 @@ _("Specify how the text is to be processed after matching and replacement. In ch
                         #                         ', '.join(val), '-----', traceback.format_exc()]),
                         #       show_copy_button=True)
                         #return ans
-                        ##un_pogaz use custom error handling
+                        ## un_pogaz use custom error handling
                         return Exception(CalibreText.EXCEPTION_Invalid_identifier)
         else:
             val = self.s_r_replace_mode_separator().join(val)
