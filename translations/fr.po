@@ -274,6 +274,22 @@ msgstr "Le plugin {PLUGIN_NAME} a rencontré une exception non gérée."
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
+#: common_utils/dialogs.py:500
+msgid "Select a ZIP archive file to import…"
+msgstr "Sélectionnez un fichier d'archive ZIP à importer…"
+
+#: common_utils/dialogs.py:511
+msgid "Save ZIP archive file as…"
+msgstr "Enregistrer l'archive ZIP sous…"
+
+#: common_utils/dialogs.py:523
+msgid "Select a JSON file to import…"
+msgstr "Sélectionnez un fichier JSON à importer…"
+
+#: common_utils/dialogs.py:534
+msgid "Save the JSON file as…"
+msgstr "Enregistrer le fichier JSON sous…"
+
 #: common_utils/librarys.py:48
 msgid "Could not to launch {:s}"
 msgstr "Impossible de lancer {:s}"
@@ -499,7 +515,7 @@ msgstr "Ceci n'est pas une archive d'exportation OWIP valide"
 msgid "Import completed"
 msgstr "Importation terminée"
 
-#: config.py:343 config.py:854
+#: config.py:343
 msgid "{:d} menu items imported"
 msgstr "{:d} éléments de menu importés"
 
@@ -524,7 +540,7 @@ msgid ""
 "{:d} menu items exported to\n"
 "{:s}"
 msgstr ""
-"{:d} éléments de menu importés\n"
+"{:d} éléments de menu exportés\n"
 "{:s}"
 
 #: config.py:387
@@ -615,9 +631,9 @@ msgstr "Déplacer l'opération vers le bas"
 msgid "This is not a valid JSON file"
 msgstr "Ceci n'est pas fichier JSON valide"
 
-#: config.py:860
-msgid "Select a JSON file to import…"
-msgstr "Sélectionnez un fichier JSON à importer…"
+#: config.py:854
+msgid "{:d} operations imported"
+msgstr "{:d} opérations importés"
 
 #: config.py:870
 msgid "No operations selected to export"
@@ -628,12 +644,8 @@ msgid ""
 "{:d} operations exported to\n"
 "{:s}"
 msgstr ""
-"{:d} opérations\n"
+"{:d} opérations exportés\n"
 "{:s}"
-
-#: config.py:884
-msgid "Save the operations as…"
-msgstr "Enregistrer les opérations sous…"
 
 #: config.py:976
 msgid "Are you sure you want to delete this operation?"

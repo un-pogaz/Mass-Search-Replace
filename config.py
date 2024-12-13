@@ -20,7 +20,6 @@ try:
         QAbstractItemView,
         QAction,
         QCheckBox,
-        QFileDialog,
         QHBoxLayout,
         QLabel,
         QPushButton,
@@ -39,7 +38,6 @@ except ImportError:
         QAbstractItemView,
         QAction,
         QCheckBox,
-        QFileDialog,
         QHBoxLayout,
         QLabel,
         QPushButton,
@@ -54,14 +52,21 @@ except ImportError:
         QWidget,
     )
 
-from calibre.gui2 import FileDialog, choose_files, error_dialog, info_dialog, open_local_file, question_dialog
+from calibre.gui2 import error_dialog, info_dialog, open_local_file, question_dialog
 from calibre.gui2.widgets2 import Dialog
 from calibre.utils.config import JSONConfig
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import unicode_type
 
 from .common_utils import CALIBRE_VERSION, GUI, PREFS_json, debug_print, get_icon, get_image_map, local_resource
-from .common_utils.dialogs import ImageDialog, KeyboardConfigDialogButton
+from .common_utils.dialogs import (
+    ImageDialog,
+    KeyboardConfigDialogButton,
+    pick_archive_to_export,
+    pick_archive_to_import,
+    pick_json_to_export,
+    pick_json_to_import,
+)
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.templates import TEMPLATE_FIELD
 from .common_utils.widgets import (
@@ -340,7 +345,7 @@ class MenuTableWidget(QTableWidget):
         open_local_file(local_resource.IMAGES)
     
     def import_menus(self):
-        archive_path = self.pick_archive_to_import()
+        archive_path = pick_archive_to_import(parent=self)
         if not archive_path:
             return
         
@@ -373,23 +378,11 @@ class MenuTableWidget(QTableWidget):
         except Exception as e:
             return error_dialog(self, _('Import failed'), e, show=True)
     
-    def pick_archive_to_import(self) -> str:
-        archives = choose_files(self,
-            name='owip archive dialog',
-            title=_('Select a menu file archive to import…'),
-            filters=[('OWIP Files', ['owip','owip.zip']), ('ZIP Files', ['owip','zip'])],
-            all_files=False, select_only_single_file=True,
-        )
-        if not archives:
-            return
-        f = archives[0]
-        return f
-    
     def export_menus(self):
         menu_list = [m for m in self.get_selected_menu() if m['Text']]
         if len(menu_list) == 0:
             return error_dialog(self, _('Export failed'), _('No menu items selected to export'), show=True)
-        archive_path = self.pick_archive_to_export()
+        archive_path = pick_archive_to_export(parent=self)
         if not archive_path:
             return
         
@@ -417,18 +410,6 @@ class MenuTableWidget(QTableWidget):
             )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
-    
-    def pick_archive_to_export(self) -> str:
-        fd = FileDialog(parent=self,
-            name='owip archive dialog',
-            title=_('Save menu archive as…'),
-            filters=[('OWIP Files', ['owip.zip']), ('ZIP Files', ['zip'])],
-            add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile,
-        )
-        fd.setParent(None)
-        if not fd.accepted:
-            return None
-        return fd.get_files()[0]
     
     
     def populate_table(self, menu_list=None):
@@ -880,7 +861,7 @@ class OperationListTableWidget(QTableWidget):
     
     
     def import_operations(self):
-        json_path = self.pick_json_to_import()
+        json_path = pick_json_to_import(parent=self)
         if not json_path:
             return
         
@@ -895,29 +876,17 @@ class OperationListTableWidget(QTableWidget):
             
             info_dialog(self,
                 _('Import completed'),
-                _('{:d} menu items imported').format(len(operation_list), json_path),
+                _('{:d} operations imported').format(len(operation_list), json_path),
                 show=True, show_copy_button=False,
             )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
     
-    def pick_json_to_import(self) -> str:
-        archives = choose_files(self,
-            name='json dialog',
-            title=_('Select a JSON file to import…'),
-            filters=[('JSON List Files', ['list.json']), ('JSON Files', ['json'])],
-            all_files=False, select_only_single_file=True,
-        )
-        if not archives:
-            return
-        f = archives[0]
-        return f
-    
     def export_operations(self):
         operation_list = self.get_selected_operation()
         if len(operation_list) == 0:
             return error_dialog(self, _('Export failed'), _('No operations selected to export'), show=True)
-        json_path = self.pick_json_to_export()
+        json_path = pick_json_to_export(parent=self)
         if not json_path:
             return
         
@@ -931,18 +900,6 @@ class OperationListTableWidget(QTableWidget):
             )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
-    
-    def pick_json_to_export(self) -> str:
-        fd = FileDialog(parent=self,
-            name='json dialog',
-            title=_('Save the operations as…'),
-            filters=[('JSON List Files', ['list.json']), ('JSON Files', ['json'])],
-            add_all_files_filter=False, mode=QFileDialog.FileMode.AnyFile,
-        )
-        fd.setParent(None)
-        if not fd.accepted:
-            return None
-        return fd.get_files()[0]
     
     
     def populate_table(self, operation_list=None):
