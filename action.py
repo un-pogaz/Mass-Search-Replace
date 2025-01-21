@@ -146,7 +146,6 @@ class MassSearchReplaceAction(InterfaceAction):
                         unique_name=unique_name,
                         )
     
-    
     def quick_selected(self):
         self.quick_search_replace(get_BookIds_selected(), _('the selected books'))
     
@@ -185,7 +184,6 @@ class MassSearchReplaceAction(InterfaceAction):
         
         PREFS[KEY_MENU.QUICK] = d.operation_list
     
-    
     def run_SearchReplace(self, menu, book_ids):
         if book_ids is None:
             book_ids = get_BookIds_selected(show_error=True)
@@ -222,7 +220,6 @@ class SearchReplacesProgressDialog(ProgressDialog):
         
         # is a quick Search/Replace
         self.quick_search_replace = kvargs['menu'][KEY_MENU.TEXT] is None
-        
         
         # operation list of Search/Replace
         self.op_num = 0
@@ -349,7 +346,6 @@ class SearchReplacesProgressDialog(ProgressDialog):
                     ),
                     show=True, show_copy_button=False,
                 )
-            
         
         self.s_r.close()
         del self.s_r
@@ -377,7 +373,6 @@ class SearchReplacesProgressDialog(ProgressDialog):
                 if err:
                     debug_print('!! Invalide operation:', err, '\n')
                     self.operationErrorList.append([self.op_num, str(err)])
-                
                 
                 if len(self.operationErrorList) == 1 and self.operationStrategy == ERROR_OPERATION.ABORT:
                     return
@@ -433,12 +428,11 @@ class SearchReplacesProgressDialog(ProgressDialog):
                                     book_info = '"{title}" ({authors})'.format(
                                         title=miA.get('title'), authors=' & '.join(miA.get('authors')),
                                     )
-                                    self.exception.append( (book_id, book_info, 'identifier', err) )
+                                    self.exception.append((book_id, book_info, 'identifier', err))
                                 else:
                                     raise err
                             else:
                                 raise Exception(err)
-        
         
         except Exception as e:
             self.exception_unhandled = True
@@ -490,7 +484,7 @@ class SearchReplacesProgressDialog(ProgressDialog):
                                     book_info = '"{title}" ({authors})'.format(
                                         title=miA.get('title'), authors=' & '.join(miA.get('authors')),
                                     )
-                                    self.exception.append( (id, book_info, field, e) )
+                                    self.exception.append((id, book_info, field, e))
                 
                 else:
                     try:
@@ -513,11 +507,11 @@ class SearchReplacesProgressDialog(ProgressDialog):
                     
                     except Exception as e:
                         self.exception_update = True
-                        self.exception.append( (None, None, None, e) )
+                        self.exception.append((None, None, None, e))
                         
                         if is_restore:
                             for field, book_id_val_map in backup_fields.items():
-                               self.dbAPI.set_field(field, book_id_val_map)
+                                self.dbAPI.set_field(field, book_id_val_map)
                             book_id_update = {}
                 
                 GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)

@@ -46,7 +46,7 @@ S_R_FUNCTIONS = {
 S_R_MATCH_MODES = [
         _('Character match'),
         _('Regular expression'),
-        CalibreText.S_R_REPLACE,  ## un_pogaz Replace Field
+        CalibreText.S_R_REPLACE,  # un_pogaz: Replace Field
                   ]
 
 S_R_REPLACE_MODES = [
@@ -54,6 +54,7 @@ S_R_REPLACE_MODES = [
         _('Prepend to field'),
         _('Append to field'),
                     ]
+
 
 class KEY_QUERY:
     CASE_SENSITIVE      = 'case_sensitive'
@@ -124,65 +125,65 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.scrollArea3 = QtWidgets.QScrollArea()
         self.scrollArea3.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scrollArea3.setWidgetResizable(True)
-        self.scrollArea3.setObjectName("scrollArea3")
+        self.scrollArea3.setObjectName('scrollArea3')
         self.tabWidgetPage3 = QtWidgets.QWidget()
         self.tabWidgetPage3.setGeometry(QtCore.QRect(0, 0, 804, 388))
-        self.tabWidgetPage3.setObjectName("tabWidgetPage3")
+        self.tabWidgetPage3.setObjectName('tabWidgetPage3')
         self.vargrid = QtWidgets.QGridLayout(self.tabWidgetPage3)
         self.vargrid.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.vargrid.setObjectName("vargrid")
+        self.vargrid.setObjectName('vargrid')
         self.s_r_heading = QtWidgets.QLabel(self.tabWidgetPage3)
         self.s_r_heading.setWordWrap(True)
         self.s_r_heading.setOpenExternalLinks(True)
-        self.s_r_heading.setObjectName("s_r_heading")
+        self.s_r_heading.setObjectName('s_r_heading')
         self.vargrid.addWidget(self.s_r_heading, 0, 0, 1, 4)
         self.filler = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.filler.setText("")
-        self.filler.setObjectName("filler")
+        self.filler.setText('')
+        self.filler.setObjectName('filler')
         self.vargrid.addWidget(self.filler, 1, 0, 1, 1)
         self.line = QtWidgets.QFrame(self.tabWidgetPage3)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
+        self.line.setObjectName('line')
         self.vargrid.addWidget(self.line, 2, 0, 1, 3)
         self.xlabel_22 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_22.setObjectName("xlabel_22")
+        self.xlabel_22.setObjectName('xlabel_22')
         self.vargrid.addWidget(self.xlabel_22, 3, 0, 1, 1)
         self.query_field = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.query_field.setObjectName("query_field")
+        self.query_field.setObjectName('query_field')
         self.vargrid.addWidget(self.query_field, 3, 1, 1, 1)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.horizontalLayout_6.setObjectName('horizontalLayout_6')
         spacerItem4 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem4)
         self.save_button = QtWidgets.QPushButton(self.tabWidgetPage3)
-        self.save_button.setObjectName("save_button")
+        self.save_button.setObjectName('save_button')
         self.horizontalLayout_6.addWidget(self.save_button)
         self.remove_button = QtWidgets.QPushButton(self.tabWidgetPage3)
-        self.remove_button.setObjectName("remove_button")
+        self.remove_button.setObjectName('remove_button')
         self.horizontalLayout_6.addWidget(self.remove_button)
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem5)
         self.vargrid.addLayout(self.horizontalLayout_6, 3, 2, 1, 1)
         self.source_field_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.source_field_label.setObjectName("source_field_label")
+        self.source_field_label.setObjectName('source_field_label')
         self.vargrid.addWidget(self.source_field_label, 4, 0, 1, 1)
         self.search_field = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.search_field.setObjectName("search_field")
+        self.search_field.setObjectName('search_field')
         self.vargrid.addWidget(self.search_field, 4, 1, 1, 1)
         self.HLayout_4 = QtWidgets.QHBoxLayout()
-        self.HLayout_4.setObjectName("HLayout_4")
+        self.HLayout_4.setObjectName('HLayout_4')
         self.xlabel_24 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_24.setObjectName("xlabel_24")
+        self.xlabel_24.setObjectName('xlabel_24')
         self.HLayout_4.addWidget(self.xlabel_24)
         self.search_mode = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.search_mode.setObjectName("search_mode")
+        self.search_mode.setObjectName('search_mode')
         self.HLayout_4.addWidget(self.search_mode)
         spacerItem6 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.HLayout_4.addItem(spacerItem6)
         self.vargrid.addLayout(self.HLayout_4, 4, 2, 1, 1)
         self.s_r_src_ident_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.s_r_src_ident_label.setObjectName("s_r_src_ident_label")
+        self.s_r_src_ident_label.setObjectName('s_r_src_ident_label')
         self.vargrid.addWidget(self.s_r_src_ident_label, 5, 0, 1, 1)
         self.s_r_src_ident = QtWidgets.QComboBox(self.tabWidgetPage3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -190,10 +191,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_src_ident.sizePolicy().hasHeightForWidth())
         self.s_r_src_ident.setSizePolicy(sizePolicy)
-        self.s_r_src_ident.setObjectName("s_r_src_ident")
+        self.s_r_src_ident.setObjectName('s_r_src_ident')
         self.vargrid.addWidget(self.s_r_src_ident, 5, 1, 1, 1)
         self.template_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.template_label.setObjectName("template_label")
+        self.template_label.setObjectName('template_label')
         self.vargrid.addWidget(self.template_label, 5, 0, 1, 1)
         self.s_r_template = HistoryLineEdit(self.tabWidgetPage3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -201,10 +202,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_template.sizePolicy().hasHeightForWidth())
         self.s_r_template.setSizePolicy(sizePolicy)
-        self.s_r_template.setObjectName("s_r_template")
+        self.s_r_template.setObjectName('s_r_template')
         self.vargrid.addWidget(self.s_r_template, 5, 1, 1, 1)
         self.search_for_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.search_for_label.setObjectName("search_for_label")
+        self.search_for_label.setObjectName('search_for_label')
         self.vargrid.addWidget(self.search_for_label, 6, 0, 1, 1)
         self.search_for = HistoryLineEdit(self.tabWidgetPage3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -212,59 +213,59 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.search_for.sizePolicy().hasHeightForWidth())
         self.search_for.setSizePolicy(sizePolicy)
-        self.search_for.setObjectName("search_for")
+        self.search_for.setObjectName('search_for')
         self.vargrid.addWidget(self.search_for, 6, 1, 1, 1)
         self.case_sensitive = QtWidgets.QCheckBox(self.tabWidgetPage3)
         self.case_sensitive.setChecked(True)
-        self.case_sensitive.setObjectName("case_sensitive")
+        self.case_sensitive.setObjectName('case_sensitive')
         self.vargrid.addWidget(self.case_sensitive, 6, 2, 1, 1)
         self.xlabel_4 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_4.setObjectName("xlabel_4")
+        self.xlabel_4.setObjectName('xlabel_4')
         self.vargrid.addWidget(self.xlabel_4, 7, 0, 1, 1)
         self.replace_with = HistoryLineEdit(self.tabWidgetPage3)
-        ## un_pogaz sizePolicy for replace_with
+        # un_pogaz: sizePolicy for replace_with
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.replace_with.sizePolicy().hasHeightForWidth())
         self.replace_with.setSizePolicy(sizePolicy)
         ##
-        self.replace_with.setObjectName("replace_with")
+        self.replace_with.setObjectName('replace_with')
         self.vargrid.addWidget(self.replace_with, 7, 1, 1, 1)
         self.verticalLayout = QtWidgets.QHBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setObjectName('verticalLayout')
         self.replace_func_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.replace_func_label.setObjectName("label_41")
+        self.replace_func_label.setObjectName('label_41')
         self.verticalLayout.addWidget(self.replace_func_label)
         self.replace_func = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.replace_func.setObjectName("replace_func")
+        self.replace_func.setObjectName('replace_func')
         self.verticalLayout.addWidget(self.replace_func)
         spacerItem7 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.verticalLayout.addItem(spacerItem7)
         self.vargrid.addLayout(self.verticalLayout, 7, 2, 1, 1)
         self.destination_field_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.destination_field_label.setObjectName("destination_field_label")
+        self.destination_field_label.setObjectName('destination_field_label')
         self.vargrid.addWidget(self.destination_field_label, 8, 0, 1, 1)
         self.destination_field = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.destination_field.setObjectName("destination_field")
+        self.destination_field.setObjectName('destination_field')
         self.vargrid.addWidget(self.destination_field, 8, 1, 1, 1)
         self.verticalLayout_2 = QtWidgets.QHBoxLayout()
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout_2.setObjectName('verticalLayout_2')
         self.replace_mode_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.replace_mode_label.setObjectName("replace_mode_label")
+        self.replace_mode_label.setObjectName('replace_mode_label')
         self.verticalLayout_2.addWidget(self.replace_mode_label)
         self.replace_mode = QtWidgets.QComboBox(self.tabWidgetPage3)
-        self.replace_mode.setObjectName("replace_mode")
+        self.replace_mode.setObjectName('replace_mode')
         self.verticalLayout_2.addWidget(self.replace_mode)
         self.comma_separated = QtWidgets.QCheckBox(self.tabWidgetPage3)
         self.comma_separated.setChecked(True)
-        self.comma_separated.setObjectName("comma_separated")
+        self.comma_separated.setObjectName('comma_separated')
         self.verticalLayout_2.addWidget(self.comma_separated)
         spacerItem8 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.verticalLayout_2.addItem(spacerItem8)
         self.vargrid.addLayout(self.verticalLayout_2, 8, 2, 1, 1)
         self.s_r_dst_ident_label = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.s_r_dst_ident_label.setObjectName("s_r_dst_ident_label")
+        self.s_r_dst_ident_label.setObjectName('s_r_dst_ident_label')
         self.vargrid.addWidget(self.s_r_dst_ident_label, 9, 0, 1, 1)
         self.s_r_dst_ident = QtWidgets.QLineEdit(self.tabWidgetPage3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -272,62 +273,62 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.s_r_dst_ident.sizePolicy().hasHeightForWidth())
         self.s_r_dst_ident.setSizePolicy(sizePolicy)
-        self.s_r_dst_ident.setObjectName("s_r_dst_ident")
+        self.s_r_dst_ident.setObjectName('s_r_dst_ident')
         self.vargrid.addWidget(self.s_r_dst_ident, 9, 1, 1, 1)
         self.horizontalLayout_21 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_21.setObjectName("horizontalLayout_21")
+        self.horizontalLayout_21.setObjectName('horizontalLayout_21')
         spacerItem9 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_21.addItem(spacerItem9)
         self.xlabel_412 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_412.setObjectName("xlabel_412")
+        self.xlabel_412.setObjectName('xlabel_412')
         self.horizontalLayout_21.addWidget(self.xlabel_412)
         self.results_count = QtWidgets.QSpinBox(self.tabWidgetPage3)
         self.results_count.setEnabled(True)
         self.results_count.setMinimum(1)
         self.results_count.setMaximum(999)
-        self.results_count.setProperty("value", 999)
-        self.results_count.setObjectName("results_count")
+        self.results_count.setProperty('value', 999)
+        self.results_count.setObjectName('results_count')
         self.horizontalLayout_21.addWidget(self.results_count)
         self.xlabel_413 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_413.setObjectName("xlabel_413")
+        self.xlabel_413.setObjectName('xlabel_413')
         self.horizontalLayout_21.addWidget(self.xlabel_413)
         self.starting_from = QtWidgets.QSpinBox(self.tabWidgetPage3)
         self.starting_from.setEnabled(True)
         self.starting_from.setMinimum(1)
         self.starting_from.setMaximum(999)
-        self.starting_from.setProperty("value", 1)
-        self.starting_from.setObjectName("starting_from")
+        self.starting_from.setProperty('value', 1)
+        self.starting_from.setObjectName('starting_from')
         self.horizontalLayout_21.addWidget(self.starting_from)
         self.xlabel_41 = QtWidgets.QLabel(self.tabWidgetPage3)
-        self.xlabel_41.setObjectName("xlabel_41")
+        self.xlabel_41.setObjectName('xlabel_41')
         self.horizontalLayout_21.addWidget(self.xlabel_41)
         self.multiple_separator = QtWidgets.QLineEdit(self.tabWidgetPage3)
-        self.multiple_separator.setObjectName("multiple_separator")
+        self.multiple_separator.setObjectName('multiple_separator')
         self.horizontalLayout_21.addWidget(self.multiple_separator)
         self.vargrid.addLayout(self.horizontalLayout_21, 10, 1, 1, 2)
         self.scrollArea11 = QtWidgets.QScrollArea(self.tabWidgetPage3)
         self.scrollArea11.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scrollArea11.setWidgetResizable(True)
-        self.scrollArea11.setObjectName("scrollArea11")
+        self.scrollArea11.setObjectName('scrollArea11')
         self.gridLayoutWidget_2 = QtWidgets.QWidget()
         self.gridLayoutWidget_2.setGeometry(QtCore.QRect(0, 0, 203, 70))
-        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
+        self.gridLayoutWidget_2.setObjectName('gridLayoutWidget_2')
         self.testgrid = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
-        self.testgrid.setObjectName("testgrid")
+        self.testgrid.setObjectName('testgrid')
         self.xlabel_3 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.xlabel_3.setObjectName("xlabel_3")
+        self.xlabel_3.setObjectName('xlabel_3')
         self.testgrid.addWidget(self.xlabel_3, 7, 1, 1, 1)
         self.xlabel_5 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.xlabel_5.setObjectName("xlabel_5")
+        self.xlabel_5.setObjectName('xlabel_5')
         self.testgrid.addWidget(self.xlabel_5, 7, 2, 1, 1)
         self.label_31 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_31.setObjectName("label_31")
+        self.label_31.setObjectName('label_31')
         self.testgrid.addWidget(self.label_31, 8, 0, 1, 1)
         self.test_text = HistoryLineEdit(self.gridLayoutWidget_2)
-        self.test_text.setObjectName("test_text")
+        self.test_text.setObjectName('test_text')
         self.testgrid.addWidget(self.test_text, 8, 1, 1, 1)
         self.test_result = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
-        self.test_result.setObjectName("test_result")
+        self.test_result.setObjectName('test_result')
         self.testgrid.addWidget(self.test_result, 8, 2, 1, 1)
         spacerItem10 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.testgrid.addItem(spacerItem10, 25, 0, 1, 2)
@@ -353,9 +354,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.xlabel_41.setBuddy(self.multiple_separator)
         self.label_31.setBuddy(self.test_text)
         
-        ## un_pogaz template_button
+        # un_pogaz: template_button
         self.template_button = TemplateEditorDialogButton(show_icon=True, show_text=False, parent=self.tabWidgetPage3)
-        self.template_button.setObjectName("template_button")
+        self.template_button.setObjectName('template_button')
         self.template_button.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self.template_button.clicked.connect(self.open_template_dialog)
         self.vargrid.addWidget(self.template_button, 5, 2, 1, 1)
@@ -364,53 +365,53 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.retranslateUi()
     
     def retranslateUi(self):
-        self.xlabel_22.setText(_("&Load search/replace:"))
-        self.query_field.setToolTip(_("Select saved search/replace to load."))
-        self.save_button.setToolTip(_("Save current search/replace"))
-        self.save_button.setText(_("Sa&ve"))
-        self.remove_button.setToolTip(_("Delete saved search/replace"))
-        self.remove_button.setText(_("Delete"))
-        self.source_field_label.setText(_("Search &field:"))
-        self.search_field.setToolTip(_("The name of the field that you want to search"))
-        self.xlabel_24.setText(_("Search &mode:"))
-        self.search_mode.setToolTip(_("Choose whether to use basic text matching or advanced regular expression matching"))
-        self.s_r_src_ident_label.setText(_("&Identifier type:"))
-        self.s_r_src_ident.setToolTip(_("Choose which identifier type to operate upon"))
-        self.template_label.setText(_("&Template:"))
-        self.s_r_template.setToolTip(_("Enter a template to be used as the source for the search/replace"))
-        self.search_for_label.setText(_("&Search for:"))
-        self.search_for.setToolTip(_("Enter what you are looking for, either plain text or a regular expression, depending on the mode"))
-        self.case_sensitive.setToolTip(_("Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored"))
-        self.case_sensitive.setText(_("Cas&e sensitive"))
-        self.xlabel_4.setText(_("&Replace with:"))
-        self.replace_with.setToolTip(_("The replacement text. The matched search text will be replaced with this string"))
-        self.replace_func_label.setText(_("&Apply function after replace:"))
-        self.replace_func.setToolTip(_("Specify how the text is to be processed after matching and replacement. In character mode, the entire\n"
-"field is processed. In regular expression mode, only the matched text is processed"))
-        self.destination_field_label.setText(_("&Destination field:"))
-        self.destination_field.setToolTip(_("The field that the text will be put into after all replacements.\n"
-"If blank, the source field is used if the field is modifiable"))
-        self.replace_mode_label.setText(_("M&ode:"))
-        self.replace_mode.setToolTip(_("Specify how the text should be copied into the destination."))
-        self.comma_separated.setToolTip(_("Specifies whether result items should be split into multiple values or\n"
-"left as single values. This option has the most effect when the source field is\n"
-"not multiple and the destination field is multiple"))
-        self.comma_separated.setText(_("Split &result"))
-        self.s_r_dst_ident_label.setText(_("Identifier type:"))
+        self.xlabel_22.setText(_('&Load search/replace:'))
+        self.query_field.setToolTip(_('Select saved search/replace to load.'))
+        self.save_button.setToolTip(_('Save current search/replace'))
+        self.save_button.setText(_('Sa&ve'))
+        self.remove_button.setToolTip(_('Delete saved search/replace'))
+        self.remove_button.setText(_('Delete'))
+        self.source_field_label.setText(_('Search &field:'))
+        self.search_field.setToolTip(_('The name of the field that you want to search'))
+        self.xlabel_24.setText(_('Search &mode:'))
+        self.search_mode.setToolTip(_('Choose whether to use basic text matching or advanced regular expression matching'))
+        self.s_r_src_ident_label.setText(_('&Identifier type:'))
+        self.s_r_src_ident.setToolTip(_('Choose which identifier type to operate upon'))
+        self.template_label.setText(_('&Template:'))
+        self.s_r_template.setToolTip(_('Enter a template to be used as the source for the search/replace'))
+        self.search_for_label.setText(_('&Search for:'))
+        self.search_for.setToolTip(_('Enter what you are looking for, either plain text or a regular expression, depending on the mode'))
+        self.case_sensitive.setToolTip(_('Check this box if the search string must match exactly upper and lower case. Uncheck it if case is to be ignored'))
+        self.case_sensitive.setText(_('Cas&e sensitive'))
+        self.xlabel_4.setText(_('&Replace with:'))
+        self.replace_with.setToolTip(_('The replacement text. The matched search text will be replaced with this string'))
+        self.replace_func_label.setText(_('&Apply function after replace:'))
+        self.replace_func.setToolTip(_('Specify how the text is to be processed after matching and replacement. In character mode, the entire\n'
+                                       'field is processed. In regular expression mode, only the matched text is processed'))
+        self.destination_field_label.setText(_('&Destination field:'))
+        self.destination_field.setToolTip(_('The field that the text will be put into after all replacements.\n'
+                                            'If blank, the source field is used if the field is modifiable'))
+        self.replace_mode_label.setText(_('M&ode:'))
+        self.replace_mode.setToolTip(_('Specify how the text should be copied into the destination.'))
+        self.comma_separated.setToolTip(_('Specifies whether result items should be split into multiple values or\n'
+                                          'left as single values. This option has the most effect when the source field is\n'
+                                          'not multiple and the destination field is multiple'))
+        self.comma_separated.setText(_('Split &result'))
+        self.s_r_dst_ident_label.setText(_('Identifier type:'))
         self.s_r_dst_ident.setToolTip(_("<p>Choose which identifier type to operate upon. When the\n"
-"              source field is something other than \'identifiers\' you can enter\n"
-"              a * if you want to replace the entire set of identifiers with\n"
-"              the result of the search/replace.</p>"))
-        self.xlabel_412.setText(_("For multiple-valued fields, sho&w"))
-        self.xlabel_413.setText(_("val&ues starting at"))
-        self.xlabel_41.setText(_("with values separated b&y"))
-        self.multiple_separator.setToolTip(_("Used when displaying test results to separate values in multiple-valued fields"))
-        self.xlabel_3.setText(_("Test text"))
-        self.xlabel_5.setText(_("Test result"))
-        self.label_31.setText(_("Your &test:"))
-        #self.central_widget.setTabText(self.central_widget.indexOf(self.scrollArea3), _("&Search and replace"))
+                          "              source field is something other than 'identifiers' you can enter\n"
+                          "              a * if you want to replace the entire set of identifiers with\n"
+                          "              the result of the search/replace.</p>"))
+        self.xlabel_412.setText(_('For multiple-valued fields, sho&w'))
+        self.xlabel_413.setText(_('val&ues starting at'))
+        self.xlabel_41.setText(_('with values separated b&y'))
+        self.multiple_separator.setToolTip(_('Used when displaying test results to separate values in multiple-valued fields'))
+        self.xlabel_3.setText(_('Test text'))
+        self.xlabel_5.setText(_('Test result'))
+        self.label_31.setText(_('Your &test:'))
+        # self.central_widget.setTabText(self.central_widget.indexOf(self.scrollArea3), _("&Search and replace"))
         
-        ## un_pogaz Search and destination field label swap
+        # un_pogaz: Search and destination field label swap
         self.source_field_label_text = self.source_field_label.text()
         self.destination_field_label_text = self.destination_field_label.text()
     
@@ -450,13 +451,13 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.testgrid.addWidget(w, i+offset, 0, 1, 1)
             w = QtWidgets.QLineEdit(self.tabWidgetPage3)
             w.setReadOnly(True)
-            name = 'book_%d_text'%i
+            name = f'book_{i}_text'
             setattr(self, name, w)
             self.book_1_text.setObjectName(name)
             self.testgrid.addWidget(w, i+offset, 1, 1, 1)
             w = QtWidgets.QLineEdit(self.tabWidgetPage3)
             w.setReadOnly(True)
-            name = 'book_%d_result'%i
+            name = f'book_{i}_result'
             setattr(self, name, w)
             self.book_1_text.setObjectName(name)
             self.testgrid.addWidget(w, i+offset, 2, 1, 1)
@@ -477,7 +478,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                  'Search and replace in text fields using character matching '
                  'or regular expressions. ')
         
-        ## un_pogaz main_heading_short
+        # un_pogaz: main_heading_short
         self.main_heading_short = self.main_heading[:self.main_heading.find('<p>')] + '<p>'
         
         self.character_heading = _(
@@ -503,8 +504,8 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                  'matching and replacement is to be assigned. You can replace '
                  'the text in the field, or prepend or append the matched text. '
                  'See <a href="https://docs.python.org/library/re.html">'
-                 'this reference</a> for more information on Python\'s regular '
-                 'expressions, and in particular the \'sub\' function.'
+                 "this reference</a> for more information on Python's regular "
+                 "expressions, and in particular the 'sub' function."
                  )
         
         self.search_mode.addItems(S_R_MATCH_MODES)
@@ -531,9 +532,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.s_r_src_ident.currentIndexChanged.connect(self.s_r_identifier_type_changed)
         self.s_r_dst_ident.textChanged.connect(self.s_r_paint_results)
         
-        self.s_r_template.editTextChanged.connect(self.s_r_template_changed)  ## un_pogaz template_button
-        #self.s_r_template.lost_focus.connect(self.s_r_template_changed)
-        #self.central_widget.setCurrentIndex(0)
+        self.s_r_template.editTextChanged.connect(self.s_r_template_changed)  # un_pogaz: template_button
+        # self.s_r_template.lost_focus.connect(self.s_r_template_changed)
+        # self.central_widget.setCurrentIndex(0)
         
         self.search_for.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
         self.replace_with.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
@@ -549,9 +550,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.save_button.clicked.connect(self.s_r_save_query)
         self.remove_button.clicked.connect(self.s_r_remove_query)
         
-        self.queries = JSONConfig("search_replace_queries")
+        self.queries = JSONConfig('search_replace_queries')
         self.saved_search_name = ''
-        self.query_field.addItem("")
+        self.query_field.addItem('')
         self.query_field_values = sorted(self.queries, key=sort_key)
         self.query_field.addItems(self.query_field_values)
         self.query_field.currentIndexChanged.connect(self.s_r_query_change)
@@ -590,7 +591,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 if id_type:
                     val = [val.get(id_type, '')]
                 else:
-                    val = ['%s:%s'%(t[0], t[1]) for t in val.items()]
+                    val = [f'{t[0]}:{t[1]}' for t in val.items()]
             if val is None:
                 val = [] if fm['is_multiple'] else ['']
             elif not fm['is_multiple']:
@@ -609,11 +610,11 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.s_r_search_field_changed(self.search_field.currentIndex())
     
     def s_r_template_changed(self, *args):
-        #self.s_r_search_field_changed(self.search_field.currentIndex())
+        # self.s_r_search_field_changed(self.search_field.currentIndex())
         
         ## un_pogaz
-        for i in range(0, self.s_r_number_of_books):
-            w = getattr(self, 'book_%d_text'%(i+1))
+        for i in range(self.s_r_number_of_books):
+            w = getattr(self, f'book_{i+1}_text')
             mi = self.db.get_metadata(self.ids[i], index_is_id=True)
             src = self.s_r_sf_itemdata(None)
             t = self.s_r_get_field(mi, src)
@@ -627,7 +628,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def s_r_identifier_type_changed(self, idx):
         self.s_r_search_field_changed(self.search_field.currentIndex())
         
-        if self.search_mode.currentIndex() == 2:  ## un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  # un_pogaz: Replace Field
             self.s_r_dst_ident.setText(self.s_r_src_ident.currentText())
         
         self.s_r_paint_results(None)
@@ -635,19 +636,19 @@ class MetadataBulkWidget(QtWidgets.QWidget):
     def s_r_search_field_changed(self, idx):
         self.s_r_template.setVisible(False)
         self.template_label.setVisible(False)
-        self.template_button.setVisible(False)  ## un_pogaz template_button
+        self.template_button.setVisible(False)  # un_pogaz: template_button
         self.s_r_src_ident_label.setVisible(False)
         self.s_r_src_ident.setVisible(False)
-        if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD:  ## idx == 1 => Template
+        if self.s_r_sf_itemdata(idx) == TEMPLATE_FIELD:  # idx == 1 => Template
             self.s_r_template.setVisible(True)
             self.template_label.setVisible(True)
-            self.template_button.setVisible(True)  ## un_pogaz template_button
+            self.template_button.setVisible(True)  # un_pogaz: template_button
         elif self.s_r_sf_itemdata(idx) == 'identifiers':
             self.s_r_src_ident_label.setVisible(True)
             self.s_r_src_ident.setVisible(True)
         
-        for i in range(0, self.s_r_number_of_books):
-            w = getattr(self, 'book_%d_text'%(i+1))
+        for i in range(self.s_r_number_of_books):
+            w = getattr(self, f'book_{i+1}_text')
             mi = self.db.get_metadata(self.ids[i], index_is_id=True)
             src = self.s_r_sf_itemdata(idx)
             t = self.s_r_get_field(mi, src)
@@ -669,7 +670,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if not txt:
             txt = self.s_r_sf_itemdata(None)
         if txt and txt in self.writable_fields:
-            if txt == 'identifiers' and self.search_mode.currentIndex() != 2:  ##un_pogaz Replace Field
+            if txt == 'identifiers' and self.search_mode.currentIndex() != 2:  # un_pogaz: Replace Field
                 self.s_r_dst_ident_label.setVisible(True)
                 self.s_r_dst_ident.setVisible(True)
             
@@ -694,7 +695,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.search_field.clear()
         self.destination_field.clear()
         
-        if val == 2:  ## un_pogaz Replace Field
+        if val == 2:  # un_pogaz: Replace Field
             self.s_r_visible_groupe(False, False)
             
             self.source_field_label.setText(self.destination_field_label_text)
@@ -714,7 +715,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.replace_mode.setCurrentIndex(0)
             self.s_r_heading.setText('<p>'+self.main_heading + self.character_heading)
             
-        elif val == 2:  ## un_pogaz Replace Field
+        elif val == 2:  # un_pogaz: Replace Field
             self.search_field.blockSignals(True)
             self.destination_field.blockSignals(True)
             for f in self.writable_fields:
@@ -760,10 +761,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         elif CALIBRE_VERSION >= (5,0,0):
             self.test_result.setStyleSheet(QtWidgets.QApplication.instance().stylesheet_for_line_edit(self.s_r_error is not None))
         else:
-            self.test_result.setStyleSheet('QLineEdit { color: black; background-color: %s; }'%col)
+            self.test_result.setStyleSheet(f'QLineEdit {{ color: black; background-color: {col}; }}')
         
-        for i in range(0,self.s_r_number_of_books):
-            getattr(self, 'book_%d_result'%(i+1)).setText('')
+        for i in range(self.s_r_number_of_books):
+            getattr(self, 'book_{i+1}_result').setText('')
     
     def s_r_func(self, match):
         rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
@@ -777,7 +778,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         result = []
         rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
         
-        if self.search_mode.currentIndex() == 2:  ##un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  # un_pogaz: Replace Field
             result.append(self.replace_with.text())
         else:
             for s in src:
@@ -836,7 +837,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                     dest_val = [dest_val.get(dst_id_type, '')]
                 else:
                     # convert the csp dict into a list
-                    dest_val = ['%s:%s'%(t[0], t[1]) for t in dest_val.items()]
+                    dest_val = [f'{t[0]}:{t[1]}' for t in dest_val.items()]
             if dest_val is None:
                 dest_val = []
             elif not isinstance(dest_val, list):
@@ -863,11 +864,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if not self.case_sensitive.isChecked():
             flags |= regex.IGNORECASE
         
-        if self.search_mode.currentIndex() == 2:  ## un_pogaz Replace Field
+        if self.search_mode.currentIndex() == 2:  # un_pogaz: Replace Field
             flags |= regex.DOTALL
         
-        
-        ## un_pogaz extend try catch
+        ## un_pogaz: extend try catch
         try:
             
             sftxt = unicode_type(self.search_field.currentText())
@@ -884,7 +884,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             
             if sftxt == 'identifiers':
                 if not unicode_type(self.s_r_src_ident.currentText()):
-                    raise Exception(CalibreText.get_empty_field(CalibreText.FIELD_NAME.IDENTIFIER_TYPE ))
+                    raise Exception(CalibreText.get_empty_field(CalibreText.FIELD_NAME.IDENTIFIER_TYPE))
             
             if sftxt == TEMPLATE_FIELD:
                 error = check_template(self.s_r_template.text())
@@ -895,7 +895,6 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.s_r_error = e
             self.s_r_set_colors()
             return
-        
         
         try:
             
@@ -926,10 +925,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.s_r_set_colors()
             return
         
-        
-        for i in range(0,self.s_r_number_of_books):
+        for i in range(self.s_r_number_of_books):
             mi = self.db.get_metadata(self.ids[i], index_is_id=True)
-            wr = getattr(self, 'book_%d_result'%(i+1))
+            wr = getattr(self, f'book_{i+1}_result')
             try:
                 result = self.s_r_do_regexp(mi)
                 t = self.s_r_do_destination(mi, result)
@@ -956,7 +954,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         dfm = self.db.field_metadata[dest]
         mi = self.db.new_api.get_metadata(book_id)
         
-        #edit the metadata object with the stored edited field
+        # edit the metadata object with the stored edited field
         if dest in self.set_field_calls:
             if book_id in self.set_field_calls[dest]:
                 store = self.set_field_calls[dest][book_id]
@@ -973,24 +971,24 @@ class MetadataBulkWidget(QtWidgets.QWidget):
                 dst_id_type = unicode_type(self.s_r_dst_ident.text())
                 if dst_id_type and dst_id_type != '*':
                     v = ''.join(val)
-                    ids = mi.get(dest).copy()  # un_pogaz fix ghost identifier with empty value
+                    ids = mi.get(dest).copy()  # un_pogaz: fix ghost identifier with empty value
                     ids[dst_id_type] = v
                     val = ids
                 else:
                     try:
                         val = dict([(t.split(':', maxsplit=1)) for t in val])
                     except:
-                        #import traceback
-                        #ans = question_dialog(self, _('Invalid identifier string'),
-                        #       _('The identifier string for book "{:s}" (id {:s}) is '
-                        #         'invalid. It must be a comma-separated list of '
-                        #         'pairs of strings separated by a colon.\n\n'
-                        #         'Do you want to continue processing books?').format(mi.title, mi.id),
-                        #       det_msg='\n'.join([_('Result identifier string: '),
-                        #                         ', '.join(val), '-----', traceback.format_exc()]),
-                        #       show_copy_button=True)
-                        #return ans
-                        ## un_pogaz use custom error handling
+                        # import traceback
+                        # ans = question_dialog(self, _('Invalid identifier string'),
+                        #        _('The identifier string for book "{:s}" (id {:s}) is '
+                        #          'invalid. It must be a comma-separated list of '
+                        #          'pairs of strings separated by a colon.\n\n'
+                        #          'Do you want to continue processing books?').format(mi.title, mi.id),
+                        #        det_msg='\n'.join([_('Result identifier string: '),
+                        #                          ', '.join(val), '-----', traceback.format_exc()]),
+                        #        show_copy_button=True)
+                        # return ans
+                        ## un_pogaz: use custom error handling
                         return Exception(CalibreText.EXCEPTION_Invalid_identifier)
         else:
             val = self.s_r_replace_mode_separator().join(val)
@@ -1016,7 +1014,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             return False
         elif v is True or v is False:
             return True
-        elif v is int() or v is float():
+        elif v == 0 or v == 0.0:
             return True
         else:
             try:
@@ -1028,9 +1026,9 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         if self.query_field.currentIndex() == 0:
             return
         
-        if not question_dialog(self, _("Delete saved search/replace"),
-                _("The selected saved search/replace will be deleted. "
-                    "Are you sure?")):
+        if not question_dialog(self, _('Delete saved search/replace'),
+                _('The selected saved search/replace will be deleted. '
+                    'Are you sure?')):
             return
         
         item_id = self.query_field.currentIndex()
@@ -1059,14 +1057,14 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             if not ok:
                 return
             if not name:
-                error_dialog(self, _("Save search/replace"),
-                        _("You must provide a name."), show=True)
+                error_dialog(self, _('Save search/replace'),
+                        _('You must provide a name.'), show=True)
         new = True
         name = unicode_type(name)
         if name in list(self.queries.keys()):
-            if not question_dialog(self, _("Save search/replace"),
-                    _("That saved search/replace already exists and will be overwritten. "
-                        "Are you sure?")):
+            if not question_dialog(self, _('Save search/replace'),
+                    _('That saved search/replace already exists and will be overwritten. '
+                        'Are you sure?')):
                 return
             new = False
         
@@ -1106,10 +1104,10 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         # as it was
         self.search_field.setCurrentIndex(0)
         self.s_r_src_ident.setCurrentIndex(0)
-        self.s_r_template.setText("")
-        self.search_for.setText("")
+        self.s_r_template.setText('')
+        self.search_for.setText('')
         self.case_sensitive.setChecked(False)
-        self.replace_with.setText("")
+        self.replace_with.setText('')
         self.replace_func.setCurrentIndex(0)
         self.destination_field.setCurrentIndex(0)
         self.s_r_dst_ident.setText('')
@@ -1117,7 +1115,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
         self.comma_separated.setChecked(True)
         self.results_count.setValue(999)
         self.starting_from.setValue(1)
-        self.multiple_separator.setText(" ::: ")
+        self.multiple_separator.setText(' ::: ')
     
     def load_query(self, query):
         if query:

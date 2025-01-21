@@ -86,6 +86,7 @@ class ICON:
     IMPORT    = 'images/import.png'
     WARNING   = 'images/warning.png'
 
+
 class KEY_MENU:
     MENU = 'Menu'
     ACTIVE = 'Active'
@@ -106,10 +107,12 @@ class KEY_MENU:
     UPDATE_REPORT = 'UpdateReport'
     USE_MARK = 'UseMark'
 
+
 class KEY_ERROR:
     ERROR = 'ErrorStrategy'
     UPDATE = 'Update'
     OPERATION = 'Operation'
+
 
 class ERROR_UPDATE:
     
@@ -120,7 +123,6 @@ class ERROR_UPDATE:
     RESTORE = 'restore'
     RESTORE_NAME = _('Restore the library')
     RESTORE_DESC = _('Stop Mass Search/Replace and restore the library to its original state.')
-    
     
     safely_txt = _('Updates the fields one by one. This operation can be slower than other strategies.')
     
@@ -143,6 +145,7 @@ class ERROR_UPDATE:
     
     DEFAULT = INTERRUPT
 
+
 class ERROR_OPERATION:
     
     ABORT = 'abort'
@@ -164,6 +167,7 @@ class ERROR_OPERATION:
     }
     
     DEFAULT = ASK
+
 
 # This is where all preferences for this plugin are stored
 PREFS = PREFS_json()
@@ -189,6 +193,7 @@ def get_default_menu() -> Dict[str, Any]:
     menu[KEY_MENU.IMAGE] = ''
     menu[KEY_MENU.OPERATIONS] = []
     return menu
+
 
 class ConfigWidget(QWidget):
     def __init__(self):
@@ -284,7 +289,7 @@ class ConfigWidget(QWidget):
         if CALIBRE_VERSION >= (5,41,0):
             PREFS[KEY_MENU.USE_MARK] = self.useMark.checkState() == Qt.Checked
         debug_print('Save settings: menu operation count:', len(PREFS[KEY_MENU.MENU]), '\n')
-        #debug_print('Save settings:\n', PREFS, '\n')
+        # debug_print('Save settings:\n', PREFS, '\n')
     
     def edit_error_strategy(self):
         d = ErrorStrategyDialog()
@@ -298,6 +303,8 @@ class ConfigWidget(QWidget):
 
 
 COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
+
+
 class MenuTableWidget(QTableWidget):
     def __init__(self, menu_list=None, *args):
         QTableWidget.__init__(self, *args)
@@ -337,7 +344,6 @@ class MenuTableWidget(QTableWidget):
         act_export = QAction(get_icon(ICON.EXPORT), _('&Export…'), parent)
         act_export.triggered.connect(self.export_menus)
         parent.addAction(act_export)
-    
     
     def open_images_folder(self):
         if not os.path.exists(local_resource.IMAGES):
@@ -410,7 +416,6 @@ class MenuTableWidget(QTableWidget):
             )
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
-    
     
     def populate_table(self, menu_list=None):
         self.clear()
@@ -576,7 +581,7 @@ class MenuTableWidget(QTableWidget):
         self.blockSignals(True)
         self.insertRow(dest_row)
         
-        for col in range(0,3):
+        for col in range(3):
             self.setItem(dest_row, col, self.takeItem(src_row, col))
         
         menu_text = self.item(dest_row, 1).text().strip()
@@ -632,6 +637,7 @@ class MenuTableWidget(QTableWidget):
             row = self.currentRow() + 1
             self.insertRow(row)
             self.populate_table_row(row, menu)
+
 
 class SettingsButton(QToolButton):
     def __init__(self, table, menu):
@@ -694,7 +700,7 @@ class SettingsButton(QToolButton):
         if len(op_lst) != len(initial_op_lst):
             return True
         
-        for i in range(0, len(op_lst)):
+        for i in range(len(op_lst)):
             if op_lst[i].get(KEY_QUERY.ACTIVE, True) != initial_op_lst[i].get(KEY_QUERY.ACTIVE, True):
                 return True
             
@@ -718,6 +724,8 @@ class SettingsButton(QToolButton):
 
 
 COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('Search'), _('Replace')]
+
+
 class ConfigOperationListDialog(Dialog):
     def __init__(self, menu, book_ids=None):
         menu = menu or get_default_menu()
@@ -752,10 +760,10 @@ class ConfigOperationListDialog(Dialog):
             self,
         )
         heading_layout.addWidget(heading_label)
-        #help_label = QLabel(' ', self)
-        #help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
-        #help_label.setAlignment(Qt.AlignRight)
-        #heading_layout.addWidget(help_label)
+        # help_label = QLabel(' ', self)
+        # help_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
+        # help_label.setAlignment(Qt.AlignRight)
+        # heading_layout.addWidget(help_label)
         
         # Add a horizontal layout containing the table and the buttons next to it
         table_layout = QHBoxLayout()
@@ -827,10 +835,11 @@ class ConfigOperationListDialog(Dialog):
             txt = 'Saved operation list:\n' + '\n'.join(
                 (f'Operation {i} > '+ operation.string_info()) for i, operation in enumerate(self.operation_list, 1)
             )
-            #txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
+            # txt += '\n[  '+ ',\n'.join( [str(operation) for operation in self.operation_list] ) +'  ]\n'
             debug_print(txt)
         
         Dialog.accept(self)
+
 
 class OperationListTableWidget(QTableWidget):
     def __init__(self, operation_list=None, book_ids=None, *args):
@@ -858,7 +867,6 @@ class OperationListTableWidget(QTableWidget):
         act_export = QAction(get_icon(ICON.EXPORT), _('&Export…'), self)
         act_export.triggered.connect(self.export_operations)
         self.addAction(act_export)
-    
     
     def import_operations(self):
         json_path = pick_json_to_import(parent=self)
@@ -901,7 +909,6 @@ class OperationListTableWidget(QTableWidget):
         except Exception as e:
             return error_dialog(self, _('Export failed'), e, show=True)
     
-    
     def populate_table(self, operation_list=None):
         self.clear()
         self.setColumnCount(len(COL_CONFIG))
@@ -909,7 +916,7 @@ class OperationListTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         
         operation_list = clean_empty_operation(operation_list)
-        calibre_queries = JSONConfig("search_replace_queries")
+        calibre_queries = JSONConfig('search_replace_queries')
         
         self.setRowCount(len(operation_list))
         for row, operation in enumerate(operation_list):
@@ -1048,7 +1055,7 @@ class OperationListTableWidget(QTableWidget):
         self.blockSignals(True)
         self.insertRow(dest_row)
         
-        for col in range(0, len(COL_CONFIG)):
+        for col in range(len(COL_CONFIG)):
             self.setItem(dest_row, col, self.takeItem(src_row, col))
         
         self.update_row(dest_row)
@@ -1087,7 +1094,6 @@ class OperationListTableWidget(QTableWidget):
         
         self.test_column_hidden()
     
-    
     def settings_doubleClick(self):
         self.setFocus()
         row = self.currentRow()
@@ -1100,10 +1106,11 @@ class OperationListTableWidget(QTableWidget):
         
         self.test_column_hidden()
 
+
 class OperationWidgetItem(QTableWidgetItem):
     def __init__(self, table, operation):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled))
         
         self.table = table
         self._operation = operation
@@ -1173,7 +1180,7 @@ class ErrorStrategyDialog(Dialog):
         
         operation_label.setBuddy(self.operationStrategy)
         
-        layout.addWidget(QLabel (' ', self))
+        layout.addWidget(QLabel(' ', self))
         
         update_label = QLabel(_('Define the strategy when a error occurs during the library update:'), self)
         layout.addWidget(update_label)
@@ -1188,7 +1195,7 @@ class ErrorStrategyDialog(Dialog):
         
         update_label.setBuddy(self.updateStrategy)
         
-        self.desc = QTextEdit (' ', self)
+        self.desc = QTextEdit(' ', self)
         self.desc.setReadOnly(True)
         layout.addWidget(self.desc)
         

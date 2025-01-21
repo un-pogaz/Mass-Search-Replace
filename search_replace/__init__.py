@@ -120,7 +120,7 @@ class Operation(dict):
             dst_ident = self.get(KEY_QUERY.S_R_DST_IDENT, src_ident)
             replace_with = dst_ident+':'+replace_with.strip()
         
-        return [ name, column, template, search_mode, search_for, replace_with ]
+        return [name, column, template, search_mode, search_for, replace_with]
         
     def string_info(self) -> str:
         tbl = self.get_para_list()
@@ -128,6 +128,7 @@ class Operation(dict):
             del tbl[2]
         
         return ('name:"'+tbl[0]+'" => ' if tbl[0] else '') + '"'+ '" | "'.join(tbl[1:])+'"'
+
 
 class OperationError(ValueError):
     pass
@@ -144,6 +145,7 @@ def clean_empty_operation(operation_list) -> List[Operation]:
                 break
     
     return rlst
+
 
 def operation_list_active(operation_list) -> List[Operation]:
     rlst = []
@@ -177,7 +179,7 @@ class SearchReplaceWidget(MetadataBulkWidget):
         
         err = self.get_error()
         if not err:
-           err = self.do_search_replace(book_id)
+            err = self.do_search_replace(book_id)
         return err
 
 
