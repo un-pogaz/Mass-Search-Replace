@@ -1,5 +1,8 @@
 # Changelog - Mass Search/Replace
 
+## [1.8.3] - 2025/09/29
+- fix fatal freeze on linux
+
 ## [1.8.2] - 2024/02/19
 
 ### Bug fixes
