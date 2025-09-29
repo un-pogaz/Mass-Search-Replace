@@ -764,7 +764,7 @@ class MetadataBulkWidget(QtWidgets.QWidget):
             self.test_result.setStyleSheet(f'QLineEdit {{ color: black; background-color: {col}; }}')
         
         for i in range(self.s_r_number_of_books):
-            getattr(self, 'book_{i+1}_result').setText('')
+            getattr(self, f'book_{i+1}_result').setText('')
     
     def s_r_func(self, match):
         rfunc = S_R_FUNCTIONS[unicode_type(self.replace_func.currentText())]
