@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.8.4] - 2025/10/09
+
+### Bug fixes
+- fix edge case for malformed comments custom columns
+
 ## [1.8.3] - 2025/09/29
 
 ### Bug fixes
