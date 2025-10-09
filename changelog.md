@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.8.5] - 2025/10/09
+
+### Bug fixes
+- fix previous patch
+
 ## [1.8.4] - 2025/10/09
 
 ### Bug fixes

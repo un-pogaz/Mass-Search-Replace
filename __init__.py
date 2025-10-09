@@ -28,7 +28,7 @@ class ActionMassSearchReplace(InterfaceActionBase):
                                 'to your books metadata')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (1, 8, 4)
+    version                 = (1, 8, 5)
     minimum_calibre_version = (5, 0, 0)
     
     # This field defines the GUI plugin class that contains all the code
