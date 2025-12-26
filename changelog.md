@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.8.6] - 2025/12/26
+
+### Bug fixes
+- linux: don't use gui as parent for menu (raise a warning)
+
 ## [1.8.5] - 2025/10/09
 
 ### Bug fixes
