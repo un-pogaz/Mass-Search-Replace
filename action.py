@@ -58,7 +58,7 @@ class MassSearchReplaceAction(InterfaceAction):
     dont_add_to = frozenset(['context-menu-device'])
     
     def genesis(self):
-        self.menu = QMenu(GUI)
+        self.menu = QMenu()
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
         
@@ -124,7 +124,7 @@ class MassSearchReplaceAction(InterfaceAction):
             # Create the sub-menu if it does not exist
             if sub_menu_text not in sub_menus:
                 ac = create_menu_item(self, parent_menu, sub_menu_text, image=None, shortcut=None)
-                sm = QMenu()
+                sm = QMenu(parent_menu)
                 ac.setMenu(sm)
                 sub_menus[sub_menu_text] = sm
             # Now set our menu variable so the parent menu item will be the sub-menu
