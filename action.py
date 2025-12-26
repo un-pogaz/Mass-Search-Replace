@@ -79,6 +79,8 @@ class MassSearchReplaceAction(InterfaceAction):
         
         unregister_menu_actions()
         
+        global print_rebuild
+        print_rebuild = True
         for menu in PREFS[KEY_MENU.MENU]:
             if not menu_get_error(menu) and menu[KEY_MENU.ACTIVE]:
                 self.append_menu_item_ex(self.menu, sub_menus, menu)
@@ -86,7 +88,7 @@ class MassSearchReplaceAction(InterfaceAction):
         self.menu.addSeparator()
         
         ac = create_menu_item(self, self.menu, _('&Quick Search/Replace…'), ICON.PLUGIN)
-        mn_books = QMenu()
+        mn_books = QMenu(self.menu)
         ac.setMenu(mn_books)
         
         create_menu_action_unique(self, mn_books, _('&Selection'), 'highlight_only_on.png',
@@ -133,13 +135,17 @@ class MassSearchReplaceAction(InterfaceAction):
         if not menu_text:
             parent_menu.addSeparator()
         elif len(menu[KEY_MENU.OPERATIONS])>0:
+            global print_rebuild
             if sub_menu_text:
                 unique_name = f'{sub_menu_text} > {menu_text}'
             else:
                 unique_name = f'{menu_text}'
             
             unique_name = unique_name.replace('&','')
-            debug_print('Rebuilding menu for:', unique_name)
+            if print_rebuild:
+                debug_print('Rebuilding menu for:')
+                print_rebuild = False
+            print('-', unique_name)
             
             create_menu_action_unique(self, parent_menu, menu_text, image_name,
                         triggered=partial(self.run_SearchReplace, menu, None),
