@@ -58,7 +58,7 @@ class MassSearchReplaceAction(InterfaceAction):
     dont_add_to = frozenset(['context-menu-device'])
     
     def genesis(self):
-        self.menu = QMenu()
+        self.menu = QMenu(GUI)
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
         
