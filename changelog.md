@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.8.7] - 2026/01/31
+
+### Changed
+- various improvement and Calibre 9 support
+
 ## [1.8.6] - 2025/12/26
 
 ### Bug fixes
