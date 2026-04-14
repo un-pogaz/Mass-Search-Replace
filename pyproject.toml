@@ -1,6 +1,8 @@
 [project]
 name = "Mass Search/Replace"
 requires-python = ">=3.8"
+license = "GPL-3.0-only"
+dynamic = ["version"]
 
 [tool.ruff]
 exclude = ["common_utils/"]
