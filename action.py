@@ -491,25 +491,25 @@ class SearchReplacesProgressDialog(ProgressDialog):
                         is_restore = self.exceptionStrategy == ERROR_UPDATE.RESTORE
                         if is_restore:
                             backup_fields = defaultdict(dict)
+                            for field, book_id_val_map in self.s_r.updated_fields.items():
+                                backup_fields[field] = self.dbAPI.all_field_for(field, book_id_val_map.keys())
                         
                         if self.exception:
                             raise Exception('raise')
                         
-                        for field, book_id_val_map in self.s_r.updated_fields.items():
-                            if is_restore:
-                                src_field = self.dbAPI.all_field_for(field, book_id_val_map.keys())
-                                backup_fields[field] = src_field
-                            
-                            self.dbAPI.set_field(field, book_id_val_map)
-                            book_id_update[field] = {id:'' for id in book_id_val_map.keys()}
+                        with self.dbAPI.write_lock, self.dbAPI.backend.conn:
+                            for field, book_id_val_map in self.s_r.updated_fields.items():
+                                self.dbAPI.set_field(field, book_id_val_map)
+                                book_id_update[field] = {id:'' for id in book_id_val_map.keys()}
                     
                     except Exception as e:
                         self.exception_update = True
                         self.exception.append((None, None, None, e))
                         
                         if is_restore:
-                            for field, book_id_val_map in backup_fields.items():
-                                self.dbAPI.set_field(field, book_id_val_map)
+                            with self.dbAPI.write_lock, self.dbAPI.backend.conn:
+                                for field, book_id_val_map in backup_fields.items():
+                                    self.dbAPI.set_field(field, book_id_val_map)
                             book_id_update = {}
                 
                 GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
