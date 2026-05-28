@@ -1,5 +1,10 @@
 # Changelog - Mass Search/Replace
 
+## [1.9.0] - 2026/05/28
+
+### Changed
+- improve speed updating the library database
+
 ## [1.8.7] - 2026/01/31
 
 ### Changed
