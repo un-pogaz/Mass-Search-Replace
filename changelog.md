@@ -1,5 +1,11 @@
 # Changelog - Mass Search/Replace
 
+## [1.9.1] - 2026/06/21
+
+### Bug fixes
+- fix that various dialogs doesn't pass the focus properly
+
+
 ## [1.9.0] - 2026/05/28
 
 ### Changed
