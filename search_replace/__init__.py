@@ -184,13 +184,13 @@ class SearchReplaceWidget(MetadataBulkWidget):
 
 
 class SearchReplaceDialog(Dialog):
-    def __init__(self, operation=None, book_ids=[]):
+    def __init__(self, operation=None, book_ids=[], parent=None):
         self.operation = operation or Operation()
         self.widget = SearchReplaceWidget(book_ids[:10])
         Dialog.__init__(self,
             title=_('Configuration of a Search/Replace operation'),
             name='plugin.MassSearchReplace:config_query_SearchReplace',
-            parent=GUI,
+            parent=parent or GUI,
         )
     
     def setup_ui(self):

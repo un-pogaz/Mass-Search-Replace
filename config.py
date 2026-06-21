@@ -217,7 +217,7 @@ class ConfigWidget(QWidget):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the menu list
-        self.table = MenuTableWidget(menu_list, self)
+        self.table = MenuTableWidget(menu_list, parent=self)
         heading_label.setBuddy(self.table)
         table_layout.addWidget(self.table)
         
@@ -292,7 +292,7 @@ class ConfigWidget(QWidget):
         # debug_print('Save settings:\n', PREFS, '\n')
     
     def edit_error_strategy(self):
-        d = ErrorStrategyDialog()
+        d = ErrorStrategyDialog(self)
         if d.exec():
             PREFS[KEY_ERROR.ERROR] = {
                 KEY_ERROR.OPERATION : d.error_operation,
@@ -306,8 +306,8 @@ COL_NAMES = ['', _('Name'), _('Submenu'), _('Image'), _('Operation')]
 
 
 class MenuTableWidget(QTableWidget):
-    def __init__(self, menu_list=None, *args):
-        QTableWidget.__init__(self, *args)
+    def __init__(self, menu_list=None, parent=None):
+        QTableWidget.__init__(self, parent=parent)
         
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -641,7 +641,7 @@ class MenuTableWidget(QTableWidget):
 
 class SettingsButton(QToolButton):
     def __init__(self, table, menu):
-        QToolButton.__init__(self)
+        QToolButton.__init__(self, parent=table)
         
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         
@@ -718,7 +718,7 @@ class SettingsButton(QToolButton):
         return copy.copy(self._menu[KEY_MENU.OPERATIONS])
     
     def _clicked(self):
-        d = ConfigOperationListDialog(self.get_menu())
+        d = ConfigOperationListDialog(self.get_menu(), parent=self)
         if d.exec():
             self.set_operation_list(d.operation_list)
 
@@ -727,7 +727,7 @@ COL_CONFIG = ['', _('Name'), _('Columns'), _('Template'), _('Search mode'), _('S
 
 
 class ConfigOperationListDialog(Dialog):
-    def __init__(self, menu, book_ids=None):
+    def __init__(self, menu, book_ids=None, parent=None):
         menu = menu or get_default_menu()
         name = menu[KEY_MENU.TEXT]
         sub_menu = menu[KEY_MENU.SUBMENU]
@@ -746,7 +746,7 @@ class ConfigOperationListDialog(Dialog):
         Dialog.__init__(self,
             title=title,
             name='plugin.MassSearchReplace:config_list_SearchReplace',
-            parent=GUI,
+            parent=parent or GUI,
         )
     
     def setup_ui(self):
@@ -770,7 +770,7 @@ class ConfigOperationListDialog(Dialog):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the operation list
-        self.table = OperationListTableWidget(self.operation_list, self.book_ids, self)
+        self.table = OperationListTableWidget(self.operation_list, self.book_ids, parent=self)
         heading_label.setBuddy(self.table)
         table_layout.addWidget(self.table)
         
@@ -842,8 +842,8 @@ class ConfigOperationListDialog(Dialog):
 
 
 class OperationListTableWidget(QTableWidget):
-    def __init__(self, operation_list=None, book_ids=None, *args):
-        QTableWidget.__init__(self, *args)
+    def __init__(self, operation_list=None, book_ids=None, parent=None):
+        QTableWidget.__init__(self, parent=parent)
         
         self.book_ids = (book_ids or get_BookIds_selected(show_error=False))[:10]
         
@@ -1099,7 +1099,7 @@ class OperationListTableWidget(QTableWidget):
         row = self.currentRow()
         
         src_operation = self.convert_row_to_operation(row)
-        d = SearchReplaceDialog(src_operation, self.book_ids)
+        d = SearchReplaceDialog(src_operation, self.book_ids, parent=self)
         if d.exec():
             d.operation[KEY_QUERY.ACTIVE] = src_operation.get(KEY_QUERY.ACTIVE, True)
             self.populate_table_row(row, d.operation)
@@ -1147,7 +1147,7 @@ class OperationWidgetItem(QTableWidgetItem):
 
 
 class ErrorStrategyDialog(Dialog):
-    def __init__(self):
+    def __init__(self, parent=None):
         self.error_update = PREFS[KEY_ERROR.ERROR][KEY_ERROR.UPDATE]
         self.error_operation = PREFS[KEY_ERROR.ERROR][KEY_ERROR.OPERATION]
         
@@ -1160,7 +1160,7 @@ class ErrorStrategyDialog(Dialog):
         Dialog.__init__(self,
             title=_('Error Strategy'),
             name='plugin.MassSearchReplace:config_ErrorStrategy',
-            parent=GUI,
+            parent=parent or GUI,
         )
     
     def setup_ui(self):
